@@ -1,0 +1,262 @@
+//-------------------------------------------------------------------
+//マップ
+//-------------------------------------------------------------------
+#include  "MyPG.h"
+#include  "Task_Map2D.h"
+#include  "Task_Enemy00.h"
+#include "assert.h"
+
+namespace Map2D
+{
+	Resource::WP  Resource::instance;
+	//-------------------------------------------------------------------
+	//リソースの初期化
+	bool  Resource::Initialize()
+	{
+		img = DG::Image::Create("./data/image/Dark_lvl0.png");
+		return true;
+	}
+	//-------------------------------------------------------------------
+	//リソースの解放
+	bool  Resource::Finalize()
+	{
+		img.reset();
+		return true;
+	}
+	//-------------------------------------------------------------------
+	//「初期化」タスク生成時に１回だけ行う処理
+	bool  Object::Initialize()
+	{
+		//スーパークラス初期化
+		__super::Initialize(defGroupName, defName, true);
+		//リソースクラス生成orリソース共有
+		this->res = Resource::Create();
+
+		//★データ初期化
+		chipSize = 64;//チップのサイズ
+		sizeX = 41;
+		sizeY = 16;
+		render2D_Priority[1] = 0.9f;
+		//マップのゼロクリア
+		for (int y = 0; y < size(map); ++y) {
+			for (int x = 0; x < size(map[y]); ++x) {
+				map[y][x] = 0;
+			}
+		}
+		hitBase = ML::Box2D(0, 0, sizeX * chipSize, sizeY * chipSize);
+
+		//マップチップ情報の初期化
+		for (int c = 0; c < chipKind; ++c) {
+			int x = (c % 8);
+			int y = (c / 8);
+			chip[c] = ML::Box2D(x * chipSize, y * chipSize, chipSize, chipSize);
+		}
+		//★タスクの生成
+
+		return  true;
+	}
+	//-------------------------------------------------------------------
+	//「終了」タスク消滅時に１回だけ行う処理
+	bool  Object::Finalize()
+	{
+		//★データ＆タスク解放
+
+		if (!ge->QuitFlag() && this->nextTaskCreate) {
+			//★引き継ぎタスクの生成
+		}
+
+		return  true;
+	}
+	//-------------------------------------------------------------------
+	//「更新」１フレーム毎に行う処理
+	void  Object::UpDate()
+	{
+	}
+	//-------------------------------------------------------------------
+	//「２Ｄ描画」１フレーム毎に行う処理
+	void  Object::Render2D_AF()
+	{
+		for (int y = 0; y < sizeY; ++y) {
+			for (int x = 0; x < sizeX; ++x) {
+				DrawMapChip(map[y][x], x, y);
+			}
+		}
+	}
+	//-------------------------------------------------------------------
+	//マップチップ描画
+	void Object::DrawMapChip(int map, int x, int y)
+	{
+		if (map < 0) {
+			return;//マップ番号が0未満(空白,オブジェクトなど)の場合は描画しない
+		}
+		ML::Box2D draw(x * chipSize, y * chipSize, chipSize, chipSize);
+		ML::Box2D src(map % 10 * chipSize, map / 10 * chipSize, chipSize, chipSize);
+		ge->ApplyCamera2D(draw);
+		res->img->Draw(draw, src);
+	}
+	//-------------------------------------------------------------------
+	//マップのロード
+	bool Object::LoadMap(const string& fpath_)
+	{
+		ifstream fin(fpath_);
+		if (!fin) {
+			assert(!"読み込み失敗");
+			return false;
+		}
+
+
+		for (int y = 0; y < sizeY; ++y) {
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
+			for (int x = 0; x < sizeX; ++x) {
+				string  tc;
+				getline(ss_lt, tc, ',');
+				stringstream ss;
+				ss << tc;
+				ss >> map[y][x];
+				if (map[y][x] == -2) {
+					auto enemy = Enemy00::Object::Create(true);//敵の生成
+					enemy->pos = ML::Vec2(float(x * chipSize + chipSize / 2), float(y * chipSize + chipSize / 2));
+					map[y][x] = -1;//リセット
+				}
+			}
+		}
+
+		//ファイルを閉じる
+		fin.close();
+		return true;
+	}
+	//-------------------------------------------------------------------
+	//当たり判定
+	bool Object::CheckHit(ML::Box2D hit_)
+	{
+		ML::Rect r = { hit_.x,
+						hit_.y,
+						hit_.x + hit_.w,
+						hit_.y + hit_.h };
+		//矩形がマップ外に出ていたらサイズを変更する
+		ML::Rect m = {
+			hitBase.x,
+			hitBase.y,
+			hitBase.x + hitBase.w,
+			hitBase.x + hitBase.h
+		};
+		r.left = max(r.left, m.left);			//左に飛び出している
+		r.top = max(r.top, m.top);				//上に飛び出している
+		r.right = min(r.right, m.right);		//右に飛び出している
+		r.bottom = min(r.bottom, m.bottom);		//下に飛び出している
+
+		//ループ範囲調整
+		int sx, sy, ex, ey;
+		sx = r.left / chipSize;
+		sy = r.top / chipSize;
+		ex = (r.right - 1) / chipSize;
+		ey = (r.bottom - 1) / chipSize;
+
+		//範囲内の障害物を探す
+		for (int y = sy; y <= ey; ++y) {
+			for (int x = sx; x <= ex; ++x) {
+				if (map[y][x] != -1) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	//-------------------------------------------------------------------
+	//マップ外を見せないようにカメラを位置調整する
+	void Object::AdjustCameraPos()
+	{
+		//カメラとマップの範囲を用意
+		ML::Rect c = {
+			ge->camera2D.x,
+			ge->camera2D.y,
+			ge->camera2D.x + ge->camera2D.w,
+			ge->camera2D.y + ge->camera2D.h
+		};
+		ML::Rect m = {
+			hitBase.x,
+			hitBase.y,
+			hitBase.x + hitBase.w,
+			hitBase.x + hitBase.h
+		};
+		//カメラの位置を調整
+		if (c.right > m.right) {
+			ge->camera2D.x = m.right - ge->camera2D.w;
+		}
+
+		if (c.bottom > m.bottom) {
+			ge->camera2D.y = m.bottom - ge->camera2D.h;
+		}
+		if (c.left < m.left) {
+			ge->camera2D.x = m.left;
+		}
+		if (c.top < m.top) {
+			ge->camera2D.y = m.top;
+		}
+		//マップがカメラより小さい場合
+		if (hitBase.w < ge->camera2D.w) {
+			ge->camera2D.x = m.left;
+		}
+
+		if (hitBase.h < ge->camera2D.h) {
+			ge->camera2D.y = m.top;
+		}
+	}
+	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+	//以下は基本的に変更不要なメソッド
+	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+	//-------------------------------------------------------------------
+	//タスク生成窓口
+	Object::SP  Object::Create(bool  flagGameEnginePushBack_)
+	{
+		Object::SP  ob = Object::SP(new  Object());
+		if (ob) {
+			ob->me = ob;
+			if (flagGameEnginePushBack_) {
+				ge->PushBack(ob);//ゲームエンジンに登録
+
+			}
+			if (!ob->B_Initialize()) {
+				ob->Kill();//イニシャライズに失敗したらKill
+			}
+			return  ob;
+		}
+		return nullptr;
+	}
+	//-------------------------------------------------------------------
+	bool  Object::B_Initialize()
+	{
+		return  this->Initialize();
+	}
+	//-------------------------------------------------------------------
+	Object::~Object() { this->B_Finalize(); }
+	bool  Object::B_Finalize()
+	{
+		auto  rtv = this->Finalize();
+		return  rtv;
+	}
+	//-------------------------------------------------------------------
+	Object::Object() {	}
+	//-------------------------------------------------------------------
+	//リソースクラスの生成
+	Resource::SP  Resource::Create()
+	{
+		if (auto sp = instance.lock()) {
+			return sp;
+		}
+		else {
+			sp = Resource::SP(new  Resource());
+			if (sp) {
+				sp->Initialize();
+				instance = sp;
+			}
+			return sp;
+		}
+	}
+	//-------------------------------------------------------------------
+	Resource::Resource() {}
+	//-------------------------------------------------------------------
+	Resource::~Resource() { this->Finalize(); }
+}
