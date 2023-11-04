@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------
 //プレイヤ
 //-------------------------------------------------------------------
-#include "GameEngine_Ver3_83.h"
+#include "BChara.h"
 
 namespace Player
 {
@@ -26,7 +26,7 @@ namespace Player
 		DG::Image::SP img;
 	};
 	//-------------------------------------------------------------------
-	class  Object : public  BTask
+	class  Object : public  BChara
 	{
 		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
@@ -47,39 +47,14 @@ namespace Player
 		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	public:
 		//追加したい変数・メソッドはここに追加する
-		//状態
-		enum class State {
-			Normal, Clear, Dead, Non
-		};
-		//キャラの向き
-		enum class Angle_LR {
-			Right, Left
-		};
-
 		enum class Anim {
 			Idle, Walk, Jump, Fall, Clear, Dead
 		};
-		State state = State::Non;
-		ML::Vec2 pos;//プレイヤ座標
-		ML::Box2D hitBase;//当たり判定範囲
-		int	moveCnt;//行動処理用カウンタ
-		int	animCnt;//アニメーション処理用カウンタ
 
 		void Operation();
-		void CheckMove(ML::Vec2& e_);
-		bool CheckFoot();
-		bool CheckHead();
 		void Animation();
-		ML::Box2D CenterBox(int w, int h);
-		ML::Box2D MultiplyBox2D(ML::Box2D box2D, float n);
 
 	private:
-		ML::Vec2 moveVec;//移動速度
-		ML::Box2D src;//画像の切り取り範囲
-		ML::Box2D drawBase;//描画範囲
-		ML::Box2D footBase;//足元判定用
-		ML::Box2D headBase;//頭上判定用
-		Angle_LR angle = Angle_LR::Right;
 		Anim animKind = Anim::Idle;
 		float fallSpeed = 0.f;
 		float jumpPow = 0.f;

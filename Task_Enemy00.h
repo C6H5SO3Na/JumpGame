@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------
 //敵00
 //-------------------------------------------------------------------
-#include "GameEngine_Ver3_83.h"
+#include "BChara.h"
 
 namespace Enemy00
 {
@@ -26,7 +26,7 @@ namespace Enemy00
 		DG::Image::SP img,img0;
 	};
 	//-------------------------------------------------------------------
-	class  Object : public  BTask
+	class  Object : public  BChara
 	{
 	//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
@@ -46,42 +46,16 @@ namespace Enemy00
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	public:
-		enum class State {
-			Normal, Clear, Dead, Non
-		};
-		//キャラの向き
-		enum class Angle_LR {
-			Right, Left
-		};
-
 		//enum class Anim {
 		//	Idle, Walk, Jump, fall, Clear, Dead
 		//};
 		//追加したい変数・メソッドはここに追加する
-		ML::Vec2 pos;//プレイヤ座標
-		ML::Vec2 moveVec;//移動速度
-		ML::Box2D hitBase;//当たり判定範囲
-		ML::Box2D src;//画像の切り取り範囲
-		ML::Box2D drawBase;//描画範囲
-		ML::Box2D footBase;//足元判定用
-		ML::Box2D headBase;//頭上判定用
-		ML::Box2D leftSideBase;//左判定用
-		ML::Box2D rightSideBase;//左判定用
-		State state = State::Non;
-		Angle_LR angle = Angle_LR::Right;
 		//Anim animKind = Anim::Idle;
-		float fallSpeed = 0.f;
+		float fallSpeed;
 		//float jumpPow = 0.f;
-		bool hitFlag = false;
-		int	moveCnt;//行動処理用カウンタ
+		bool isHitFloor;
 
-		int	animCnt;//アニメーション処理用カウンタ
-		void  Move();
-		void  CheckMove(ML::Vec2& e_);
-		bool  CheckFoot();
-		bool  CheckLeftSide();
-		bool  CheckRightSide();
-		void  CheckHitPlayer();
-		ML::Box2D CenterBox(int w, int h);
+		void Move();
+		void CheckHitPlayer();
 	};
 }

@@ -38,10 +38,6 @@ namespace Enemy00
 		state = State::Normal;
 		angle = Angle_LR::Left;
 		hitBase = drawBase = CenterBox(32 * 2, 32 * 2);
-		footBase = ML::Box2D(hitBase.x, hitBase.h + hitBase.y, hitBase.w, 1);
-		headBase = ML::Box2D(hitBase.x, hitBase.y - 1, hitBase.w, 1); //1マス上
-		leftSideBase = ML::Box2D(hitBase.x - 1, hitBase.y, 1, hitBase.h);//左判定用
-		rightSideBase = ML::Box2D(hitBase.w + hitBase.x, hitBase.y, 1, hitBase.h);//右判定用
 		moveVec = ML::Vec2(5.f, 5.f);
 		src = ML::Box2D(0, 0, 64, 128);
 		//jumpPow = -17.f;
@@ -120,8 +116,8 @@ namespace Enemy00
 		}
 
 		//足元接触判定
-		hitFlag = CheckFoot();
-		if (hitFlag) {
+		isHitFloor = CheckFoot();
+		if (isHitFloor) {
 			////ジャンプアニメーションの場合解除
 			//if (animKind == Anim::Jump) {
 			//	animKind = Anim::Idle;
@@ -158,66 +154,6 @@ namespace Enemy00
 		++animCnt;
 	}
 	//-------------------------------------------------------------------
-	//めり込まない移動処理
-	void Object::CheckMove(ML::Vec2& e_)
-	{
-		//マップが存在するか調べてからアクセス
-		auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
-		if (map == nullptr) { return; }//マップがなければ判定しない(できない)
-
-		//横軸に対する移動
-		while (e_.x != 0.f) {
-			float preX = pos.x;
-			if (e_.x >= +1.f) { pos.x += 1.f;		e_.x -= 1.f; }
-			else if (e_.x <= -1.f) { pos.x -= 1.f;		e_.x += 1.f; }
-			else { pos.x += e_.x;	e_.x = 0.f; }
-			ML::Box2D hit = hitBase.OffsetCopy(pos);
-			if (map->CheckHit(hit)) {
-				pos.x = preX;//移動キャンセル
-				break;
-			}
-		}
-
-		//縦軸に対する移動
-		while (e_.y != 0.f) {
-			float preY = pos.y;
-			if (e_.y >= +1.f) { pos.y += 1.f;		e_.y -= 1.f; }
-			else if (e_.y <= -1.f) { pos.y -= 1.f;		e_.y += 1.f; }
-			else { pos.y += e_.y;	e_.y = 0.f; }
-			ML::Box2D hit = hitBase.OffsetCopy(pos);
-			if (map->CheckHit(hit)) {
-				pos.y = preY;//移動キャンセル
-				break;
-			}
-		}
-	}
-	//-------------------------------------------------------------------
-	//足元の当たり判定
-	bool  Object::CheckFoot()
-	{
-		//マップが存在するか調べてからアクセス
-		auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
-		ML::Box2D  hit = footBase.OffsetCopy(pos);
-		return  map->CheckHit(hit);
-	}
-	//-------------------------------------------------------------------
-	//左側の当たり判定
-	bool  Object::CheckLeftSide()
-	{
-		//マップが存在するか調べてからアクセス
-		auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
-		ML::Box2D  hit = leftSideBase.OffsetCopy(pos);
-		return  map->CheckHit(hit);
-	}
-	//-------------------------------------------------------------------
-	//右側の当たり判定
-	bool  Object::CheckRightSide()
-	{
-		//マップが存在するか調べてからアクセス
-		auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
-		ML::Box2D  hit = rightSideBase.OffsetCopy(pos);
-		return  map->CheckHit(hit);
-	}
 	//プレイヤとの当たり判定
 	void Object::CheckHitPlayer()
 	{
@@ -234,12 +170,6 @@ namespace Enemy00
 			player->moveCnt = 0;
 			player->animCnt = 0;
 		}
-	}
-	//-------------------------------------------------------------------
-	//矩形の座標の中心を中央にして定義する
-	ML::Box2D Object::CenterBox(int w, int h)
-	{
-		return ML::Box2D(-w / 2, -h / 2, w, h);
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド

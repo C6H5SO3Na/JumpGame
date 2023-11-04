@@ -39,8 +39,6 @@ namespace Player
 		state = State::Normal;
 		angle = Angle_LR::Right;
 		hitBase = CenterBox(32 * 2, 64 * 2);
-		footBase = ML::Box2D(hitBase.x, hitBase.h + hitBase.y, hitBase.w, 1);
-		headBase = ML::Box2D(hitBase.x, hitBase.y - 1, hitBase.w, 1); //1マス上
 		pos = ML::Vec2(200.f, 200.f);
 		moveVec = ML::Vec2(8.f, 8.f);
 		jumpPow = -17.f;
@@ -205,85 +203,6 @@ namespace Player
 		++animCnt;
 	}
 	//-------------------------------------------------------------------
-	//めり込まない移動処理
-	void Object::CheckMove(ML::Vec2& e_)
-	{
-
-		//マップが存在するか調べてからアクセス
-		auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
-		if (map == nullptr) { return; }//マップがなければ判定しない(できない)
-
-		//横軸に対する移動
-		while (e_.x != 0.f) {
-			float preX = pos.x;
-			if (e_.x >= +1.f) {
-				pos.x += 1.f;
-				e_.x -= 1.f;
-			}
-			else if (e_.x <= -1.f) {
-				pos.x -= 1.f;
-				e_.x += 1.f;
-			}
-			else {
-				pos.x += e_.x;
-				e_.x = 0.f;
-			}
-			ML::Box2D hit = hitBase.OffsetCopy(pos);
-			if (map->CheckHit(hit)) {
-				pos.x = preX;//移動キャンセル
-				break;
-			}
-		}
-
-		//縦軸に対する移動
-		while (e_.y != 0.f) {
-			float preY = pos.y;
-			if (e_.y >= +1.f) {
-				pos.y += 1.f;
-				e_.y -= 1.f;
-			}
-			else if (e_.y <= -1.f) {
-				pos.y -= 1.f;
-				e_.y += 1.f;
-			}
-			else {
-				pos.y += e_.y;
-				e_.y = 0.f;
-			}
-			ML::Box2D hit = hitBase.OffsetCopy(pos);
-			if (map->CheckHit(hit)) {
-				pos.y = preY;//移動キャンセル
-				break;
-			}
-		}
-	}
-	//-------------------------------------------------------------------------
-	//足元の当たり判定
-	bool  Object::CheckFoot()
-	{
-		//マップが存在するか調べてからアクセス
-		auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
-		if (map == nullptr) { return false; }//マップがなければfalseを返す
-		ML::Box2D  hit = footBase.OffsetCopy(pos);
-		return  map->CheckHit(hit);
-	}
-
-	//-------------------------------------------------------------------------
-	//頭上の当たり判定
-	bool  Object::CheckHead()
-	{
-		//マップが存在するか調べてからアクセス
-		auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
-		if (map == nullptr) { return false; }//マップがなければfalseを返す
-		ML::Box2D  hit = headBase.OffsetCopy(pos);
-		return  map->CheckHit(hit);
-	}
-	//-------------------------------------------------------------------
-	//矩形の座標の中心を中央にして定義する
-	ML::Box2D Object::CenterBox(int w, int h)
-	{
-		return ML::Box2D(-w / 2, -h / 2, w, h);
-	}
 	//アニメーション
 	void Object::Animation()
 	{
@@ -330,13 +249,6 @@ namespace Player
 			drawBase.w = -drawBase.w;
 		}
 	}
-	//ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
-	//Box2D型の各要素に一定の値を掛ける(拡大用)
-	ML::Box2D Object::MultiplyBox2D(ML::Box2D box, float n)
-	{
-		return ML::Box2D(int(box.x * n), int(box.y * n),
-			int(box.w * n), int(box.h * n));
-	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -371,7 +283,7 @@ namespace Player
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() :animCnt(), moveCnt() {	}
+	Object::Object() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()
