@@ -1,25 +1,29 @@
 //-------------------------------------------------------------------
-//タイトル画面
+//ゲーム開始画面
 //-------------------------------------------------------------------
 #include "MyPG.h"
-#include "Task_Title.h"
 #include "Task_StartGame.h"
-//#include "randomLib.h"
-//#include "easing.h"
+#include "Task_Game.h"
+#include <assert.h>
 
-namespace Title
+namespace StartGame
 {
 	Resource::WP  Resource::instance;
 	//-------------------------------------------------------------------
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
+		font = DG::Font::Create("ＭＳ 明朝", 30, 60);
+		stageImg = DG::Image::Create("./data/image/Stage1.png");
+		playerImg = DG::Image::Create("./data/image/Idle_KG_1.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
 	//リソースの解放
 	bool  Resource::Finalize()
 	{
+		font.reset();
+		stageImg.reset();
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -31,9 +35,11 @@ namespace Title
 		//リソースクラス生成orリソース共有
 		this->res = Resource::Create();
 
-		//★データ初期化
+		//デバッグ用の矩形
+		render2D_Priority[1] = 0.f;
 
 		//★タスクの生成
+
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -41,12 +47,10 @@ namespace Title
 	bool  Object::Finalize()
 	{
 		//★データ＆タスク解放
-		ge->stage = 1;
-		ge->remaining = 5;
-		ge->score = 0;
+
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			auto game = StartGame::Object::Create(true);
+			auto game = Game::Object::Create(true);
 		}
 
 		return  true;
@@ -56,16 +60,54 @@ namespace Title
 	void  Object::UpDate()
 	{
 		auto inp = ge->in1->GetState();
+
+		//Aボタンが押されたら
 		if (inp.B1.down) {
-			Kill();
+			--ge->remaining;
+			Kill();//次のタスクへ
 		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ge->Dbg_ToDisplay(100, 100, "Title");
+		ge->Dbg_ToDisplay(100, 100, "StartGame");
 		ge->Dbg_ToDisplay(100, 120, "Push B1");
+
+		//ステージ数
+		{
+			ML::Box2D textBox(500, 200, 500, 200);
+			string text = "Stage " + to_string(ge->stage);
+			res->font->Draw(textBox, text);
+		}
+
+		//スコア
+		{
+			ML::Box2D textBox(1000, 200, 500, 200);
+			string text = "Score:" + to_string(ge->score);
+			res->font->Draw(textBox, text);
+		}
+
+		//残機
+		{
+			ML::Box2D textBox(1700, 800, 500, 200);
+			string text = "x " + to_string(ge->remaining);
+			res->font->Draw(textBox, text);
+		}
+
+		//ステージ画像
+		{
+			ML::Box2D draw(400, 300, 960, 540);
+			ML::Box2D src(0, 0, 1920, 1080);
+			res->stageImg->Draw(draw, src);
+		}
+
+		//プレイヤ画像(残機用)
+		{
+			ML::Box2D draw(1550, 750, 200, 128);
+			ML::Box2D src(0, 0, 100, 64);
+			res->playerImg->Draw(draw, src);
+		}
 	}
 
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★

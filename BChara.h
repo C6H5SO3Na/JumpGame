@@ -16,6 +16,9 @@ protected:
 	ML::Vec2 moveVec;//移動速度
 	ML::Box2D src;//画像の切り取り範囲
 	ML::Box2D drawBase;//描画範囲
+
+	bool isHitFloor;//床と当たったか否か
+	float fallSpeed;//落下速度
 public:
 	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	//キャラの状態
@@ -24,8 +27,8 @@ public:
 	};
 
 	//左右の向き(2D横視点ゲーム専用)
-	enum class Angle_LR {
-		Right, Left
+	enum Angle_LR {
+		Right = 1, Left = -1
 	};
 
 	ML::Vec2 pos;//プレイヤ座標
@@ -40,10 +43,10 @@ public:
 	//★★メンバ変数を追加したら必ず初期化も追加すること★★
 	BChara()//コンストラクタ
 		:pos()
-		, hitBase()
-		, moveVec()
 		, moveCnt(0)
 		, animCnt(0)
+		, fallSpeed(0.f)
+		, isHitFloor(false)
 		, angle(Angle_LR::Right)
 		, state(State::Non)
 	{
@@ -61,6 +64,8 @@ public:
 	bool CheckLeftSide();
 	//右判定
 	bool CheckRightSide();
+	//穴に落ちたかの判定
+	bool CheckFallHole();
 	//矩形の座標の中心を中央にして定義する
 	ML::Box2D CenterBox(int w, int h);
 	//Box2D型の各要素に一定の値を掛ける(拡大用)

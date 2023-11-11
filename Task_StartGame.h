@@ -1,14 +1,14 @@
 #pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
-//プレイヤ
+//ゲーム開始画面
 //-------------------------------------------------------------------
-#include "BChara.h"
+#include "GameEngine_Ver3_83.h"
 
-namespace Player
+namespace StartGame
 {
 	//タスクに割り当てるグループ名と固有名
-	const  string  defGroupName("プレイヤ");	//グループ名
+	const  string  defGroupName("ゲーム開始画面");	//グループ名
 	const  string  defName("NoName");	//タスク名
 	//-------------------------------------------------------------------
 	class  Resource : public BResource
@@ -23,12 +23,13 @@ namespace Player
 		static   WP  instance;
 		static  Resource::SP  Create();
 		//共有する変数はここに追加する
-		DG::Image::SP img;
+		DG::Font::SP font;
+		DG::Image::SP stageImg, playerImg;
 	};
 	//-------------------------------------------------------------------
-	class  Object : public  BChara
+	class  Object : public  BTask
 	{
-		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+	//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
 		virtual  ~Object();
 		typedef  shared_ptr<Object>		SP;
@@ -44,19 +45,8 @@ namespace Player
 		void  UpDate()			override;//「実行」１フレーム毎に行う処理
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
-		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
+	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	public:
 		//追加したい変数・メソッドはここに追加する
-		enum class Anim {
-			Idle, Walk, Jump, Fall, Clear, Dead
-		};
-
-		void Operation();
-		void Animation();
-		bool CheckHitEnemyHead();
-		void ChangeAnim(Anim anim);
-	private:
-		Anim animKind;
-		float jumpPow;
 	};
 }

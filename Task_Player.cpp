@@ -39,7 +39,6 @@ namespace Player
 		state = State::Normal;
 		angle = Angle_LR::Right;
 		hitBase = CenterBox(32 * 2, 64 * 2);
-		pos = ML::Vec2(200.f, 200.f);
 		moveVec = ML::Vec2(8.f, 8.f);
 		jumpPow = -17.f;
 
@@ -64,11 +63,19 @@ namespace Player
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
-		auto enemies = ge->GetTasks<Enemy00::Object>("敵");
-		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
-			(*it)->CheckHitPlayer();
-		}
 		Operation();
+		if (state != State::Dead && !CheckHitEnemyHead()) {//敵を踏んでいなければ
+			auto enemies = ge->GetTasks<Enemy00::Object>("敵");
+			for (auto it = enemies->begin(); it != enemies->end(); ++it) {
+				(*it)->CheckHitPlayer();
+			}
+		}
+
+		//穴に落ちたら消滅させる
+		if (CheckFallHole()) {
+			ge->isDead = true;
+			state = State::Non;
+		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
@@ -78,6 +85,12 @@ namespace Player
 		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
 		ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
+		//デバッグ用矩形
+		//{
+		//	ML::Box2D  me = hitBase.OffsetCopy(pos);
+		//	ge->ApplyCamera2D(me);
+		//	ge->debugRect(me);
+		//}
 	}
 
 	//-------------------------------------------------------------------
@@ -97,7 +110,7 @@ namespace Player
 
 				//ジャンプ中でないとき歩くアニメーション
 				if (fallSpeed == 0.f) {
-					animKind = Anim::Walk;
+					ChangeAnim(Anim::Walk);
 				}
 			}
 			if (inp.LStick.BR.on) {
@@ -106,7 +119,7 @@ namespace Player
 
 				//ジャンプ中でないとき歩くアニメーション
 				if (fallSpeed == 0.f) {
-					animKind = Anim::Walk;
+					ChangeAnim(Anim::Walk);
 				}
 			}
 
@@ -120,7 +133,7 @@ namespace Player
 			//ジャンプ
 			if (inp.B1.down) {
 				if (isHitFloor) {//着地中のみジャンプ開始できる
-					animKind = Anim::Jump;
+					ChangeAnim(Anim::Jump);
 					fallSpeed = jumpPow;
 				}
 			}
@@ -132,7 +145,7 @@ namespace Player
 			//完全に止まっているときは止まっているときのアニメーション
 			//ジャンプ中はジャンプのアニメーションをする
 			if (est == ML::Vec2() && animKind != Anim::Jump) {
-				animKind = Anim::Idle;
+				ChangeAnim(Anim::Idle);
 			}
 
 
@@ -140,15 +153,18 @@ namespace Player
 
 			//ジャンプでない落下中は落下のアニメーションをする
 			if (!isHitFloor && animKind != Anim::Jump) {
-				animKind = Anim::Fall;
+				ChangeAnim(Anim::Fall);
 			}
 
 			break;
 
 			//死亡時
 		case State::Dead:
-			ge->isGameOver = true;
-			animKind = Anim::Dead;
+			ge->isDead = true;
+			//死亡アニメーションでないときは死亡アニメーションにする
+			if (animKind != Anim::Dead) {
+				ChangeAnim(Anim::Dead);
+			}
 
 			//死亡時には上にいかないようにする
 			fallSpeed = max(0.f, fallSpeed);
@@ -169,7 +185,7 @@ namespace Player
 		if (isHitFloor) {
 			//ジャンプアニメーションの場合解除
 			if (animKind == Anim::Jump) {
-				animKind = Anim::Idle;
+				ChangeAnim(Anim::Idle);
 			}
 			fallSpeed = 0.f;//落下速度0
 		}
@@ -178,9 +194,9 @@ namespace Player
 		}
 
 		//頭上判定
-		if (fallSpeed < 0) {//上昇中
+		if (fallSpeed < 0.f) {//上昇中
 			if (CheckHead()) {
-				fallSpeed = 0;//上昇力を無効にする
+				fallSpeed = 0.f;//上昇力を無効にする
 			}
 		}
 		//カメラの位置を再調整
@@ -189,18 +205,18 @@ namespace Player
 			int px = ge->camera2D.w / 2;
 			int py = ge->camera2D.h / 2;
 			//プレイヤを画面中央に置いたときのカメラの左上座標を求める
-			int cpx = int(this->pos.x) - px;
-			int cpy = int(this->pos.y) - py;
+			int cpx = int(pos.x) - px;
+			int cpy = int(pos.y) - py;
 			//カメラの座標を更新
 			ge->camera2D.x = cpx;
 			ge->camera2D.y = cpy;
 			//マップの外側が映らないようにカメラを調整する
-			if (auto map = ge->GetTask<Map2D::Object>(Map2D::defGroupName, Map2D::defName)) {
+			Map2D::Object::SP map = ge->qa_Map;
+			if (map != nullptr) {
 				map->AdjustCameraPos();
 			}
 		}
 		++moveCnt;
-		++animCnt;
 	}
 	//-------------------------------------------------------------------
 	//アニメーション
@@ -208,45 +224,119 @@ namespace Player
 	{
 		switch (animKind) {
 		case Anim::Idle:
+		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
 			drawBase = CenterBox(100, 64);
-			src = ML::Box2D((animCnt / 8) % 4 * drawBase.w, 0, drawBase.w, drawBase.h);
+			src = ML::Box2D((animCnt / frameInterval) % 4 * drawBase.w, 0, drawBase.w, drawBase.h);
 			break;
-
+		}
 		case Anim::Walk:
+		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
 			drawBase = CenterBox(100, 64);
-			src = ML::Box2D((animCnt / 8) % 7 * drawBase.w, drawBase.h, drawBase.w, drawBase.h);
+			src = ML::Box2D((animCnt / frameInterval) % 7 * drawBase.w, drawBase.h, drawBase.w, drawBase.h);
 			break;
-
+		}
 		case Anim::Jump:
+		{
+			int frameInterval = 11;//アニメーションの間隔フレーム
 			drawBase = CenterBox(100, 64);
-			src = ML::Box2D((animCnt / 8) % 6 * drawBase.w, drawBase.h * 2, drawBase.w, drawBase.h);
+			src = ML::Box2D((animCnt / frameInterval) % 6 * drawBase.w, drawBase.h * 2, drawBase.w, drawBase.h);
+			if (animCnt / frameInterval / 6 >= 1) {
+				ChangeAnim(Anim::Fall);
+			}
 			break;
-
+		}
 		case Anim::Fall:
+		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
 			drawBase = CenterBox(100, 64);
-			src = ML::Box2D((animCnt / 8) % 3 * drawBase.w + drawBase.w * 4, 0, drawBase.w, drawBase.h);
+			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w + drawBase.w * 4, 0, drawBase.w, drawBase.h);
 			break;
+		}
 		case Anim::Dead:
+		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
 			drawBase = CenterBox(100, 64);
-			if (ge->GameOverCnt < 5 * 8 - 1) {
-				++ge->GameOverCnt;
-			}
-			src = ML::Box2D(ge->GameOverCnt / 8 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
+			//if ( > 5 * 8 - 1) {
+			//}
+			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
 			break;
-
+		}
 		case Anim::Clear:
-			drawBase = ML::Box2D(-16, -40, 32, 64);
-			switch ((animCnt / 16) % 2) {
-			case 0:		src = ML::Box2D(0, 128, 32, 64);		break;
-			case 1:		src = ML::Box2D(32, 128, 32, 64);	break;
-			}
+		{
+			//drawBase = ML::Box2D(-16, -40, 32, 64);
+			//switch ((animCnt / 16) % 2) {
+			//case 0:		src = ML::Box2D(0, 128, 32, 64);		break;
+			//case 1:		src = ML::Box2D(32, 128, 32, 64);	break;
+			//}
 			break;
+		}
 		}
 		//左向き反転
 		if (angle == Angle_LR::Left &&
 			drawBase.w >= 0) {
 			drawBase.x = -drawBase.x;
 			drawBase.w = -drawBase.w;
+		}
+		++animCnt;
+	}
+	//-------------------------------------------------------------------
+	//敵の頭との当たり判定
+	bool Object::CheckHitEnemyHead()
+	{
+		if (state == State::Non) { return false; }
+		//当たり判定を基にして足元矩形を生成
+		ML::Box2D playerFoot(
+			hitBase.x,
+			hitBase.y + hitBase.h,
+			hitBase.w,
+			10);
+		//敵の頭上と当たり判定
+		ML::Box2D  me = playerFoot.OffsetCopy(pos);
+		//デバッグ用矩形
+		//{
+		//	ge->ApplyCamera2D(me);
+		//	ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
+		//}
+		auto enemies = ge->qa_Enemies;
+		for (auto it = enemies->begin();
+			it != enemies->end();
+			++it) {
+			if ((*it)->state != State::Normal) { continue; }
+			//当たり判定を基にして頭上矩形を生成
+			ML::Box2D enemyHead(
+				(*it)->hitBase.x,
+				(*it)->hitBase.y - 1,
+				(*it)->hitBase.w,
+				10);
+			ML::Box2D  you = enemyHead.OffsetCopy((*it)->pos);
+			//デバッグ用矩形
+			//{
+			//	ge->ApplyCamera2D(you);
+			//	ge->debugRect(you, ge->DEBUGRECTMODE::RED);
+			//}
+			if (you.Hit(me)) {
+				if (fallSpeed <= 0.f) {//プレイヤが落下中でなければ無効
+					return false;
+				}
+				(*it)->state = State::Non;
+				(*it)->moveCnt = 0;
+				(*it)->animCnt = 0;
+				fallSpeed = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
+				ChangeAnim(Anim::Jump);
+				return true;
+			}
+		}
+		return false;
+	}
+	//-------------------------------------------------------------------
+	//アニメーションをチェンジ
+	void Object::ChangeAnim(Anim anim)
+	{
+		animKind = anim;
+		if (anim == Anim::Jump || anim == Anim::Dead) {
+			animCnt = 0;//アニメーション用のカウントをリセット
 		}
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -283,7 +373,9 @@ namespace Player
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() {	}
+	Object::Object() :
+		animKind(Anim::Idle),
+		jumpPow(0.f) {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

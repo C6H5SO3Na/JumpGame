@@ -146,6 +146,8 @@
     <ClCompile Include="Task_Game.cpp" />
     <ClCompile Include="Task_Map2D.cpp" />
     <ClCompile Include="Task_Player.cpp" />
+    <ClCompile Include="Task_Result.cpp" />
+    <ClCompile Include="Task_StartGame.cpp" />
     <ClCompile Include="Task_Title.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="XI2018_Ver1_0.cpp" />
@@ -177,6 +179,8 @@
     <ClInclude Include="Task_Game.h" />
     <ClInclude Include="Task_Map2D.h" />
     <ClInclude Include="Task_Player.h" />
+    <ClInclude Include="Task_Result.h" />
+    <ClInclude Include="Task_StartGame.h" />
     <ClInclude Include="Task_Title.h" />
     <ClInclude Include="XI2018_Ver1_0.h" />
   </ItemGroup>

@@ -63,6 +63,9 @@ namespace Enemy00
 	void  Object::UpDate()
 	{
 		Move();
+		if (state == State::Non) {
+			Kill();
+		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
@@ -78,16 +81,11 @@ namespace Enemy00
 	//敵の動き
 	void Object::Move()
 	{
-		if (state == State::Non) { return; }
+		if (!CheckHitCamera2D() || state == State::Non) { return; }//消滅したかカメラの範囲外のとき、動作しない
 		ML::Vec2 est(0.f, 0.f);
 		auto inp = ge->in1->GetState();
 		//左右移動
-		if (angle == Angle_LR::Left) {
-			est.x = -moveVec.x;
-		}
-		else {
-			est.x = moveVec.x;
-		}
+		est.x = moveVec.x * angle;
 		////ジャンプ
 		//if (inp.B1.down) {
 		//	if (hitFlag) {//着地中のみジャンプ開始できる
@@ -134,21 +132,10 @@ namespace Enemy00
 		//		fallSpeed = 0;//上昇力を無効にする
 		//	}
 		//}
-		//カメラの位置を再調整
-		{
-			//プレイヤを画面のどこに置くか（今回は画面中央）
-			int px = ge->camera2D.w / 2;
-			int py = ge->camera2D.h / 2;
-			//プレイヤを画面中央に置いたときのカメラの左上座標を求める
-			int cpx = int(this->pos.x) - px;
-			int cpy = int(this->pos.y) - py;
-			//カメラの座標を更新
-			ge->camera2D.x = cpx;
-			ge->camera2D.y = cpy;
-			//マップの外側が映らないようにカメラを調整する
-			if (auto map = ge->GetTask<Map2D::Object>(Map2D::defGroupName, Map2D::defName)) {
-				map->AdjustCameraPos();
-			}
+
+		//穴に落ちたら消滅させる
+		if (CheckFallHole()) {
+			state = State::Non;
 		}
 		++moveCnt;
 		++animCnt;
@@ -159,17 +146,36 @@ namespace Enemy00
 	{
 		if (state == State::Non) { return; }
 		//プレイヤと当たり判定
-		ML::Box2D  me = hitBase.OffsetCopy((int)pos.x, (int)pos.y);
+		ML::Box2D  me = hitBase.OffsetCopy(pos);
 		auto player = ge->GetTask<Player::Object>(Player::defGroupName);
 
-		if (player->state != Player::Object::State::Normal) { return; }
+		if (player->state != State::Normal) { return; }
 
-		ML::Box2D  you = player->hitBase.OffsetCopy((int)player->pos.x, (int)player->pos.y);
+		ML::Box2D  you = player->hitBase.OffsetCopy(player->pos);
 		if (you.Hit(me)) {
-			player->state = Player::Object::State::Dead;
+			player->state = State::Dead;
 			player->moveCnt = 0;
 			player->animCnt = 0;
 		}
+	}
+	//-------------------------------------------------------------------
+	//カメラとの当たり判定
+	bool Object::CheckHitCamera2D()
+	{
+		if (state == State::Non) { return false; }
+		//プレイヤと当たり判定
+		ML::Box2D  me = hitBase.OffsetCopy(pos);
+		int n = 400;//カメラ矩形より指定した数両端に広げる
+		ML::Box2D  you(
+			ge->camera2D.x - n,
+			ge->camera2D.y,
+			ge->camera2D.w + n * 2,
+			ge->camera2D.h
+		);
+		if (you.Hit(me)) {
+			return true;
+		}
+		return false;
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド

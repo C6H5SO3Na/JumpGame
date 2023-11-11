@@ -29,6 +29,12 @@
     <Filter Include="MyPG\Task\Ending">
       <UniqueIdentifier>{2afa7d7b-26e9-419d-a8c9-8311c1bbd8da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MyPG\Task\StartGame">
+      <UniqueIdentifier>{cf241c11-ca19-43ec-8e5c-bc9f0e908fed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MyPG\Task\Result">
+      <UniqueIdentifier>{91141150-1893-446e-b784-55cf5c3afa48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine_Ver3_83.cpp">
@@ -121,6 +127,12 @@
     <ClCompile Include="BChara.cpp">
       <Filter>MyPG</Filter>
     </ClCompile>
+    <ClCompile Include="Task_StartGame.cpp">
+      <Filter>MyPG\Task\StartGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Task_Result.cpp">
+      <Filter>MyPG\Task\Result</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine_Ver3_83.h">
@@ -206,6 +218,12 @@
     </ClInclude>
     <ClInclude Include="BChara.h">
       <Filter>MyPG</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_StartGame.h">
+      <Filter>MyPG\Task\StartGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_Result.h">
+      <Filter>MyPG\Task\Result</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

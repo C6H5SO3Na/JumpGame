@@ -51,11 +51,10 @@ namespace Enemy00
 		//};
 		//追加したい変数・メソッドはここに追加する
 		//Anim animKind = Anim::Idle;
-		float fallSpeed;
 		//float jumpPow = 0.f;
-		bool isHitFloor;
 
 		void Move();
 		void CheckHitPlayer();
+		bool CheckHitCamera2D();
 	};
 }

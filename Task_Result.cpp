@@ -1,13 +1,11 @@
 //-------------------------------------------------------------------
-//タイトル画面
+//ゲームオーバー、結果表示
 //-------------------------------------------------------------------
 #include "MyPG.h"
+#include "Task_Result.h"
 #include "Task_Title.h"
-#include "Task_StartGame.h"
-//#include "randomLib.h"
-//#include "easing.h"
 
-namespace Title
+namespace Result
 {
 	Resource::WP  Resource::instance;
 	//-------------------------------------------------------------------
@@ -32,7 +30,7 @@ namespace Title
 		this->res = Resource::Create();
 
 		//★データ初期化
-
+		
 		//★タスクの生成
 		return  true;
 	}
@@ -41,12 +39,11 @@ namespace Title
 	bool  Object::Finalize()
 	{
 		//★データ＆タスク解放
-		ge->stage = 1;
-		ge->remaining = 5;
-		ge->score = 0;
+
+
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			auto game = StartGame::Object::Create(true);
+			auto title = Title::Object::Create(true);
 		}
 
 		return  true;
@@ -64,7 +61,7 @@ namespace Title
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ge->Dbg_ToDisplay(100, 100, "Title");
+		ge->Dbg_ToDisplay(100, 100, "GameOver");
 		ge->Dbg_ToDisplay(100, 120, "Push B1");
 	}
 
@@ -80,7 +77,7 @@ namespace Title
 			ob->me = ob;
 			if (flagGameEnginePushBack_) {
 				ge->PushBack(ob);//ゲームエンジンに登録
-
+				
 			}
 			if (!ob->B_Initialize()) {
 				ob->Kill();//イニシャライズに失敗したらKill
