@@ -1,4 +1,4 @@
-#pragma warning(disable:4996)
+//#pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
 //プレイヤ
@@ -48,16 +48,19 @@ namespace Player
 	public:
 		//追加したい変数・メソッドはここに追加する
 		enum class Anim {
-			Idle, Walk, Jump, Fall, Clear, Dead
+			Idle, Walk, Jump, Fall, Hurt, Clear, Dead
 		};
 
 		void Operation();
 		void Animation();
-
+		bool CheckHitEnemyHead();
+		void ChangeAnim(Anim anim);
+		void DamageOperation();
+		bool isFlash;//点滅フラグ
+		bool isInvincible;//無敵フラグ
+		int invincibleCnt;//無敵カウント
 	private:
-		Anim animKind = Anim::Idle;
-		float fallSpeed = 0.f;
-		float jumpPow = 0.f;
-		bool isHitFloor = false;
+		Anim animKind;
+		float jumpPow;
 	};
 }

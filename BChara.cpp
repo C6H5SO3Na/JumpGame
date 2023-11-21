@@ -9,8 +9,8 @@
 //めり込まない移動処理
 void BChara::CheckMove(ML::Vec2& e_)
 {
+	auto map = ge->qa_Map;
 	//マップが存在するか調べてからアクセス
-	auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
 	if (map == nullptr) { return; }//マップがなければ判定しない(できない)
 
 	//横軸に対する移動
@@ -51,6 +51,7 @@ void BChara::CheckMove(ML::Vec2& e_)
 			e_.y = 0.f;
 		}
 		ML::Box2D hit = hitBase.OffsetCopy(pos);
+		auto map = ge->qa_Map;
 		if (map->CheckHit(hit)) {
 			pos.y = preY;//移動キャンセル
 			break;
@@ -69,7 +70,7 @@ bool BChara::CheckFoot()
 		1);
 	foot.Offset(pos);
 
-	auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
+	auto map = ge->qa_Map;
 	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//マップと接触判定
 	return map->CheckHit(foot);
@@ -87,7 +88,7 @@ bool BChara::CheckHead()
 		1);
 	head.Offset(pos);
 
-	auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
+	auto map = ge->qa_Map;
 	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//マップと接触判定
 	return  map->CheckHit(head);
@@ -104,7 +105,7 @@ bool  BChara::CheckLeftSide()
 		hitBase.h);
 	leftSide.Offset(pos);
 
-	auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
+	auto map = ge->qa_Map;
 	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//マップと接触判定
 	return  map->CheckHit(leftSide);
@@ -121,10 +122,17 @@ bool  BChara::CheckRightSide()
 		hitBase.h);
 	rightSide.Offset(pos);
 
-	auto map = ge->GetTask<Map2D::Object>("フィールド", "マップ");
+	auto map = ge->qa_Map;
 	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//マップと接触判定
 	return  map->CheckHit(rightSide);
+}
+//-------------------------------------------------------------------
+//穴に落ちたかの判定
+bool BChara::CheckFallHole()
+{
+	if (ge->qa_Map == nullptr) { return false; }//マップがなければ判定しない(できない)
+	return pos.y > ge->screen2DHeight - hitBase.y;//キャラクタ上部の座標が画面下の座標を超えたときtrueを返す
 }
 //-------------------------------------------------------------------
 //矩形の座標の中心を中央にして定義する
@@ -138,4 +146,15 @@ ML::Box2D BChara::MultiplyBox2D(ML::Box2D box, float n)
 {
 	return ML::Box2D(int(box.x * n), int(box.y * n),
 		int(box.w * n), int(box.h * n));
+}
+//-------------------------------------------------------------------
+//ライフの増減
+void BChara::LifeOperation(int addLife)
+{
+	life.now += addLife;
+	if (life.now <= 0) {
+		state = State::Dead;
+		moveCnt = 0;
+		animCnt = 0;
+	}
 }

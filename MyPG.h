@@ -7,7 +7,9 @@
 //-----------------------------------------------------------------------------------------------
 
 #include "fpscounter.h"
-
+#include "BChara.h"
+#include "task_Map2D.h"
+#include "task_Player.h"
 #include "task_Effect00.h"
 
 //-----------------------------------------------------------------------------------------------
@@ -18,7 +20,11 @@ namespace  MyPG
 	//カメラ基本形
 	class Camera
 	{
-		Camera() { }
+		Camera() :
+			fov(0.f),
+			nearPlane(0.f),
+			forePlane(0.f),
+			aspect(0.f) { }
 		Camera(
 			const ML::Vec3& tg_,	//	被写体の位置
 			const ML::Vec3& pos_,	//	カメラの位置
@@ -32,12 +38,12 @@ namespace  MyPG
 		ML::Vec3 target;			//	被写体の位置
 		ML::Vec3 pos;			//	カメラの位置
 		ML::Vec3 up;				//	カメラの上方向を示すベクトル（大体Ｙ＋固定）
-	//	射影情報（視野範囲関連）
+		//	射影情報（視野範囲関連）
 		float fov;					//	視野角
 		float nearPlane;			//	前クリップ平面（これより前は映らない）
 		float forePlane;			//	後クリップ平面（これより後ろは映らない）
 		float aspect;				//	アスペクト比（画面の比率に合わせる　横÷縦）
-	//	行列情報
+		//	行列情報
 		ML::Mat4x4  matView, matProj;
 		~Camera();
 		using SP = shared_ptr<Camera>;
@@ -50,7 +56,7 @@ namespace  MyPG
 			float				np_,	//	前クリップ平面（これより前は映らない）
 			float				fp_,	//	後クリップ平面（これより後ろは映らない）
 			float				asp_);	//	アスペクト比（画面の比率に合わせる　横÷縦）	
-//	カメラの設定
+		//	カメラの設定
 		void UpDate();
 	};
 	//----------------------------------------------
@@ -71,6 +77,12 @@ namespace  MyPG
 		void Set3DRenderState(DWORD l_);
 
 		//ゲームエンジンに追加したいものは下に加える
+		//敵の検出処理を節約
+		shared_ptr<vector<BChara::SP>> qa_Enemies;
+		//マップの検出処理を節約
+		Map2D::Object::SP qa_Map;
+		//プレイヤの検出処理を節約
+		Player::Object::SP qa_Player;
 		//----------------------------------------------
 		MyPG::Camera::SP		camera[4];		//	カメラ
 
@@ -80,27 +92,30 @@ namespace  MyPG
 		ML::Box2D				camera2D;	//  ２Ｄスクロール制御用
 		map<string, int> evFlags;
 
+		bool isDead = false;//やられたか否か
 		bool isGameOver = false; //ゲームオーバーフラグ
 		bool GameClearFlag = false;//クリアフラグ
 		bool unHitEnemy = false;//敵との当たり判定
 		int GameOverCnt;
 		int MaxGameOver;
 
-		bool			Jump2Check;		//ジャンプ2判定
-		bool			DestroyFlag; //破壊フラグ
-		bool			AttackFlag; //攻撃フラグ
+		int stage;//ステージ
+		int remaining;//残機数
+		int score;//スコア
 
-		bool			TransparentFlag; //透明フラグ
+		bool Jump2Check;	//ジャンプ2判定
+		bool DestroyFlag; //破壊フラグ
+		bool AttackFlag; //攻撃フラグ
+
+		bool TransparentFlag; //透明フラグ
 		//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
 		int Clamp(int x, int low, int high);
 
 		//カメラの座標を適用
-		void ApplyCamera2D(ML::Box2D&draw);
+		void ApplyCamera2D(ML::Box2D& draw);
 
 		//----------------------------------------------
 		FPSCounter* c;
-
-		int stage;
 
 		void CreateEffect(int no, ML::Vec2 pos);
 		void Dbg_ToConsole(const char* str, ...);

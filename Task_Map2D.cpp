@@ -4,6 +4,7 @@
 #include  "MyPG.h"
 #include  "Task_Map2D.h"
 #include  "Task_Enemy00.h"
+#include  "Task_Game.h"
 #include "assert.h"
 
 namespace Map2D
@@ -34,8 +35,7 @@ namespace Map2D
 
 		//★データ初期化
 		chipSize = 64;//チップのサイズ
-		sizeX = 41;
-		sizeY = 16;
+
 		render2D_Priority[1] = 0.9f;
 		//マップのゼロクリア
 		for (int y = 0; y < size(map); ++y) {
@@ -43,7 +43,6 @@ namespace Map2D
 				map[y][x] = 0;
 			}
 		}
-		hitBase = ML::Box2D(0, 0, sizeX * chipSize, sizeY * chipSize);
 
 		//マップチップ情報の初期化
 		for (int c = 0; c < chipKind; ++c) {
@@ -86,8 +85,8 @@ namespace Map2D
 	//マップチップ描画
 	void Object::DrawMapChip(int map, int x, int y)
 	{
-		if (map < 0) {
-			return;//マップ番号が0未満(空白,オブジェクトなど)の場合は描画しない
+		if (map == -1) {
+			return;//マップ番号が-1(空白)の場合は描画しない
 		}
 		ML::Box2D draw(x * chipSize, y * chipSize, chipSize, chipSize);
 		ML::Box2D src(map % 10 * chipSize, map / 10 * chipSize, chipSize, chipSize);
@@ -104,6 +103,25 @@ namespace Map2D
 			return false;
 		}
 
+		{
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
+			//sizeX
+			string  tc;
+			getline(ss_lt, tc, ',');
+			stringstream ssSizeX;
+			ssSizeX << tc;
+			ssSizeX >> sizeX;
+			//sizeY
+			getline(ss_lt, tc, ',');
+			stringstream ssSizeY;
+			ssSizeY << tc;
+			ssSizeY >> sizeY;
+		}
+
+		//マップの当たり判定を定義
+		hitBase = ML::Box2D(0, 0, sizeX * chipSize, sizeY * chipSize);
 
 		for (int y = 0; y < sizeY; ++y) {
 			string lineText;
@@ -112,15 +130,59 @@ namespace Map2D
 			for (int x = 0; x < sizeX; ++x) {
 				string  tc;
 				getline(ss_lt, tc, ',');
+
 				stringstream ss;
 				ss << tc;
 				ss >> map[y][x];
-				if (map[y][x] == -2) {
-					auto enemy = Enemy00::Object::Create(true);//敵の生成
-					enemy->pos = ML::Vec2(float(x * chipSize + chipSize / 2), float(y * chipSize + chipSize / 2));
-					map[y][x] = -1;//リセット
-				}
 			}
+		}
+
+		//ファイルを閉じる
+		fin.close();
+		return true;
+	}
+	//-------------------------------------------------------------------
+	//敵の配置のロード
+	bool Object::LoadEnemy(const string& fpath_)
+	{
+		auto game = ge->GetTask<Game::Object>("本編統括");
+		ifstream fin(fpath_);
+		if (!fin) {
+			assert(!"読み込み失敗");
+			return false;
+		}
+
+		for (int i = 0; i < 5; ++i) {
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
+
+			string  tc;
+			getline(ss_lt, tc, ',');
+
+			ML::Vec2 pos;
+			int enemyKind;
+			{
+				stringstream ss;
+				ss << tc;
+				ss >> pos.x;
+			}
+
+			{
+				stringstream ss;
+				getline(ss_lt, tc, ',');
+				ss << tc;
+				ss >> pos.y;
+			}
+
+			{
+				stringstream ss;
+				getline(ss_lt, tc, ',');
+				ss << tc;
+				ss >> enemyKind;
+			}
+
+			game->SpawnEnemy(pos, enemyKind);
 		}
 
 		//ファイルを閉じる
@@ -142,10 +204,16 @@ namespace Map2D
 			hitBase.x + hitBase.w,
 			hitBase.x + hitBase.h
 		};
-		r.left = max(r.left, m.left);			//左に飛び出している
-		r.top = max(r.top, m.top);				//上に飛び出している
-		r.right = min(r.right, m.right);		//右に飛び出している
-		r.bottom = min(r.bottom, m.bottom);		//下に飛び出している
+		//範囲外を壁にする方法
+		if (r.left < m.left) { return true; }		//左に飛び出している
+		//if (r.top < m.top) { return true; }			//上に飛び出している//上下は判定を無効にする
+		if (r.right > m.right) { return true; }		//右に飛び出している
+		//if (r.bottom > m.bottom) { return true; }	//下に飛び出している//上下は判定を無効にする
+		//範囲外を壁にしない方法
+		//r.left = max(r.left, m.left);			//左に飛び出している
+		r.top = max(r.top, m.top);				//上に飛び出している//上下は判定を無効にする
+		//r.right = min(r.right, m.right);		//右に飛び出している
+		r.bottom = min(r.bottom, m.bottom);		//下に飛び出している//上下は判定を無効にする
 
 		//ループ範囲調整
 		int sx, sy, ex, ey;
@@ -186,15 +254,16 @@ namespace Map2D
 			ge->camera2D.x = m.right - ge->camera2D.w;
 		}
 
-		if (c.bottom > m.bottom) {
-			ge->camera2D.y = m.bottom - ge->camera2D.h;
-		}
+		//上にはスクロールしない
+		//if (c.bottom > m.bottom) {
+		ge->camera2D.y = m.bottom - ge->camera2D.h;
+		//}
 		if (c.left < m.left) {
 			ge->camera2D.x = m.left;
 		}
-		if (c.top < m.top) {
-			ge->camera2D.y = m.top;
-		}
+		//if (c.top < m.top) {
+		//	ge->camera2D.y = m.top;
+		//}
 		//マップがカメラより小さい場合
 		if (hitBase.w < ge->camera2D.w) {
 			ge->camera2D.x = m.left;
@@ -238,7 +307,7 @@ namespace Map2D
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() {	}
+	Object::Object() :sizeX(0), sizeY(0) {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

@@ -2,8 +2,8 @@
 //タイトル画面
 //-------------------------------------------------------------------
 #include "MyPG.h"
-#include "Task_Game.h"
 #include "Task_Title.h"
+#include "Task_StartGame.h"
 //#include "randomLib.h"
 //#include "easing.h"
 
@@ -41,11 +41,12 @@ namespace Title
 	bool  Object::Finalize()
 	{
 		//★データ＆タスク解放
-
-
+		ge->stage = 1;
+		ge->remaining = 5;
+		ge->score = 0;
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			auto game = Game::Object::Create(true);
+			auto game = StartGame::Object::Create(true);
 		}
 
 		return  true;

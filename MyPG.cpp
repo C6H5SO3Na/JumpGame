@@ -347,7 +347,7 @@ ge->debugRect(hit,DEBUGRECTMODE::GREENFRAME);
 スクロールや座標などのオフセットはオフセットした後でよいが、
 ML::Box2D  me = this->hitBase.OffsetCopy(this->pos);
 //スクロール対応の場合は、こんな記述になる。
-ge->debugRect(me, DEBUGRECTMODE::RED ,- ge->camera2D.x, -ge->camera2D.y);
+ge->debugRect(me, DEBUGRECTMODE::RED , -ge->camera2D.x, -ge->camera2D.y);
 
 
 

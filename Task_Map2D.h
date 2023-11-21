@@ -54,6 +54,7 @@ namespace Map2D
 		enum { chipKind = 16 };//マップチップの種類
 		ML::Box2D chip[chipKind];
 
+		bool LoadEnemy(const string& fpath_);
 		void DrawMapChip(int map, int x, int y);
 		bool LoadMap(const string& fpath_);
 		bool CheckHit(ML::Box2D hit_);
