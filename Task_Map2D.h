@@ -18,10 +18,10 @@ namespace Map2D
 		Resource();
 	public:
 		~Resource();
-		typedef  shared_ptr<Resource>	SP;
-		typedef  weak_ptr<Resource>		WP;
-		static   WP  instance;
-		static  Resource::SP  Create();
+		typedef shared_ptr<Resource>	SP;
+		typedef weak_ptr<Resource>		WP;
+		static WP  instance;
+		static Resource::SP  Create();
 		//共有する変数はここに追加する
 		DG::Image::SP img;
 	};
@@ -48,11 +48,12 @@ namespace Map2D
 	public:
 		//追加したい変数・メソッドはここに追加する
 		int map[100][100];//一応100*100
-		int sizeY, sizeX;
+		int mapSize[2];//0:x,1:y
 		int chipSize;//チップのサイズ
 		ML::Box2D hitBase;//ピクセル単位のマップサイズを持つ
 		enum { chipKind = 16 };//マップチップの種類
 		ML::Box2D chip[chipKind];
+		ML::Vec2 playerSpawnPos;
 
 		void DrawMapChip(int map, int x, int y);
 		bool LoadMap(const string& fpath_);

@@ -1,6 +1,7 @@
 //-------------------------------------------------------------------
 //プレイヤ
 //-------------------------------------------------------------------
+//#define MYDEBUG
 #include "MyPG.h"
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
@@ -86,11 +87,11 @@ namespace Player
 		ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
 		//デバッグ用矩形
-		//{
-		//	ML::Box2D  me = hitBase.OffsetCopy(pos);
-		//	ge->ApplyCamera2D(me);
-		//	ge->debugRect(me);
-		//}
+#ifdef MYDEBUG
+		ML::Box2D  me = hitBase.OffsetCopy(pos);
+		ge->ApplyCamera2D(me);
+		ge->debugRect(me);
+#endif
 	}
 
 	//-------------------------------------------------------------------
@@ -124,11 +125,11 @@ namespace Player
 			}
 
 			//デバッグ用　自爆コマンド
-			{
-				if (inp.B3.down) {
-					state = State::Dead;
-				}
+#ifdef MYDEBUG
+			if (inp.B3.down) {
+				state = State::Dead;
 			}
+#endif
 
 			//ジャンプ
 			if (inp.B1.down) {
@@ -205,8 +206,8 @@ namespace Player
 			int px = ge->camera2D.w / 2;
 			int py = ge->camera2D.h / 2;
 			//プレイヤを画面中央に置いたときのカメラの左上座標を求める
-			int cpx = int(pos.x) - px;
-			int cpy = int(pos.y) - py;
+			int cpx = static_cast<int>(pos.x) - px;
+			int cpy = static_cast<int>(pos.y) - py;
 			//カメラの座標を更新
 			ge->camera2D.x = cpx;
 			ge->camera2D.y = cpy;
@@ -257,9 +258,8 @@ namespace Player
 		case Anim::Dead:
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
+			animCnt = min(animCnt, 5 * frameInterval - 1);
 			drawBase = CenterBox(100, 64);
-			//if ( > 5 * 8 - 1) {
-			//}
 			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
 			break;
 		}
@@ -295,14 +295,13 @@ namespace Player
 		//敵の頭上と当たり判定
 		ML::Box2D  me = playerFoot.OffsetCopy(pos);
 		//デバッグ用矩形
-		//{
-		//	ge->ApplyCamera2D(me);
-		//	ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
-		//}
-		auto enemies = ge->qa_Enemies;
-		for (auto it = enemies->begin();
-			it != enemies->end();
-			++it) {
+#ifdef MYDEBUG
+		ge->ApplyCamera2D(me);
+		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
+#endif
+
+		shared_ptr<vector<BChara::SP>> enemies = ge->qa_Enemies;
+		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 			if ((*it)->state != State::Normal) { continue; }
 			//当たり判定を基にして頭上矩形を生成
 			ML::Box2D enemyHead(
@@ -312,10 +311,10 @@ namespace Player
 				10);
 			ML::Box2D  you = enemyHead.OffsetCopy((*it)->pos);
 			//デバッグ用矩形
-			//{
-			//	ge->ApplyCamera2D(you);
-			//	ge->debugRect(you, ge->DEBUGRECTMODE::RED);
-			//}
+#ifdef MYDEBUG
+			ge->ApplyCamera2D(you);
+			ge->debugRect(you, ge->DEBUGRECTMODE::RED);
+#endif
 			if (you.Hit(me)) {
 				if (fallSpeed <= 0.f) {//プレイヤが落下中でなければ無効
 					return false;
@@ -326,10 +325,10 @@ namespace Player
 				fallSpeed = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
 				ChangeAnim(Anim::Jump);
 				return true;
-			}
 		}
-		return false;
 	}
+		return false;
+}
 	//-------------------------------------------------------------------
 	//アニメーションをチェンジ
 	void Object::ChangeAnim(Anim anim)

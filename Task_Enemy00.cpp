@@ -1,8 +1,8 @@
 //-------------------------------------------------------------------
 //“G00
 //-------------------------------------------------------------------
-#include  "MyPG.h"
-#include  "Task_Enemy00.h"
+#include "MyPG.h"
+#include "Task_Enemy00.h"
 #include "Task_Player.h"
 #include "Task_Map2D.h"
 

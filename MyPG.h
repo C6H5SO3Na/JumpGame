@@ -106,7 +106,9 @@ namespace  MyPG
 
 		bool			TransparentFlag; //透明フラグ
 		//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
+		//現在、intとfloatに対応
 		int Clamp(int x, int low, int high);
+		float Clamp(float x, float low, float high);
 
 		//カメラの座標を適用
 		void ApplyCamera2D(ML::Box2D& draw);

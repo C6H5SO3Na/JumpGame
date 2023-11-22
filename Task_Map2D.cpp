@@ -73,8 +73,8 @@ namespace Map2D
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		for (int y = 0; y < sizeY; ++y) {
-			for (int x = 0; x < sizeX; ++x) {
+		for (int y = 0; y < mapSize[1]; ++y) {
+			for (int x = 0; x < mapSize[0]; ++x) {
 				DrawMapChip(map[y][x], x, y);
 			}
 		}
@@ -100,38 +100,39 @@ namespace Map2D
 			assert(!"読み込み失敗");
 			return false;
 		}
-
+		//マップチップの縦横情報を入手
 		{
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			//sizeX
-			string  tc;
-			getline(ss_lt, tc, ',');
-			stringstream ssSizeX;
-			ssSizeX << tc;
-			ssSizeX >> sizeX;
-			//sizeY
-			getline(ss_lt, tc, ',');
-			stringstream ssSizeY;
-			ssSizeY << tc;
-			ssSizeY >> sizeY;
+			for (int i = 0; i < 2; ++i) {
+				string  tc;
+				getline(ss_lt, tc, ',');
+
+				stringstream ss;
+				ss << tc;
+				ss >> mapSize[i];
+			}
 		}
 
 		//マップの当たり判定を定義
-		hitBase = ML::Box2D(0, 0, sizeX * chipSize, sizeY * chipSize);
+		hitBase = ML::Box2D(0, 0, mapSize[0] * chipSize, mapSize[1] * chipSize);
 
-		for (int y = 0; y < sizeY; ++y) {
+		for (int y = 0; y < mapSize[1]; ++y) {
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			for (int x = 0; x < sizeX; ++x) {
+			for (int x = 0; x < mapSize[0]; ++x) {
 				string  tc;
 				getline(ss_lt, tc, ',');
 
 				stringstream ss;
 				ss << tc;
 				ss >> map[y][x];
+				if (map[y][x] == -2) {
+					playerSpawnPos = ML::Vec2(static_cast<float>(x * chipSize + chipSize/2), static_cast<float>(y * chipSize));
+					map[y][x] = -1;
+				}
 			}
 		}
 
@@ -166,11 +167,10 @@ namespace Map2D
 		r.bottom = min(r.bottom, m.bottom);		//下に飛び出している//上下は判定を無効にする
 
 		//ループ範囲調整
-		int sx, sy, ex, ey;
-		sx = r.left / chipSize;
-		sy = r.top / chipSize;
-		ex = (r.right - 1) / chipSize;
-		ey = (r.bottom - 1) / chipSize;
+		int sx = r.left / chipSize;
+		int sy = r.top / chipSize;
+		int ex = (r.right - 1) / chipSize;
+		int ey = (r.bottom - 1) / chipSize;
 
 		//範囲内の障害物を探す
 		for (int y = sy; y <= ey; ++y) {
@@ -206,7 +206,7 @@ namespace Map2D
 
 		//上にはスクロールしない
 		//if (c.bottom > m.bottom) {
-			ge->camera2D.y = m.bottom - ge->camera2D.h;
+		ge->camera2D.y = m.bottom - ge->camera2D.h;
 		//}
 		if (c.left < m.left) {
 			ge->camera2D.x = m.left;
@@ -257,7 +257,7 @@ namespace Map2D
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object():sizeX(0),sizeY(0){	}
+	Object::Object() :mapSize{ 0,0 } {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()
