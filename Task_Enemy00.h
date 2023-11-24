@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------
 //敵00
 //-------------------------------------------------------------------
-#include "BChara.h"
+#include "BEnemy.h"
 
 namespace Enemy00
 {
@@ -26,7 +26,7 @@ namespace Enemy00
 		DG::Image::SP img,img0;
 	};
 	//-------------------------------------------------------------------
-	class  Object : public  BChara
+	class  Object : public  BEnemy
 	{
 	//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
@@ -45,16 +45,14 @@ namespace Enemy00
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
-	public:
-		//enum class Anim {
-		//	Idle, Walk, Jump, fall, Clear, Dead
-		//};
+	private:
+		enum class Anim {
+			Move, Dead
+		};
 		//追加したい変数・メソッドはここに追加する
-		//Anim animKind = Anim::Idle;
+		Anim animKind = Anim::Move;
 		//float jumpPow = 0.f;
-
+	public:
 		void Move();
-		void CheckHitPlayer();
-		bool CheckHitCamera2D();
 	};
 }

@@ -48,16 +48,18 @@ namespace Map2D
 	public:
 		//追加したい変数・メソッドはここに追加する
 		int map[100][100];//一応100*100
-		int sizeY, sizeX;
+		int mapSize[2];//0:x,1:y
 		int chipSize;//チップのサイズ
 		ML::Box2D hitBase;//ピクセル単位のマップサイズを持つ
 		enum { chipKind = 16 };//マップチップの種類
 		ML::Box2D chip[chipKind];
+		ML::Vec2 playerSpawnPos;
 
 		bool LoadEnemy(const string& fpath_);
 		void DrawMapChip(int map, int x, int y);
 		bool LoadMap(const string& fpath_);
 		bool CheckHit(ML::Box2D hit_);
 		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
+		void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);//マップ外を見せないようにカメラを位置調整
 	};
 }

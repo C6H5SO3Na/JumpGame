@@ -1,6 +1,7 @@
 //-------------------------------------------------------------------
 //プレイヤ
 //-------------------------------------------------------------------
+//#define MYDEBUG
 #include "MyPG.h"
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
@@ -145,7 +146,7 @@ namespace Player
 			est.y += fallSpeed;
 
 			//完全に止まっているときは止まっているときのアニメーション
-			//ジャンプ中、被弾中はそれぞれのアニメーションをする
+			//ジャンプ中、被弾中、歩行中はそれぞれのアニメーションをする
 			if (est == ML::Vec2() && animKind != Anim::Jump && animKind != Anim::Hurt) {
 				ChangeAnim(Anim::Idle);
 			}
@@ -191,6 +192,13 @@ namespace Player
 			break;
 		}
 
+		//頭上判定
+		if (fallSpeed < 0.f) {//上昇中
+			if (CheckHead()) {
+				fallSpeed = 0.f;//上昇力を無効にする
+			}
+		}
+
 		//足元接触判定
 		isHitFloor = CheckFoot();
 		if (isHitFloor) {
@@ -203,21 +211,14 @@ namespace Player
 		else {
 			fallSpeed += ML::Gravity(32) * 6.f;//重力加速
 		}
-
-		//頭上判定
-		if (fallSpeed < 0.f) {//上昇中
-			if (CheckHead()) {
-				fallSpeed = 0.f;//上昇力を無効にする
-			}
-		}
 		//カメラの位置を再調整
 		{
 			//プレイヤを画面のどこに置くか（今回は画面中央）
 			int px = ge->camera2D.w / 2;
 			int py = ge->camera2D.h / 2;
 			//プレイヤを画面中央に置いたときのカメラの左上座標を求める
-			int cpx = int(pos.x) - px;
-			int cpy = int(pos.y) - py;
+			int cpx = static_cast<int>(pos.x) - px;
+			int cpy = static_cast<int>(pos.y) - py;
 			//カメラの座標を更新
 			ge->camera2D.x = cpx;
 			ge->camera2D.y = cpy;
@@ -288,8 +289,8 @@ namespace Player
 		case Anim::Dead:
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
+			animCnt = min(animCnt, 5 * frameInterval - 1);
 			drawBase = CenterBox(100, 64);
-			animCnt = min(frameInterval * 4, animCnt);//ループしないように
 			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
 			break;
 		}
@@ -325,9 +326,7 @@ namespace Player
 		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
 #endif
 		auto enemies = ge->qa_Enemies;
-		for (auto it = enemies->begin();
-			it != enemies->end();
-			++it) {
+		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 			if ((*it)->state != State::Normal) { continue; }
 			//当たり判定を基にして頭上矩形を生成
 			ML::Box2D enemyHead(
@@ -351,11 +350,12 @@ namespace Player
 				ge->score += (*it)->score;
 				fallSpeed = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
 				ChangeAnim(Anim::Jump);
+				ge->CreateEffect(8, ML::Vec2(static_cast<float>(you.x), static_cast<float>(you.y)));
 				return true;
-			}
 		}
-		return false;
 	}
+		return false;
+}
 	//-------------------------------------------------------------------
 	//アニメーションをチェンジ
 	void Object::ChangeAnim(Anim anim)

@@ -7,7 +7,7 @@
 //-----------------------------------------------------------------------------------------------
 
 #include "fpscounter.h"
-#include "BChara.h"
+#include "BEnemy.h"
 #include "task_Map2D.h"
 #include "task_Player.h"
 #include "task_Effect00.h"
@@ -78,7 +78,7 @@ namespace  MyPG
 
 		//ゲームエンジンに追加したいものは下に加える
 		//敵の検出処理を節約
-		shared_ptr<vector<BChara::SP>> qa_Enemies;
+		shared_ptr<vector<BEnemy::SP>> qa_Enemies;
 		//マップの検出処理を節約
 		Map2D::Object::SP qa_Map;
 		//プレイヤの検出処理を節約
@@ -96,20 +96,22 @@ namespace  MyPG
 		bool isGameOver = false; //ゲームオーバーフラグ
 		bool GameClearFlag = false;//クリアフラグ
 		bool unHitEnemy = false;//敵との当たり判定
-		int GameOverCnt;
-		int MaxGameOver;
+		int GameOverCnt = 0;
+		int MaxGameOver = 0;
 
-		int stage;//ステージ
-		int remaining;//残機数
-		int score;//スコア
+		int stage = 0;//ステージ
+		int remaining = 0;//残機数
+		int score = 0;//スコア
 
-		bool Jump2Check;	//ジャンプ2判定
-		bool DestroyFlag; //破壊フラグ
-		bool AttackFlag; //攻撃フラグ
+		//bool Jump2Check = false;	//ジャンプ2判定
+		//bool DestroyFlag = false; //破壊フラグ
+		//bool AttackFlag = false; //攻撃フラグ
 
-		bool TransparentFlag; //透明フラグ
+		//bool TransparentFlag = false; //透明フラグ
 		//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
+		//現在、intとfloatに対応
 		int Clamp(int x, int low, int high);
+		float Clamp(float x, float low, float high);
 
 		//カメラの座標を適用
 		void ApplyCamera2D(ML::Box2D& draw);

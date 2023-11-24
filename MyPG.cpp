@@ -15,6 +15,14 @@ namespace MyPG
 		return min(max(x, low), high);
 	}
 
+	float MyGameEngine::Clamp(float x, float low, float high)
+	{
+		assert(low <= high);
+		return min(max(x, low), high);
+	}
+
+
+
 	void MyGameEngine::ApplyCamera2D(ML::Box2D& draw)
 	{
 		draw.Offset(-camera2D.x, -camera2D.y);

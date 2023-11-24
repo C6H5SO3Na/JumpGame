@@ -49,12 +49,12 @@ namespace Game
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
-		map->LoadMap("./data/Map/test3.csv");
+		map->LoadMap("./data/Map/test2.csv");
 		map->LoadEnemy("./data/enemy.csv");
 
 		//スポーン プレイヤ
 		auto player = Player::Object::Create(true);
-		player->pos = ML::Vec2(96.f, 800.f);
+		player->pos = map->playerSpawnPos;
 
 		return  true;
 	}
@@ -86,11 +86,11 @@ namespace Game
 	void  Object::UpDate()
 	{
 		//敵の検出数を減らす
-		ge->qa_Enemies = ge->GetTasks<BChara>("敵");
+		ge->qa_Enemies = ge->GetTasks<BEnemy>(Enemy00::defGroupName);
 		//マップの検出数を減らす
 		ge->qa_Map = ge->GetTask<Map2D::Object>(Map2D::defGroupName);
 		//プレイヤの検出数を減らす
-		ge->qa_Player = ge->GetTask<Player::Object>("プレイヤ");
+		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
 		auto inp = ge->in1->GetState();
 
 		//やられたら
@@ -109,9 +109,9 @@ namespace Game
 		ge->Dbg_ToDisplay(100, 120, "Push B1");
 
 		//デバッグ矩形表示
-		{
+#ifdef MYDEBUG
 			ge->debugRectDraw();
-		}
+#endif
 	}
 	//-------------------------------------------------------------------
 	//敵のスポーン

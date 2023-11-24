@@ -133,6 +133,9 @@
     <ClCompile Include="Task_Result.cpp">
       <Filter>MyPG\Task\Result</Filter>
     </ClCompile>
+    <ClCompile Include="BEnemy.cpp">
+      <Filter>MyPG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine_Ver3_83.h">
@@ -216,14 +219,17 @@
     <ClInclude Include="Task_Enemy00.h">
       <Filter>MyPG\Task\Game</Filter>
     </ClInclude>
-    <ClInclude Include="BChara.h">
-      <Filter>MyPG</Filter>
-    </ClInclude>
     <ClInclude Include="Task_StartGame.h">
       <Filter>MyPG\Task\StartGame</Filter>
     </ClInclude>
     <ClInclude Include="Task_Result.h">
       <Filter>MyPG\Task\Result</Filter>
+    </ClInclude>
+    <ClInclude Include="BChara.h">
+      <Filter>MyPG</Filter>
+    </ClInclude>
+    <ClInclude Include="BEnemy.h">
+      <Filter>MyPG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

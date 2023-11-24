@@ -14,7 +14,7 @@ namespace Enemy00
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		img = DG::Image::Create("./data/image/boxRed.bmp");
+		img = DG::Image::Create("data/image/pipo-simpleenemy01b.png");
 		img0 = DG::Image::Create("./data/image/boxBlue.bmp");
 		return true;
 	}
@@ -40,7 +40,7 @@ namespace Enemy00
 		angle = Angle_LR::Left;
 		hitBase = drawBase = CenterBox(32 * 2, 32 * 2);
 		moveVec = ML::Vec2(5.f, 5.f);
-		src = ML::Box2D(0, 0, 64, 128);
+		src = ML::Box2D(0, 0, 32, 32);
 		score = 100;
 		//jumpPow = -17.f;
 
@@ -76,7 +76,7 @@ namespace Enemy00
 		{
 			ML::Box2D draw = drawBase.OffsetCopy(pos);
 			ge->ApplyCamera2D(draw);
-			res->img0->Draw(draw, src);
+			res->img->Draw(draw, src);
 		}
 	}
 	//-------------------------------------------------------------------
@@ -142,44 +142,7 @@ namespace Enemy00
 		++moveCnt;
 		++animCnt;
 	}
-	//-------------------------------------------------------------------
-	//プレイヤとの当たり判定
-	void Object::CheckHitPlayer()
-	{
-		if (state == State::Non) { return; }
-		//プレイヤと当たり判定
-		ML::Box2D  me = hitBase.OffsetCopy(pos);
-		auto player = ge->qa_Player;
 
-		if (player->state != State::Normal || player->isInvincible) { return; }
-
-		ML::Box2D  you = player->hitBase.OffsetCopy(player->pos);
-		if (you.Hit(me)) {
-			player->LifeOperation(-1);
-			if (player->state != State::Dead) {//死んでいないときはダメージを受ける演出を入れる
-				player->DamageOperation();
-			}
-		}
-	}
-	//-------------------------------------------------------------------
-	//カメラとの当たり判定
-	bool Object::CheckHitCamera2D()
-	{
-		if (state == State::Non) { return false; }
-		//プレイヤと当たり判定
-		ML::Box2D  me = hitBase.OffsetCopy(pos);
-		int n = 400;//カメラ矩形より指定した数両端に広げる
-		ML::Box2D  you(
-			ge->camera2D.x - n,
-			ge->camera2D.y,
-			ge->camera2D.w + n * 2,
-			ge->camera2D.h
-		);
-		if (you.Hit(me)) {
-			return true;
-		}
-		return false;
-	}
 
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
