@@ -66,7 +66,11 @@ namespace Player
 	void  Object::UpDate()
 	{
 		Operation();
+<<<<<<< HEAD
 		if (state != State::Dead && !isInvincible && !CheckHitEnemyHead()) {//敵を踏んでいなければ
+=======
+		if (state != State::Dead && !CheckHitEnemyHead()) {//敵を踏んでいなければ
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			auto enemies = ge->GetTasks<Enemy00::Object>("敵");
 			for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 				(*it)->CheckHitPlayer();
@@ -89,11 +93,19 @@ namespace Player
 		ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
 		//デバッグ用矩形
+<<<<<<< HEAD
 #if defined(isDebugMode)
 		ML::Box2D  me = hitBase.OffsetCopy(pos);
 		ge->ApplyCamera2D(me);
 		ge->debugRect(me);
 #endif
+=======
+		//{
+		//	ML::Box2D  me = hitBase.OffsetCopy(pos);
+		//	ge->ApplyCamera2D(me);
+		//	ge->debugRect(me);
+		//}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	}
 
 	//-------------------------------------------------------------------
@@ -146,8 +158,13 @@ namespace Player
 			est.y += fallSpeed;
 
 			//完全に止まっているときは止まっているときのアニメーション
+<<<<<<< HEAD
 			//ジャンプ中、被弾中、歩行中はそれぞれのアニメーションをする
 			if (est == ML::Vec2() && animKind != Anim::Jump && animKind != Anim::Hurt) {
+=======
+			//ジャンプ中はジャンプのアニメーションをする
+			if (est == ML::Vec2() && animKind != Anim::Jump) {
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 				ChangeAnim(Anim::Idle);
 			}
 
@@ -211,14 +228,29 @@ namespace Player
 		else {
 			fallSpeed += ML::Gravity(32) * 6.f;//重力加速
 		}
+<<<<<<< HEAD
+=======
+
+		//頭上判定
+		if (fallSpeed < 0.f) {//上昇中
+			if (CheckHead()) {
+				fallSpeed = 0.f;//上昇力を無効にする
+			}
+		}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 		//カメラの位置を再調整
 		{
 			//プレイヤを画面のどこに置くか（今回は画面中央）
 			int px = ge->camera2D.w / 2;
 			int py = ge->camera2D.h / 2;
 			//プレイヤを画面中央に置いたときのカメラの左上座標を求める
+<<<<<<< HEAD
 			int cpx = static_cast<int>(pos.x) - px;
 			int cpy = static_cast<int>(pos.y) - py;
+=======
+			int cpx = int(pos.x) - px;
+			int cpy = int(pos.y) - py;
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			//カメラの座標を更新
 			ge->camera2D.x = cpx;
 			ge->camera2D.y = cpy;
@@ -229,6 +261,7 @@ namespace Player
 			}
 		}
 		++moveCnt;
+<<<<<<< HEAD
 
 		if (invincibleCnt > 0) {
 			--invincibleCnt;
@@ -237,6 +270,8 @@ namespace Player
 			isInvincible = false;
 			isFlash = false;
 		}
+=======
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	}
 	//-------------------------------------------------------------------
 	//アニメーション
@@ -274,6 +309,7 @@ namespace Player
 			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w + drawBase.w * 4, 0, drawBase.w, drawBase.h);
 			break;
 		}
+<<<<<<< HEAD
 		case Anim::Hurt:
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
@@ -291,11 +327,27 @@ namespace Player
 			int frameInterval = 8;//アニメーションの間隔フレーム
 			animCnt = min(animCnt, 5 * frameInterval - 1);
 			drawBase = CenterBox(100, 64);
+=======
+		case Anim::Dead:
+		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
+			drawBase = CenterBox(100, 64);
+			//if ( > 5 * 8 - 1) {
+			//}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
 			break;
 		}
 		case Anim::Clear:
 		{
+<<<<<<< HEAD
+=======
+			//drawBase = ML::Box2D(-16, -40, 32, 64);
+			//switch ((animCnt / 16) % 2) {
+			//case 0:		src = ML::Box2D(0, 128, 32, 64);		break;
+			//case 1:		src = ML::Box2D(32, 128, 32, 64);	break;
+			//}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			break;
 		}
 		}
@@ -321,12 +373,23 @@ namespace Player
 		//敵の頭上と当たり判定
 		ML::Box2D  me = playerFoot.OffsetCopy(pos);
 		//デバッグ用矩形
+<<<<<<< HEAD
 #if defined(isDebugMode)
 		ge->ApplyCamera2D(me);
 		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
 #endif
 		auto enemies = ge->qa_Enemies;
 		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
+=======
+		//{
+		//	ge->ApplyCamera2D(me);
+		//	ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
+		//}
+		auto enemies = ge->qa_Enemies;
+		for (auto it = enemies->begin();
+			it != enemies->end();
+			++it) {
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			if ((*it)->state != State::Normal) { continue; }
 			//当たり判定を基にして頭上矩形を生成
 			ML::Box2D enemyHead(
@@ -336,10 +399,17 @@ namespace Player
 				10);
 			ML::Box2D  you = enemyHead.OffsetCopy((*it)->pos);
 			//デバッグ用矩形
+<<<<<<< HEAD
 #if defined(isDebugMode)
 			ge->ApplyCamera2D(you);
 			ge->debugRect(you, ge->DEBUGRECTMODE::RED);
 #endif
+=======
+			//{
+			//	ge->ApplyCamera2D(you);
+			//	ge->debugRect(you, ge->DEBUGRECTMODE::RED);
+			//}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			if (you.Hit(me)) {
 				if (fallSpeed <= 0.f) {//プレイヤが落下中でなければ無効
 					return false;
@@ -347,6 +417,7 @@ namespace Player
 				(*it)->state = State::Non;
 				(*it)->moveCnt = 0;
 				(*it)->animCnt = 0;
+<<<<<<< HEAD
 				ge->score += (*it)->score;
 				fallSpeed = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
 				ChangeAnim(Anim::Jump);
@@ -356,6 +427,15 @@ namespace Player
 	}
 		return false;
 }
+=======
+				fallSpeed = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
+				ChangeAnim(Anim::Jump);
+				return true;
+			}
+		}
+		return false;
+	}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	//-------------------------------------------------------------------
 	//アニメーションをチェンジ
 	void Object::ChangeAnim(Anim anim)
@@ -364,6 +444,7 @@ namespace Player
 		if (anim == Anim::Jump || anim == Anim::Dead) {
 			animCnt = 0;//アニメーション用のカウントをリセット
 		}
+<<<<<<< HEAD
 	}
 	//-------------------------------------------------------------------
 	//ダメージを受けた時の処理
@@ -375,6 +456,8 @@ namespace Player
 		animCnt = 0;
 		isInvincible = true;
 		invincibleCnt = 100;
+=======
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -412,10 +495,14 @@ namespace Player
 	//-------------------------------------------------------------------
 	Object::Object() :
 		animKind(Anim::Idle),
+<<<<<<< HEAD
 		jumpPow(),
 		isInvincible(),
 		invincibleCnt(),
 		isFlash() {	}
+=======
+		jumpPow(0.f) {	}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

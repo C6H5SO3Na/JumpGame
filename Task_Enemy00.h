@@ -50,9 +50,18 @@ namespace Enemy00
 			Move, Dead
 		};
 		//追加したい変数・メソッドはここに追加する
+<<<<<<< HEAD
 		Anim animKind = Anim::Move;
 		//float jumpPow = 0.f;
 	public:
 		void Move();
+=======
+		//Anim animKind = Anim::Idle;
+		//float jumpPow = 0.f;
+
+		void Move();
+		void CheckHitPlayer();
+		bool CheckHitCamera2D();
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	};
 }

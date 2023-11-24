@@ -19,11 +19,14 @@ protected:
 
 	bool isHitFloor;//床と当たったか否か
 	float fallSpeed;//落下速度
+<<<<<<< HEAD
 	struct Life {
 		int now;
 		int max;
 	};
 	Life life;
+=======
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 public:
 	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	//キャラの状態
@@ -50,10 +53,17 @@ public:
 	//★★メンバ変数を追加したら必ず初期化も追加すること★★
 	BChara()//コンストラクタ
 		:pos()
+<<<<<<< HEAD
 		, moveCnt()
 		, animCnt()
 		, fallSpeed()
 		, isHitFloor()
+=======
+		, moveCnt(0)
+		, animCnt(0)
+		, fallSpeed(0.f)
+		, isHitFloor(false)
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 		, angle(Angle_LR::Right)
 		, state(State::Non)
 		, life()

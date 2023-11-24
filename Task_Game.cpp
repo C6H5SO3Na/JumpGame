@@ -50,12 +50,22 @@ namespace Game
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
 		map->LoadMap("./data/Map/test2.csv");
+<<<<<<< HEAD
 		map->LoadEnemy("./data/enemy.csv");
 
 		//スポーン プレイヤ
 		auto player = Player::Object::Create(true);
 		player->pos = map->playerSpawnPos;
 
+=======
+
+		//スポーン プレイヤ
+		auto player = Player::Object::Create(true);
+		player->pos = ML::Vec2(100.f, 800.f);
+		for (int i = 0; i < 10; ++i) {
+			SpawnEnemy(ML::Vec2(1000.f, 800.f), 0);
+		}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -86,11 +96,17 @@ namespace Game
 	void  Object::UpDate()
 	{
 		//敵の検出数を減らす
+<<<<<<< HEAD
 		ge->qa_Enemies = ge->GetTasks<BEnemy>(Enemy00::defGroupName);
 		//マップの検出数を減らす
 		ge->qa_Map = ge->GetTask<Map2D::Object>(Map2D::defGroupName);
 		//プレイヤの検出数を減らす
 		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
+=======
+		ge->qa_Enemies = ge->GetTasks<BChara>("敵");
+		//マップの検出数を減らす
+		ge->qa_Map = ge->GetTask<Map2D::Object>(Map2D::defGroupName);
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 		auto inp = ge->in1->GetState();
 
 		//やられたら
@@ -109,9 +125,15 @@ namespace Game
 		ge->Dbg_ToDisplay(100, 120, "Push B1");
 
 		//デバッグ矩形表示
+<<<<<<< HEAD
 #ifdef MYDEBUG
 			ge->debugRectDraw();
 #endif
+=======
+		{
+			ge->debugRectDraw();
+		}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	}
 	//-------------------------------------------------------------------
 	//敵のスポーン

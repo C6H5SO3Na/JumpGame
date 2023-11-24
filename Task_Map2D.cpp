@@ -3,8 +3,11 @@
 //-------------------------------------------------------------------
 #include  "MyPG.h"
 #include  "Task_Map2D.h"
+<<<<<<< HEAD
 #include  "Task_Enemy00.h"
 #include  "Task_Game.h"
+=======
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 #include "assert.h"
 
 namespace Map2D
@@ -102,8 +105,33 @@ namespace Map2D
 			assert(!"読み込み失敗");
 			return false;
 		}
+<<<<<<< HEAD
 		//マップチップの縦横情報を入手
 		{
+=======
+
+		{
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
+			//sizeX
+			string  tc;
+			getline(ss_lt, tc, ',');
+			stringstream ssSizeX;
+			ssSizeX << tc;
+			ssSizeX >> sizeX;
+			//sizeY
+			getline(ss_lt, tc, ',');
+			stringstream ssSizeY;
+			ssSizeY << tc;
+			ssSizeY >> sizeY;
+		}
+
+		//マップの当たり判定を定義
+		hitBase = ML::Box2D(0, 0, sizeX * chipSize, sizeY * chipSize);
+
+		for (int y = 0; y < sizeY; ++y) {
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
@@ -111,6 +139,7 @@ namespace Map2D
 				string  tc;
 				getline(ss_lt, tc, ',');
 
+<<<<<<< HEAD
 				stringstream ss;
 				ss << tc;
 				ss >> mapSize[i];
@@ -146,6 +175,8 @@ namespace Map2D
 				string  tc;
 				getline(ss_lt, tc, ',');
 
+=======
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 				stringstream ss;
 				ss << tc;
 				ss >> map[y][x];
@@ -270,7 +301,11 @@ namespace Map2D
 
 		//上にはスクロールしない
 		//if (c.bottom > m.bottom) {
+<<<<<<< HEAD
 		ge->camera2D.y = m.bottom - ge->camera2D.h;
+=======
+			ge->camera2D.y = m.bottom - ge->camera2D.h;
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 		//}
 		if (c.left < m.left) {
 			ge->camera2D.x = m.left;
@@ -321,7 +356,11 @@ namespace Map2D
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
+<<<<<<< HEAD
 	Object::Object() :chipSize(0), map{}, mapSize{} {	}
+=======
+	Object::Object():sizeX(0),sizeY(0){	}
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

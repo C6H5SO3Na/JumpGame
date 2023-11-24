@@ -55,10 +55,13 @@ namespace Player
 		void Animation();
 		bool CheckHitEnemyHead();
 		void ChangeAnim(Anim anim);
+<<<<<<< HEAD
 		void DamageOperation();
 		bool isFlash;//点滅フラグ
 		bool isInvincible;//無敵フラグ
 		int invincibleCnt;//無敵カウント
+=======
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 	private:
 		Anim animKind;
 		float jumpPow;

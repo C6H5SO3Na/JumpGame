@@ -7,9 +7,14 @@
 //-----------------------------------------------------------------------------------------------
 
 #include "fpscounter.h"
+<<<<<<< HEAD
 #include "BEnemy.h"
 #include "task_Map2D.h"
 #include "task_Player.h"
+=======
+#include "BChara.h"
+#include "task_Map2D.h"
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 #include "task_Effect00.h"
 
 //-----------------------------------------------------------------------------------------------
@@ -78,11 +83,17 @@ namespace  MyPG
 
 		//ゲームエンジンに追加したいものは下に加える
 		//敵の検出処理を節約
+<<<<<<< HEAD
 		shared_ptr<vector<BEnemy::SP>> qa_Enemies;
 		//マップの検出処理を節約
 		Map2D::Object::SP qa_Map;
 		//プレイヤの検出処理を節約
 		Player::Object::SP qa_Player;
+=======
+		shared_ptr<vector<BChara::SP>> qa_Enemies;
+		//マップの検出処理を節約
+		Map2D::Object::SP qa_Map;
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 		//----------------------------------------------
 		MyPG::Camera::SP		camera[4];		//	カメラ
 
@@ -99,9 +110,19 @@ namespace  MyPG
 		int GameOverCnt = 0;
 		int MaxGameOver = 0;
 
+<<<<<<< HEAD
 		int stage = 0;//ステージ
 		int remaining = 0;//残機数
 		int score = 0;//スコア
+=======
+		int stage;//ステージ
+		int remaining;//残機数
+		int score;//スコア
+
+		bool Jump2Check;	//ジャンプ2判定
+		bool DestroyFlag; //破壊フラグ
+		bool AttackFlag; //攻撃フラグ
+>>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 
 		//bool Jump2Check = false;	//ジャンプ2判定
 		//bool DestroyFlag = false; //破壊フラグ

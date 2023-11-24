@@ -51,6 +51,7 @@ void BChara::CheckMove(ML::Vec2& e_)
 			e_.y = 0.f;
 		}
 		ML::Box2D hit = hitBase.OffsetCopy(pos);
+		auto map = ge->qa_Map;
 		if (map->CheckHit(hit)) {
 			pos.y = preY;//ˆÚ“®ƒLƒƒƒ“ƒZƒ‹
 			break;
