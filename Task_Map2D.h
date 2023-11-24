@@ -18,10 +18,10 @@ namespace Map2D
 		Resource();
 	public:
 		~Resource();
-		typedef  shared_ptr<Resource>	SP;
-		typedef  weak_ptr<Resource>		WP;
-		static   WP  instance;
-		static  Resource::SP  Create();
+		typedef shared_ptr<Resource>	SP;
+		typedef weak_ptr<Resource>		WP;
+		static WP  instance;
+		static Resource::SP  Create();
 		//‹¤—L‚·‚é•Ï”‚Í‚±‚±‚É’Ç‰Á‚·‚é
 		DG::Image::SP img;
 	};

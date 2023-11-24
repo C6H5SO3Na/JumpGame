@@ -106,30 +106,32 @@ namespace Map2D
 			return false;
 		}
 <<<<<<< HEAD
+<<<<<<< HEAD
 		//マップチップの縦横情報を入手
 		{
 =======
 
+=======
+		//マップチップの縦横情報を入手
+>>>>>>> origin/master
 		{
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			//sizeX
-			string  tc;
-			getline(ss_lt, tc, ',');
-			stringstream ssSizeX;
-			ssSizeX << tc;
-			ssSizeX >> sizeX;
-			//sizeY
-			getline(ss_lt, tc, ',');
-			stringstream ssSizeY;
-			ssSizeY << tc;
-			ssSizeY >> sizeY;
+			for (int i = 0; i < 2; ++i) {
+				string  tc;
+				getline(ss_lt, tc, ',');
+
+				stringstream ss;
+				ss << tc;
+				ss >> mapSize[i];
+			}
 		}
 
 		//マップの当たり判定を定義
-		hitBase = ML::Box2D(0, 0, sizeX * chipSize, sizeY * chipSize);
+		hitBase = ML::Box2D(0, 0, mapSize[0] * chipSize, mapSize[1] * chipSize);
 
+<<<<<<< HEAD
 		for (int y = 0; y < sizeY; ++y) {
 >>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
 			string lineText;
@@ -153,6 +155,13 @@ namespace Map2D
 			istringstream  ss_lt(lineText);
 			float pos[2];//x:0,y:0
 			for (int i = 0; i < 2; ++i) {
+=======
+		for (int y = 0; y < mapSize[1]; ++y) {
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
+			for (int x = 0; x < mapSize[0]; ++x) {
+>>>>>>> origin/master
 				string  tc;
 				getline(ss_lt, tc, ',');
 
@@ -180,6 +189,10 @@ namespace Map2D
 				stringstream ss;
 				ss << tc;
 				ss >> map[y][x];
+				if (map[y][x] == -2) {
+					playerSpawnPos = ML::Vec2(static_cast<float>(x * chipSize + chipSize/2), static_cast<float>(y * chipSize));
+					map[y][x] = -1;
+				}
 			}
 		}
 
@@ -302,10 +315,14 @@ namespace Map2D
 		//上にはスクロールしない
 		//if (c.bottom > m.bottom) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 		ge->camera2D.y = m.bottom - ge->camera2D.h;
 =======
 			ge->camera2D.y = m.bottom - ge->camera2D.h;
 >>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
+=======
+		ge->camera2D.y = m.bottom - ge->camera2D.h;
+>>>>>>> origin/master
 		//}
 		if (c.left < m.left) {
 			ge->camera2D.x = m.left;
@@ -357,10 +374,14 @@ namespace Map2D
 	}
 	//-------------------------------------------------------------------
 <<<<<<< HEAD
+<<<<<<< HEAD
 	Object::Object() :chipSize(0), map{}, mapSize{} {	}
 =======
 	Object::Object():sizeX(0),sizeY(0){	}
 >>>>>>> 0c9e8fdf07396f966f2aa9e10c915d01e9ee85e6
+=======
+	Object::Object() :mapSize{ 0,0 } {	}
+>>>>>>> origin/master
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

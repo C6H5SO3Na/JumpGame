@@ -61,7 +61,7 @@ namespace Game
 
 		//スポーン プレイヤ
 		auto player = Player::Object::Create(true);
-		player->pos = ML::Vec2(100.f, 800.f);
+		player->pos = map->playerSpawnPos;
 		for (int i = 0; i < 10; ++i) {
 			SpawnEnemy(ML::Vec2(1000.f, 800.f), 0);
 		}

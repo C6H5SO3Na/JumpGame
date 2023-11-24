@@ -21,8 +21,11 @@ namespace MyPG
 		return min(max(x, low), high);
 	}
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/master
 	void MyGameEngine::ApplyCamera2D(ML::Box2D& draw)
 	{
 		draw.Offset(-camera2D.x, -camera2D.y);
