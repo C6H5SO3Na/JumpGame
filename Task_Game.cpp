@@ -49,7 +49,7 @@ namespace Game
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
-		map->LoadMap("./data/Map/test2.csv");
+		map->LoadMap("./data/Map/test3.csv");
 		map->LoadEnemy("./data/enemy.csv");
 
 		//スポーン プレイヤ
@@ -109,7 +109,7 @@ namespace Game
 		ge->Dbg_ToDisplay(100, 120, "Push B1");
 
 		//デバッグ矩形表示
-#ifdef MYDEBUG
+#ifdef isDebugMode
 			ge->debugRectDraw();
 #endif
 	}

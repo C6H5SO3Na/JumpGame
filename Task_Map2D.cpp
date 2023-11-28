@@ -131,8 +131,8 @@ namespace Map2D
 				ss << tc;
 				ss >> pos[i];
 			}
-			playerSpawnPos = { static_cast<float>(pos[0] * chipSize + chipSize / 2),
-								static_cast<float>(pos[1] * chipSize) };
+			playerSpawnPos = ML::Vec2(static_cast<float>(pos[0] * chipSize + chipSize / 2),
+				static_cast<float>(pos[1] * chipSize));
 		}
 
 		//マップの当たり判定を定義
@@ -173,12 +173,12 @@ namespace Map2D
 			istringstream  ss_lt(lineText);
 
 			string  tc;
-			getline(ss_lt, tc, ',');
 
 			ML::Vec2 pos;
 			int enemyKind;
 			{
 				stringstream ss;
+				getline(ss_lt, tc, ',');
 				ss << tc;
 				ss >> pos.x;
 			}

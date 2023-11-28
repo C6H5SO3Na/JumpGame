@@ -60,6 +60,6 @@ namespace Map2D
 		bool LoadMap(const string& fpath_);
 		bool CheckHit(ML::Box2D hit_);
 		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
-		void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);//マップ外を見せないようにカメラを位置調整
+		//void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);//マップ外を見せないようにカメラを位置調整
 	};
 }
