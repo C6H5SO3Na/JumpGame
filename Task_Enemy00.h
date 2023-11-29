@@ -54,5 +54,6 @@ namespace Enemy00
 		//float jumpPow = 0.f;
 	public:
 		void Move();
+		void Anim();
 	};
 }

@@ -242,25 +242,23 @@ namespace Player
 	//アニメーション
 	void Object::Animation()
 	{
+		drawBase = CenterBox(100, 64);//すべてのアニメーションにおいて縦横比は同じ
 		switch (animKind) {
 		case Anim::Idle:
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
-			drawBase = CenterBox(100, 64);
 			src = ML::Box2D((animCnt / frameInterval) % 4 * drawBase.w, 0, drawBase.w, drawBase.h);
 			break;
 		}
 		case Anim::Walk:
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
-			drawBase = CenterBox(100, 64);
 			src = ML::Box2D((animCnt / frameInterval) % 7 * drawBase.w, drawBase.h, drawBase.w, drawBase.h);
 			break;
 		}
 		case Anim::Jump:
 		{
 			int frameInterval = 11;//アニメーションの間隔フレーム
-			drawBase = CenterBox(100, 64);
 			src = ML::Box2D((animCnt / frameInterval) % 6 * drawBase.w, drawBase.h * 2, drawBase.w, drawBase.h);
 			if (animCnt / frameInterval / 6 >= 1) {
 				ChangeAnim(Anim::Fall);
@@ -270,14 +268,12 @@ namespace Player
 		case Anim::Fall:
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
-			drawBase = CenterBox(100, 64);
 			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w + drawBase.w * 4, 0, drawBase.w, drawBase.h);
 			break;
 		}
 		case Anim::Hurt:
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
-			drawBase = CenterBox(100, 64);
 			src = ML::Box2D((animCnt / frameInterval) % 4 * drawBase.w, drawBase.h * 3, drawBase.w, drawBase.h);
 			if (animCnt > frameInterval * 3) {
 				animKind = Anim::Idle;
@@ -290,7 +286,6 @@ namespace Player
 		{
 			int frameInterval = 8;//アニメーションの間隔フレーム
 			animCnt = min(animCnt, 5 * frameInterval - 1);
-			drawBase = CenterBox(100, 64);
 			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
 			break;
 		}

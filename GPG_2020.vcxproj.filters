@@ -136,6 +136,9 @@
     <ClCompile Include="BEnemy.cpp">
       <Filter>MyPG</Filter>
     </ClCompile>
+    <ClCompile Include="BObject.cpp">
+      <Filter>MyPG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine_Ver3_83.h">
@@ -229,6 +232,9 @@
       <Filter>MyPG</Filter>
     </ClInclude>
     <ClInclude Include="BEnemy.h">
+      <Filter>MyPG</Filter>
+    </ClInclude>
+    <ClInclude Include="BObject.h">
       <Filter>MyPG</Filter>
     </ClInclude>
   </ItemGroup>

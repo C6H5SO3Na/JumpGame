@@ -38,7 +38,7 @@ namespace Enemy00
 		render2D_Priority[1] = 0.5f;
 		state = State::Normal;
 		angle = Angle_LR::Left;
-		hitBase = drawBase = CenterBox(32 * 2, 32 * 2);
+		hitBase = CenterBox(32 * 2, 32 * 2);
 		moveVec = ML::Vec2(5.f, 5.f);
 		src = ML::Box2D(0, 0, 32, 32);
 		score = 100;
@@ -73,8 +73,9 @@ namespace Enemy00
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
+		Anim();
 		{
-			ML::Box2D draw = drawBase.OffsetCopy(pos);
+			ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
 			ge->ApplyCamera2D(draw);
 			res->img->Draw(draw, src);
 		}
@@ -142,8 +143,25 @@ namespace Enemy00
 		++moveCnt;
 		++animCnt;
 	}
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::Anim()
+	{
+		int animAngleTmp = 32;//drawにおけるh座標 左の場合32
+		if (angle == Angle_LR::Right) {//右だったら64にする
+			animAngleTmp = 64;
+		}
 
-
+		switch (animKind) {
+		case Anim::Move:
+		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
+			drawBase = CenterBox(32, 32);
+			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w, animAngleTmp, drawBase.w, drawBase.h);
+			break;
+		}
+		}
+	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
