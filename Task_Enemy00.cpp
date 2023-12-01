@@ -14,7 +14,8 @@ namespace Enemy00
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		img = DG::Image::Create("data/image/pipo-simpleenemy01b.png");
+		img[0] = DG::Image::Create("data/image/pipo-simpleenemy01b.png");
+		img[1] = DG::Image::Create("data/image/pipo-simpleenemy01c.png");
 		img0 = DG::Image::Create("./data/image/boxBlue.bmp");
 		return true;
 	}
@@ -22,7 +23,9 @@ namespace Enemy00
 	//リソースの解放
 	bool  Resource::Finalize()
 	{
-		img.reset();
+		for (int i = 0; i < size(img); ++i) {
+			img[i].reset();
+		}
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -42,7 +45,7 @@ namespace Enemy00
 		moveVec = ML::Vec2(5.f, 5.f);
 		src = ML::Box2D(0, 0, 32, 32);
 		score = 100;
-		//jumpPow = -17.f;
+		jumpPow = -10.f;
 
 		//★タスクの生成
 
@@ -77,7 +80,7 @@ namespace Enemy00
 		{
 			ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
 			ge->ApplyCamera2D(draw);
-			res->img->Draw(draw, src);
+			res->img[static_cast<int>(type)]->Draw(draw, src);
 		}
 	}
 	//-------------------------------------------------------------------
@@ -89,16 +92,13 @@ namespace Enemy00
 		auto inp = ge->in1->GetState();
 		//左右移動
 		est.x = moveVec.x * angle;
-		////ジャンプ
-		//if (inp.B1.down) {
-		//	if (hitFlag) {//着地中のみジャンプ開始できる
-		//		animKind = Anim::Jump;
-		//		fallSpeed = jumpPow;
-		//	}
-		//}
-		//if (inp.B1.up && fallSpeed < 0) {//ジャンプボタンが離れた瞬間かつ上昇中の場合
-		//	fallSpeed = 0.f;//落下速度0(小ジャンプ)
-		//}
+		//ジャンプ
+		if (type == Type::Jumping) {
+			if (isHitFloor) {//着地中のみジャンプ開始できる
+				//animKind = Anim::Jump;
+				fallSpeed = jumpPow;
+			}
+		}
 		est.y += fallSpeed;
 
 		////完全に止まっているときは止まっているときのアニメーション
@@ -130,11 +130,11 @@ namespace Enemy00
 		}
 
 		//頭上判定
-		//if (fallSpeed < 0) {//上昇中
-		//	if (CheckHead()) {
-		//		fallSpeed = 0;//上昇力を無効にする
-		//	}
-		//}
+		if (fallSpeed < 0) {//上昇中
+			if (CheckHead()) {
+				fallSpeed = 0;//上昇力を無効にする
+			}
+		}
 
 		//穴に落ちたら消滅させる
 		if (CheckFallHole()) {

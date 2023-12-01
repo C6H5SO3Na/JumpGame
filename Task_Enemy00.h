@@ -23,7 +23,7 @@ namespace Enemy00
 		static   WP  instance;
 		static  Resource::SP  Create();
 		//共有する変数はここに追加する
-		DG::Image::SP img,img0;
+		DG::Image::SP img[2], img0;
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BEnemy
@@ -49,11 +49,18 @@ namespace Enemy00
 		enum class Anim {
 			Move, Dead
 		};
+
+
 		//追加したい変数・メソッドはここに追加する
 		Anim animKind = Anim::Move;
-		//float jumpPow = 0.f;
+
+		float jumpPow = 0.f;
 	public:
+		enum class Type {
+			Normal, Jumping
+		};
 		void Move();
 		void Anim();
+		Type type = Type::Normal;
 	};
 }

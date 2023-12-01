@@ -1,7 +1,7 @@
 //-------------------------------------------------------------------
 //プレイヤ
 //-------------------------------------------------------------------
-//#define MYDEBUG
+//#define isDebugMode
 #include "MyPG.h"
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
@@ -103,6 +103,7 @@ namespace Player
 		if (state == State::Non) { return; }
 		ML::Vec2 est(0.f, 0.f);
 		auto inp = ge->in1->GetState();
+		static int effectNum = 1;
 		switch (state) {
 			//動いているとき
 		case State::Normal:
@@ -125,11 +126,16 @@ namespace Player
 					ChangeAnim(Anim::Walk);
 				}
 			}
-
 #if defined(isDebugMode)
-			//デバッグ用　自爆コマンド
+			//デバッグ用 エフェクトテスト
+			if (inp.LStick.BU.down) {
+				++effectNum;
+			}
+			if (inp.LStick.BD.down) {
+				--effectNum;
+			}
 			if (inp.B3.down) {
-				state = State::Dead;
+				ge->CreateEffect(effectNum, ML::Vec2(pos.x, pos.y + static_cast<float>(drawBase.h) / 2));
 			}
 #endif
 
@@ -320,7 +326,7 @@ namespace Player
 		ge->ApplyCamera2D(me);
 		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
 #endif
-		auto enemies = ge->qa_Enemies;
+		shared_ptr<vector<BEnemy::SP>> enemies = ge->qa_Enemies;
 		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 			if ((*it)->state != State::Normal) { continue; }
 			//当たり判定を基にして頭上矩形を生成
@@ -347,10 +353,10 @@ namespace Player
 				ChangeAnim(Anim::Jump);
 				ge->CreateEffect(8, ML::Vec2(static_cast<float>(you.x), static_cast<float>(you.y)));
 				return true;
+			}
 		}
-	}
 		return false;
-}
+	}
 	//-------------------------------------------------------------------
 	//アニメーションをチェンジ
 	void Object::ChangeAnim(Anim anim)

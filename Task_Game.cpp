@@ -57,7 +57,7 @@ namespace Game
 
 		//スポーン プレイヤ
 		auto player = Player::Object::Create(true);
-		player->pos = map->playerSpawnPos;
+		player->pos = map->GetPlayerSpawnpos();
 
 		//ステージ情報表示
 		auto stageInfo = StageInfo::Object::Create(true);
@@ -124,12 +124,9 @@ namespace Game
 	//敵のスポーン
 	void Object::SpawnEnemy(ML::Vec2 pos, int kind)
 	{
-		switch (kind) {
-		case 0:
 			auto enemy = Enemy00::Object::Create(true);
 			enemy->pos = pos;
-			break;
-		}
+			enemy->type = static_cast<Enemy00::Object::Type>(kind);
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
