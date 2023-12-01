@@ -1,15 +1,15 @@
 #pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
-//マップ
+//ステージ情報タスク
 //-------------------------------------------------------------------
 #include "GameEngine_Ver3_83.h"
 
-namespace Map2D
+namespace StageInfo
 {
 	//タスクに割り当てるグループ名と固有名
-	const  string  defGroupName("フィールド");	//グループ名
-	const  string  defName("マップ");	//タスク名
+	const  string  defGroupName("ステージ情報");	//グループ名
+	const  string  defName("UI");	//タスク名
 	//-------------------------------------------------------------------
 	class  Resource : public BResource
 	{
@@ -23,12 +23,13 @@ namespace Map2D
 		static WP  instance;
 		static Resource::SP  Create();
 		//共有する変数はここに追加する
-		DG::Image::SP img;
+		DG::Image::SP imgHP;
+		DG::Font::SP font;
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BTask
 	{
-		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+	//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
 		virtual  ~Object();
 		typedef  shared_ptr<Object>		SP;
@@ -44,23 +45,8 @@ namespace Map2D
 		void  UpDate()			override;//「実行」１フレーム毎に行う処理
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
-		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
+	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	public:
-		//追加したい変数・メソッドはここに追加する
-		int map[100][100];//一応100*100
-		int mapSize[2];//0:x,1:y
-		int chipSize;//チップのサイズ
-		ML::Box2D hitBase;//ピクセル単位のマップサイズを持つ
-		enum { chipKind = 16 };//マップチップの種類
-		enum { X = 0, Y = 1 };//座標用
-		ML::Box2D chip[chipKind];
-		ML::Vec2 playerSpawnPos;
 
-		bool LoadEnemy(const string& fpath_);
-		void DrawMapChip(int map, int x, int y);
-		bool LoadMap(const string& fpath_);
-		bool CheckHit(ML::Box2D hit_);
-		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
-		//void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);//マップ外を見せないようにカメラを位置調整
 	};
 }

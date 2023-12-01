@@ -5,7 +5,7 @@
 #include  "Task_Map2D.h"
 #include  "Task_Enemy00.h"
 #include  "Task_Game.h"
-#include "assert.h"
+#include <assert.h>
 
 namespace Map2D
 {
@@ -75,8 +75,8 @@ namespace Map2D
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		for (int y = 0; y < mapSize[1]; ++y) {
-			for (int x = 0; x < mapSize[0]; ++x) {
+		for (int y = 0; y < mapSize[Y]; ++y) {
+			for (int x = 0; x < mapSize[X]; ++x) {
 				DrawMapChip(map[y][x], x, y);
 			}
 		}
@@ -122,7 +122,7 @@ namespace Map2D
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			float pos[2];//x:0,y:0
+			float pos[2] = {};//x:0,y:0
 			for (int i = 0; i < 2; ++i) {
 				string  tc;
 				getline(ss_lt, tc, ',');
@@ -131,18 +131,18 @@ namespace Map2D
 				ss << tc;
 				ss >> pos[i];
 			}
-			playerSpawnPos = ML::Vec2(static_cast<float>(pos[0] * chipSize + chipSize / 2),
-				static_cast<float>(pos[1] * chipSize));
+			playerSpawnPos = ML::Vec2(static_cast<float>(pos[X] * chipSize + chipSize / 2),
+				static_cast<float>(pos[Y] * chipSize));
 		}
 
 		//マップの当たり判定を定義
-		hitBase = ML::Box2D(0, 0, mapSize[0] * chipSize, mapSize[1] * chipSize);
+		hitBase = ML::Box2D(0, 0, mapSize[X] * chipSize, mapSize[Y] * chipSize);
 
-		for (int y = 0; y < mapSize[1]; ++y) {
+		for (int y = 0; y < mapSize[Y]; ++y) {
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			for (int x = 0; x < mapSize[0]; ++x) {
+			for (int x = 0; x < mapSize[X]; ++x) {
 				string  tc;
 				getline(ss_lt, tc, ',');
 

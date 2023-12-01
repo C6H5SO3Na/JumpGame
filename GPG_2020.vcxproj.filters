@@ -139,6 +139,9 @@
     <ClCompile Include="BObject.cpp">
       <Filter>MyPG</Filter>
     </ClCompile>
+    <ClCompile Include="Task_StageInfo.cpp">
+      <Filter>MyPG\Task\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine_Ver3_83.h">
@@ -236,6 +239,9 @@
     </ClInclude>
     <ClInclude Include="BObject.h">
       <Filter>MyPG</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_StageInfo.h">
+      <Filter>MyPG\Task\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
