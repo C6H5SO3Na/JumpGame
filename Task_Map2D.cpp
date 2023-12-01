@@ -149,8 +149,8 @@ namespace Map2D
 				stringstream ss;
 				ss << tc;
 				ss >> map[y][x];
+				}
 			}
-		}
 
 		//ƒtƒ@ƒCƒ‹‚ð•Â‚¶‚é
 		fin.close();
