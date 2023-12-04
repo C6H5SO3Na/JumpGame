@@ -35,6 +35,9 @@
     <Filter Include="MyPG\Task\Result">
       <UniqueIdentifier>{91141150-1893-446e-b784-55cf5c3afa48}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MyPG\Task\StageEditor">
+      <UniqueIdentifier>{236ce858-3bb8-42a7-bdbc-508f171fa378}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameEngine_Ver3_83.cpp">
@@ -142,6 +145,9 @@
     <ClCompile Include="Task_StageInfo.cpp">
       <Filter>MyPG\Task\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Task_StageEditor.cpp">
+      <Filter>MyPG\Task\StageEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine_Ver3_83.h">
@@ -242,6 +248,9 @@
     </ClInclude>
     <ClInclude Include="Task_StageInfo.h">
       <Filter>MyPG\Task\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_StageEditor.h">
+      <Filter>MyPG\Task\StageEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -47,7 +47,6 @@ namespace Map2D
 		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	private:
 		//追加したい変数・メソッドはここに追加する
-		int map[100][100];//一応100*100
 		int mapSize[2];//0:x,1:y
 		int chipSize;//チップのサイズ
 		ML::Box2D hitBase;//ピクセル単位のマップサイズを持つ
@@ -63,6 +62,8 @@ namespace Map2D
 		bool CheckHit(ML::Box2D hit_);
 		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
 		//void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);
+
+		int map[100][100];//一応100*100
 
 		ML::Vec2 GetPlayerSpawnpos() { return playerSpawnPos; }
 	};

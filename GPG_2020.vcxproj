@@ -149,6 +149,7 @@
     <ClCompile Include="Task_Map2D.cpp" />
     <ClCompile Include="Task_Player.cpp" />
     <ClCompile Include="Task_Result.cpp" />
+    <ClCompile Include="Task_StageEditor.cpp" />
     <ClCompile Include="Task_StageInfo.cpp" />
     <ClCompile Include="Task_StartGame.cpp" />
     <ClCompile Include="Task_Title.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="Task_Map2D.h" />
     <ClInclude Include="Task_Player.h" />
     <ClInclude Include="Task_Result.h" />
+    <ClInclude Include="Task_StageEditor.h" />
     <ClInclude Include="Task_StageInfo.h" />
     <ClInclude Include="Task_StartGame.h" />
     <ClInclude Include="Task_Title.h" />

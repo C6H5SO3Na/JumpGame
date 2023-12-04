@@ -47,6 +47,7 @@ namespace Game
 		//デバッグ用の矩形
 		render2D_Priority[1] = 0.f;
 		ge->debugRectLoad();
+
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);

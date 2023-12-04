@@ -6,6 +6,7 @@
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
 #include "Task_Map2D.h"
+#include "Task_Effect00.h"
 #include <assert.h>
 #include "randomLib.h"
 
@@ -218,6 +219,7 @@ namespace Player
 			fallSpeed += ML::Gravity(32) * 6.f;//重力加速
 		}
 		//カメラの位置を再調整
+		//関数化できる?
 		{
 			//プレイヤを画面のどこに置くか（今回は画面中央）
 			int px = ge->camera2D.w / 2;
