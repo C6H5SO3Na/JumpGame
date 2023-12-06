@@ -35,8 +35,7 @@ namespace StartGame
 		//リソースクラス生成orリソース共有
 		this->res = Resource::Create();
 
-		//デバッグ用の矩形
-		render2D_Priority[1] = 0.f;
+		render2D_Priority[1] = 1.0f;
 
 		//★タスクの生成
 

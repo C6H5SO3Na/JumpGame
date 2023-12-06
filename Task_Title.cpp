@@ -6,7 +6,7 @@
 #include "Task_StartGame.h"
 #include "Task_StageEditor.h"
 //#include "randomLib.h"
-//#include "easing.h"
+#include "easing.h"
 
 namespace Title
 {
@@ -15,7 +15,7 @@ namespace Title
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		font = DG::Font::Create("メイリオ", 30, 60);
+		font = DG::Font::Create("HG創英プレゼンスEB", 30, 60);
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -34,7 +34,9 @@ namespace Title
 		this->res = Resource::Create();
 
 		//★データ初期化
-
+		render2D_Priority[1] = 1.0f;
+		//イージングセット
+		easing::Set("タイトル文字", easing::EXPOOUT, -100, 100, 60);
 		//★タスクの生成
 		return  true;
 	}
@@ -48,8 +50,8 @@ namespace Title
 		ge->score = 0;
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			//auto game = StartGame::Object::Create(true);
-			auto game = StageEditor::Object::Create(true);
+			auto game = StartGame::Object::Create(true);
+			//auto game = StageEditor::Object::Create(true);
 		}
 
 		return  true;
@@ -64,17 +66,32 @@ namespace Title
 		switch (phase)
 		{
 		case 0:
-			++mainCnt;
-			if (mainCnt >= 60) {
+			easing::Start("タイトル文字");
+			++phase;
+			break;
+
+		case 1:
+			if (easing::GetState("タイトル文字") == easing::EQ_STATE::EQ_END) {
 				++phase;
 			}
 			break;
-		case 1:
+		case 2:
 			if (inp.B1.down) {
-				Kill();
+				++phase;
+				ge->CreateEffect(99, ML::Vec2());
 			}
 			break;
+		case 3:
+			++mainCnt;
+			if (mainCnt > 45) {
+				++phase;
+			}
+			break;
+
+		case 4:
+			Kill();
 		}
+		easing::UpDate();
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
@@ -84,16 +101,17 @@ namespace Title
 		ge->Dbg_ToDisplay(100, 120, "Push B1");
 
 		//テキストボックス
-		ML::Box2D textBox(0, 0, 1000, 1000);
+		ML::Box2D textBox(ge->screen2DWidth / 2 - 200, 0, 1000, 1000);
 		string text;
 		//段階毎の処理
 		switch (phase)
 		{
-		case 0:
-			text = "甜花ちゃん";
-			res->font->DrawF(textBox, text, DG::Font::x1);
-			break;
+		case 2:
 		case 1:
+		case 0:
+			text = "鯛獲る";
+			textBox.y += static_cast<int>(easing::GetPos("タイトル文字"));
+			res->font->DrawF(textBox, text, DG::Font::x1);
 			break;
 		}
 	}

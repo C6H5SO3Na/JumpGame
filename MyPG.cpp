@@ -231,8 +231,8 @@ namespace MyPG
 				e->resSizeX = e->resSizeY = 256;
 				e->drawSizeX = ge->screen2DWidth + 1000;//動きながらに対応できるよう大きめに
 				e->drawSizeY = ge->screen2DHeight;
-				e->pos.x = static_cast<float>(ge->screen2DWidth / 2 + ge->screen2DWidth / 2);
-				e->pos.y = static_cast<float>(ge->screen2DHeight / 2 + ge->screen2DHeight / 2);
+				e->pos.x = static_cast<float>(ge->camera2D.x + ge->screen2DWidth / 2);
+				e->pos.y = static_cast<float>(ge->camera2D.y + ge->screen2DHeight / 2);
 				e->fade = true;
 				e->addAngle = 2.f;
 				e->angle = 0.f;

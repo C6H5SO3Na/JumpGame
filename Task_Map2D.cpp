@@ -268,15 +268,18 @@ namespace Map2D
 			ge->camera2D.x = m.right - ge->camera2D.w;
 		}
 
-		if (c.bottom > m.bottom) {
-			ge->camera2D.y = m.bottom - ge->camera2D.h;
-		}
 		if (c.left < m.left) {
 			ge->camera2D.x = m.left;
 		}
-		if (c.top < m.top) {
+
+		if (ge->qa_Player != nullptr || c.bottom > m.bottom) {
+			ge->camera2D.y = m.bottom - ge->camera2D.h;
+		}
+
+		if (ge->qa_Player != nullptr || c.top < m.top) {
 			ge->camera2D.y = m.top;
 		}
+
 		//マップがカメラより小さい場合
 		if (hitBase.w < ge->camera2D.w) {
 			ge->camera2D.x = m.left;
