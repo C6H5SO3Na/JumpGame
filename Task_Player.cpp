@@ -44,8 +44,7 @@ namespace Player
 		hitBase = CenterBox(28 * 2, 64 * 2);
 		moveVec = ML::Vec2(8.f, 8.f);
 		jumpPow = -17.f;
-		life.now = 3;
-		life.max = 5;
+		SetLife(5, 5);
 		//★タスクの生成
 
 		return  true;
@@ -128,7 +127,7 @@ namespace Player
 					ChangeAnim(Anim::Walk);
 				}
 			}
-#if defined(isDebugMode)
+//#if defined(isDebugMode)
 			//デバッグ用 エフェクトテスト
 			if (inp.LStick.BU.down) {
 				++effectNum;
@@ -139,7 +138,7 @@ namespace Player
 			if (inp.B3.down) {
 				ge->CreateEffect(effectNum, ML::Vec2(pos.x, pos.y + static_cast<float>(drawBase.h) / 2));
 			}
-#endif
+//#endif
 
 			//ジャンプ
 			if (inp.B1.down) {
@@ -384,7 +383,8 @@ namespace Player
 		ge->ApplyCamera2D(me);
 		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
 #endif
-		GoalFlag::Object::SP goalFlag = ge->GetTask<GoalFlag::Object>("ゴール旗");
+		GoalFlag::Object::SP goalFlag = ge->GetTask<GoalFlag::Object>("オブジェクト","ゴール旗");
+		if (goalFlag == nullptr) { return false; }
 		if (goalFlag->state == State::Non) { return false; }
 		//ゴール旗
 		ML::Box2D  you = goalFlag->GetHitBase().OffsetCopy(goalFlag->GetPos());

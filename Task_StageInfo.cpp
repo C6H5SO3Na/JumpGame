@@ -12,8 +12,9 @@ namespace StageInfo
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		imgHP = DG::Image::Create("./data/image/Dark_lvl0.png");
-		font = DG::Font::Create("メイリオ", 30, 60);
+		imgHP = DG::Image::Create("./data/image/health_bar.png");
+		imgHPFrame = DG::Image::Create("./data/image/health_bar_decoration.png");
+		font = DG::Font::Create("メイリオ", 50, 100);
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -34,7 +35,7 @@ namespace StageInfo
 		this->res = Resource::Create();
 
 		//★データ初期化
-		
+
 		//★タスクの生成
 
 		return  true;
@@ -60,9 +61,36 @@ namespace StageInfo
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ML::Box2D textBox(0, 0, 1000, 1000);
-		string scoreText = "得点:" + to_string(ge->score);
-		res->font->DrawF(textBox, scoreText, DG::Font::x1);
+		{
+			ML::Box2D textBox(0, 0, 1000, 1000);
+			string scoreText = "score:" + to_string(ge->score);
+			res->font->DrawF(textBox, scoreText, DG::Font::x1);
+		}
+		//体力ゲージの枠
+		{
+			ML::Box2D draw(500, 10, 256, 68);
+			ML::Box2D src(0, 0, 256, 68);
+			res->imgHPFrame->Draw(draw, src);
+		}
+		//体力ゲージの中身
+		{
+			int nowLife, maxLife;
+			if (ge->qa_Player == nullptr) {
+				nowLife = 0;
+				maxLife = 1;
+			}
+			else {
+				nowLife = ge->qa_Player->GetNowLife();
+				maxLife = ge->qa_Player->GetMaxLife();
+			}
+
+			float lifePer =
+				static_cast<float>(nowLife) /
+				static_cast<float>(maxLife);
+			ML::Box2D src(0, 0, static_cast<int>(196.f * lifePer), 68);
+			ML::Box2D draw(56 + 500, 10, static_cast<int>(196.f * lifePer), 68);
+			res->imgHP->Draw(draw, src);
+		}
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド

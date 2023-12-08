@@ -23,13 +23,13 @@ namespace StageInfo
 		static WP  instance;
 		static Resource::SP  Create();
 		//共有する変数はここに追加する
-		DG::Image::SP imgHP;
+		DG::Image::SP imgHP, imgHPFrame;
 		DG::Font::SP font;
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BTask
 	{
-	//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
 		virtual  ~Object();
 		typedef  shared_ptr<Object>		SP;
@@ -45,7 +45,7 @@ namespace StageInfo
 		void  UpDate()			override;//「実行」１フレーム毎に行う処理
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
-	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
+		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	public:
 
 	};

@@ -53,7 +53,7 @@ public:
 		, fallSpeed()
 		, isHitFloor()
 		, state(State::Non)
-		, life()
+		, life{ 0, 0 }
 		, score()
 	{
 	}
@@ -81,4 +81,16 @@ public:
 	ML::Vec2 GetPos() { return pos; }
 	//当たり判定取得
 	ML::Box2D GetHitBase() { return hitBase; }
+	//ライフをセット
+	void SetLife(int now, int max) { life = { now,max }; }
+	//現在のライフ取得
+	int GetNowLife()
+	{
+		return life.now;
+	}
+	//最大ライフ取得
+	int GetMaxLife()
+	{
+		return life.max;
+	}
 };

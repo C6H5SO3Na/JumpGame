@@ -101,12 +101,12 @@ namespace Game
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
+		//プレイヤの検出数を減らす
+		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
 		//敵の検出数を減らす
 		ge->qa_Enemies = ge->GetTasks<BEnemy>(Enemy00::defGroupName);
 		//マップの検出数を減らす
 		ge->qa_Map = ge->GetTask<Map2D::Object>(Map2D::defGroupName);
-		//プレイヤの検出数を減らす
-		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
 		auto inp = ge->in1->GetState();
 
 		//クリアしたら
