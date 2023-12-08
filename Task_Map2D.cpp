@@ -15,7 +15,7 @@ namespace Map2D
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		img = DG::Image::Create("./data/image/Dark_lvl0.png");
+		img = DG::Image::Create("./data/image/Tile2.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -133,7 +133,7 @@ namespace Map2D
 				ss >> pos[i];
 			}
 			playerSpawnPos = ML::Vec2(static_cast<float>(pos[X] * chipSize + chipSize / 2),
-				static_cast<float>(pos[Y] * chipSize));
+				static_cast<float>(pos[Y] * chipSize + chipSize / 2));
 		}
 
 		//マップの当たり判定を定義
@@ -153,8 +153,8 @@ namespace Map2D
 				if (map[y][x] == -2) {
 					auto goalFlag = GoalFlag::Object::Create(true);
 					goalFlag->SetPos(ML::Vec2(
-						static_cast<const float>(x * chipSize),
-						static_cast<const float>(y * chipSize)));
+						static_cast<const float>(x * chipSize + chipSize / 2),
+						static_cast<const float>(y * chipSize + chipSize / 2)));
 					map[y][x] = -1;
 				}
 			}

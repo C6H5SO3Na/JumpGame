@@ -60,6 +60,7 @@ namespace Player
 		void Operation();
 		void Animation();
 		bool CheckHitEnemyHead();
+		bool CheckHitGoalFlag();
 		void ChangeAnim(Anim anim);
 		void DamageOperation();
 		bool GetInvincibleflag() { return invincible.flag; }

@@ -38,8 +38,8 @@ namespace Game
 		this->res = Resource::Create();
 
 		//★データ初期化
-		deadCnt = 0;
 		ge->isDead = false;
+		ge->isClear = false;
 
 		//2Dカメラ矩形
 		ge->camera2D = ML::Box2D(-200, -100, ge->screen2DWidth, ge->screen2DHeight);
@@ -73,17 +73,24 @@ namespace Game
 		ge->KillAll_G("プレイヤ");
 		ge->KillAll_G("フィールド");
 		ge->KillAll_G("敵");
+		ge->KillAll_G("オブジェクト");
 		ge->KillAll_G("ステージ情報");
 		ge->debugRectReset();
 
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			//残機が0未満になったらゲームオーバー画面に推移
-			if (ge->remaining < 0) {
-				auto result = Result::Object::Create(true);
+			
+			if (ge->isDead) {
+				//残機が0未満になったらゲームオーバー画面に推移
+				if (ge->remaining < 0) {
+					auto result = Result::Object::Create(true);
+				}
+				else {
+					--ge->remaining;
+					auto startGame = StartGame::Object::Create(true);
+				}
 			}
 			else {
-				--ge->remaining;
 				auto startGame = StartGame::Object::Create(true);
 			}
 		}
@@ -102,12 +109,12 @@ namespace Game
 		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
 		auto inp = ge->in1->GetState();
 
-		//やられたら
-		if (ge->isDead) {
-			++deadCnt;
+		//クリアしたら
+		if (ge->isClear) {
+			++cnt;
 			switch (afterDeadPhase) {
 			case 0:
-				if (deadCnt >= 60 * 3) {//やられてしばらく経過後
+				if (cnt >= 60 * 3) {//やられてしばらく経過後
 					++afterDeadPhase;
 				}
 				break;
@@ -116,7 +123,26 @@ namespace Game
 				++afterDeadPhase;
 			case 2:
 				//完全にフェードアウトしたら
-				if (deadCnt >= 60 * 3 + 45) {
+				if (cnt >= 60 * 3 + 45) {
+					Kill();//次のタスクへ
+				}
+			}
+		}
+		//やられたら
+		else if (ge->isDead) {
+			++cnt;
+			switch (afterDeadPhase) {
+			case 0:
+				if (cnt >= 60 * 3) {//やられてしばらく経過後
+					++afterDeadPhase;
+				}
+				break;
+			case 1:
+				ge->CreateEffect(99, ML::Vec2());
+				++afterDeadPhase;
+			case 2:
+				//完全にフェードアウトしたら
+				if (cnt >= 60 * 3 + 45) {
 					Kill();//次のタスクへ
 				}
 			}
@@ -176,7 +202,7 @@ namespace Game
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() :deadCnt(0) {	}
+	Object::Object() :cnt(),afterDeadPhase(), afterClearPhase() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

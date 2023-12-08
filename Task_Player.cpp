@@ -7,6 +7,7 @@
 #include "Task_Enemy00.h"
 #include "Task_Map2D.h"
 #include "Task_Effect00.h"
+#include "Task_GoalFlag.h"
 #include <assert.h>
 #include "randomLib.h"
 
@@ -158,6 +159,11 @@ namespace Player
 				ChangeAnim(Anim::Idle);
 			}
 
+			if (CheckHitGoalFlag()) {
+				state = State::Clear;
+				ChangeAnim(Anim::Clear);
+				break;
+			}
 
 			CheckMove(est);
 
@@ -190,12 +196,16 @@ namespace Player
 
 			//死亡時にも重力を働かせる
 			est.y += fallSpeed;
-
 			CheckMove(est);
+
 			break;
 
-			//クリア時
+		//クリア時
 		case State::Clear:
+			ge->isClear = true;
+			//重力を働かせる
+			est.y += fallSpeed;
+			CheckMove(est);
 			break;
 		}
 
@@ -299,6 +309,9 @@ namespace Player
 		}
 		case Anim::Clear:
 		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
+			animCnt = min(animCnt, 5 * frameInterval - 1);
+			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 5, drawBase.w, drawBase.h);
 			break;
 		}
 		}
@@ -360,11 +373,39 @@ namespace Player
 		return false;
 	}
 	//-------------------------------------------------------------------
+	//ゴール旗との当たり判定
+	bool Object::CheckHitGoalFlag()
+	{
+		if (state == State::Non) { return false; }
+		//プレイヤ
+		ML::Box2D  me = hitBase.OffsetCopy(pos);
+		//デバッグ用矩形
+#if defined(isDebugMode)
+		ge->ApplyCamera2D(me);
+		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
+#endif
+		GoalFlag::Object::SP goalFlag = ge->GetTask<GoalFlag::Object>("ゴール旗");
+		if (goalFlag->state == State::Non) { return false; }
+		//ゴール旗
+		ML::Box2D  you = goalFlag->GetHitBase().OffsetCopy(goalFlag->GetPos());
+		//デバッグ用矩形
+#if defined(isDebugMode)
+		ge->ApplyCamera2D(you);
+		ge->debugRect(you, ge->DEBUGRECTMODE::RED);
+#endif
+		if (you.Hit(me)) {
+			ge->score += goalFlag->score;
+			ge->CreateEffect(2, ML::Vec2(static_cast<float>(me.x), static_cast<float>(me.y)));
+			return true;
+		}
+		return false;
+	}
+	//-------------------------------------------------------------------
 	//アニメーションをチェンジ
 	void Object::ChangeAnim(Anim anim)
 	{
 		animKind = anim;
-		if (anim == Anim::Jump || anim == Anim::Dead) {
+		if (anim == Anim::Jump || anim == Anim::Dead || anim == Anim::Clear) {
 			animCnt = 0;//アニメーション用のカウントをリセット
 		}
 	}

@@ -410,12 +410,14 @@ ge->debugRect(me, DEBUGRECTMODE::RED , -ge->camera2D.x, -ge->camera2D.y);
 			false,							//	フルスクリーンモード
 			480,							//	2D描画用解像度X(現在非対応）
 			270,							//	2D描画用解像度Y(現在非対応）
-			"自主制作3",	//	ウインドウタイトル
-			"GPG",							//	ウィンドウクラス名
+			"JumpGame",	//	ウインドウタイトル
+			"自主制作",							//	ウィンドウクラス名
 			1,//UpDate呼び出し頻度　↓のRender呼び出し頻度との比率で決まる１以上を指定すること
 			1 //Render呼び出し頻度　↑のUpDate呼び出し頻度との比率で決まる１以上を指定すること
 			//例えば、120Hz固定のPCで、60Hzと同等の状態で動かす場合、1U/2Rで設定すれば、UpDateの呼び出しが1/2になる
 		) {
+		c = nullptr;//警告を防止
+
 		//seting.txtによるリフレッシュレート調整の為追加
 		ifstream  fin("./data/Shader/seting.txt");
 		if (fin) {

@@ -1,5 +1,5 @@
 //-------------------------------------------------------------------
-//“G00
+//ƒS[ƒ‹Šø
 //-------------------------------------------------------------------
 #include "MyPG.h"
 #include "Task_GoalFlag.h"
@@ -69,7 +69,7 @@ namespace GoalFlag
 	{
 		{
 			ML::Box2D draw = drawBase.OffsetCopy(pos);
-			//ge->ApplyCamera2D(draw);
+			ge->ApplyCamera2D(draw);
 			res->img->Draw(draw, src);
 		}
 	}

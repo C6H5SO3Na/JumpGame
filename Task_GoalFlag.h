@@ -1,15 +1,15 @@
 #pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
-//敵00
+//ゴール旗
 //-------------------------------------------------------------------
 #include "BObject.h"
 
 namespace GoalFlag
 {
 	//タスクに割り当てるグループ名と固有名
-	const  string  defGroupName("ゴール旗");	//グループ名
-	const  string  defName("NoName");	//タスク名
+	const  string  defGroupName("オブジェクト");	//グループ名
+	const  string  defName("ゴール旗");	//タスク名
 	//-------------------------------------------------------------------
 	class  Resource : public BResource
 	{

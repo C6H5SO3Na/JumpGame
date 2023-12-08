@@ -94,7 +94,7 @@ namespace  MyPG
 
 		bool isDead = false;//やられたか否か
 		bool isGameOver = false; //ゲームオーバーフラグ
-		bool GameClearFlag = false;//クリアフラグ
+		bool isClear = false;//クリアフラグ
 		bool unHitEnemy = false;//敵との当たり判定
 		int GameOverCnt = 0;
 		int MaxGameOver = 0;
