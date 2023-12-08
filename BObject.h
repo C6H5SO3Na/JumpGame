@@ -23,6 +23,10 @@ protected:
 		int max;
 	};
 	Life life;
+
+	ML::Vec2 pos;//プレイヤ座標
+	ML::Box2D hitBase;//当たり判定範囲
+
 public:
 	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	//キャラの状態
@@ -34,9 +38,6 @@ public:
 	enum Angle_LR {
 		Right = 1, Left = -1
 	};
-
-	ML::Vec2 pos;//プレイヤ座標
-	ML::Box2D hitBase;//当たり判定範囲
 
 	int	moveCnt;//行動処理用カウンタ
 	int	animCnt;//アニメーション処理用カウンタ
@@ -74,4 +75,10 @@ public:
 	ML::Box2D MultiplyBox2D(ML::Box2D box2D, float n);
 	//ライフの増減
 	void LifeOperation(int addLife);
+	//座標セット
+	void SetPos(ML::Vec2 p) { pos = p; }
+	//座標取得
+	ML::Vec2 GetPos() { return pos; }
+	//当たり判定取得
+	ML::Box2D GetHitBase() { return hitBase; }
 };

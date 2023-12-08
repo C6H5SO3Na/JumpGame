@@ -1,14 +1,14 @@
-//#pragma warning(disable:4996)
+#pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
-//プレイヤ
+//敵00
 //-------------------------------------------------------------------
-#include "BChara.h"
+#include "BObject.h"
 
-namespace Player
+namespace GoalFlag
 {
 	//タスクに割り当てるグループ名と固有名
-	const  string  defGroupName("プレイヤ");	//グループ名
+	const  string  defGroupName("ゴール旗");	//グループ名
 	const  string  defName("NoName");	//タスク名
 	//-------------------------------------------------------------------
 	class  Resource : public BResource
@@ -26,7 +26,7 @@ namespace Player
 		DG::Image::SP img;
 	};
 	//-------------------------------------------------------------------
-	class  Object : public  BChara
+	class  Object : public  BObject
 	{
 		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
@@ -45,27 +45,7 @@ namespace Player
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
-	public:
-		//追加したい変数・メソッドはここに追加する
-		enum class Anim {
-			Idle, Walk, Jump, Fall, Hurt, Clear, Dead
-		};
-
-		struct Invincible {
-			bool doFlash;//点滅フラグ
-			bool flag;//無敵フラグ
-			int cnt;//無敵カウント
-		};
-
-		void Operation();
-		void Animation();
-		bool CheckHitEnemyHead();
-		void ChangeAnim(Anim anim);
-		void DamageOperation();
-		bool GetInvincibleflag() { return invincible.flag; }
 	private:
-		Anim animKind;
-		float jumpPow;
-		Invincible invincible;
+		void Oparation();
 	};
 }

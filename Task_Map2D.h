@@ -63,7 +63,7 @@ namespace Map2D
 		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
 		//void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);
 
-		int map[100][100];//一応100*100
+		int map[1000][1000];//一応1000*1000
 
 		ML::Vec2 GetPlayerSpawnpos() { return playerSpawnPos; }
 	};

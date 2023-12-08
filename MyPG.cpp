@@ -9,19 +9,12 @@
 namespace MyPG
 {
 	//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
-	int MyGameEngine::Clamp(int x, int low, int high)
+	template<typename T>
+	inline T MyGameEngine::Clamp(T x, T low, T high)
 	{
 		assert(low <= high);
 		return min(max(x, low), high);
 	}
-
-	float MyGameEngine::Clamp(float x, float low, float high)
-	{
-		assert(low <= high);
-		return min(max(x, low), high);
-	}
-
-
 
 	void MyGameEngine::ApplyCamera2D(ML::Box2D& draw)
 	{

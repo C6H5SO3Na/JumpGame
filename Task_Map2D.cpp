@@ -4,6 +4,7 @@
 #include  "MyPG.h"
 #include  "Task_Map2D.h"
 #include  "Task_Enemy00.h"
+#include  "Task_GoalFlag.h"
 #include  "Task_Game.h"
 #include <assert.h>
 
@@ -149,6 +150,13 @@ namespace Map2D
 				stringstream ss;
 				ss << tc;
 				ss >> map[y][x];
+				if (map[y][x] == -2) {
+					auto goalFlag = GoalFlag::Object::Create(true);
+					goalFlag->SetPos(ML::Vec2(
+						static_cast<const float>(x * chipSize),
+						static_cast<const float>(y * chipSize)));
+					map[y][x] = -1;
+				}
 			}
 		}
 

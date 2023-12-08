@@ -31,11 +31,11 @@ void BEnemy::CheckHitPlayer()
 	if (state == State::Non) { return; }
 	//プレイヤと当たり判定
 	ML::Box2D  me = hitBase.OffsetCopy(pos);
-	auto player = ge->qa_Player;
+	Player::Object::SP player = ge->qa_Player;
 
-	if (player->state != State::Normal || player->isInvincible) { return; }
+	if (player->state != State::Normal || player->GetInvincibleflag()) { return; }
 
-	ML::Box2D  you = player->hitBase.OffsetCopy(player->pos);
+	ML::Box2D  you = player->GetHitBase().OffsetCopy(player->GetPos());
 	if (you.Hit(me)) {
 		player->LifeOperation(-1);
 		if (player->state != State::Dead) {//死んでいないときはダメージを受ける演出を入れる

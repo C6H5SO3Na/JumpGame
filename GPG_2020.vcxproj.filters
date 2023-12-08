@@ -148,6 +148,9 @@
     <ClCompile Include="Task_StageEditor.cpp">
       <Filter>MyPG\Task\StageEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Task_GoalFlag.cpp">
+      <Filter>MyPG\Task\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine_Ver3_83.h">
@@ -251,6 +254,9 @@
     </ClInclude>
     <ClInclude Include="Task_StageEditor.h">
       <Filter>MyPG\Task\StageEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_GoalFlag.h">
+      <Filter>MyPG\Task\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

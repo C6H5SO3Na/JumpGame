@@ -50,5 +50,6 @@ namespace Game
 
 	private:
 		int deadCnt; //‚â‚ç‚ê‚Ä‚©‚ç‚ÌŒo‰ßŠÔ
+		int afterDeadPhase;//‚â‚ç‚ê‚Ä‚©‚ç‚Ìˆ—’iŠK
 	};
 }

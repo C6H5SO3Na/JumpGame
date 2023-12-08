@@ -51,14 +51,14 @@ namespace Game
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
-		map->LoadMap("./data/Map/test3.csv");
+		map->LoadMap("./data/Map/test4.csv");
 
 		//敵の生成
 		map->LoadEnemy("./data/enemy.csv");
 
 		//スポーン プレイヤ
 		auto player = Player::Object::Create(true);
-		player->pos = map->GetPlayerSpawnpos();
+		player->SetPos(map->GetPlayerSpawnpos());
 
 		//ステージ情報表示
 		auto stageInfo = StageInfo::Object::Create(true);
@@ -83,6 +83,7 @@ namespace Game
 				auto result = Result::Object::Create(true);
 			}
 			else {
+				--ge->remaining;
 				auto startGame = StartGame::Object::Create(true);
 			}
 		}
@@ -104,8 +105,20 @@ namespace Game
 		//やられたら
 		if (ge->isDead) {
 			++deadCnt;
-			if (deadCnt >= 60 * 3) {//やられてしばらく経過後
-				Kill();//次のタスクへ
+			switch (afterDeadPhase) {
+			case 0:
+				if (deadCnt >= 60 * 3) {//やられてしばらく経過後
+					++afterDeadPhase;
+				}
+				break;
+			case 1:
+				ge->CreateEffect(99, ML::Vec2());
+				++afterDeadPhase;
+			case 2:
+				//完全にフェードアウトしたら
+				if (deadCnt >= 60 * 3 + 45) {
+					Kill();//次のタスクへ
+				}
 			}
 		}
 	}
@@ -118,16 +131,16 @@ namespace Game
 
 		//デバッグ矩形表示
 #ifdef isDebugMode
-			ge->debugRectDraw();
+		ge->debugRectDraw();
 #endif
 	}
 	//-------------------------------------------------------------------
 	//敵のスポーン
 	void Object::SpawnEnemy(ML::Vec2 pos, int kind)
 	{
-			auto enemy = Enemy00::Object::Create(true);
-			enemy->pos = pos;
-			enemy->type = static_cast<Enemy00::Object::Type>(kind);
+		auto enemy = Enemy00::Object::Create(true);
+		enemy->SetPos(pos);
+		enemy->SetType(static_cast<Enemy00::Object::Type>(kind));
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド

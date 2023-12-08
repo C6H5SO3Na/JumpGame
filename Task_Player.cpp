@@ -40,7 +40,7 @@ namespace Player
 		render2D_Priority[1] = 0.5f;
 		state = State::Normal;
 		angle = Angle_LR::Right;
-		hitBase = CenterBox(32 * 2, 64 * 2);
+		hitBase = CenterBox(28 * 2, 64 * 2);
 		moveVec = ML::Vec2(8.f, 8.f);
 		jumpPow = -17.f;
 		life.now = 3;
@@ -67,7 +67,7 @@ namespace Player
 	void  Object::UpDate()
 	{
 		Operation();
-		if (state != State::Dead && !isInvincible && !CheckHitEnemyHead()) {//敵を踏んでいなければ
+		if (state != State::Dead && !invincible.flag && !CheckHitEnemyHead()) {//敵を踏んでいなければ
 			auto enemies = ge->GetTasks<Enemy00::Object>("敵");
 			for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 				(*it)->CheckHitPlayer();
@@ -84,7 +84,7 @@ namespace Player
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		if (isFlash && moveCnt % 2 == 0) { return; }
+		if (invincible.doFlash && moveCnt % 2 == 0) { return; }
 		Animation();
 		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
 		ge->ApplyCamera2D(draw);
@@ -238,12 +238,12 @@ namespace Player
 		}
 		++moveCnt;
 
-		if (invincibleCnt > 0) {
-			--invincibleCnt;
+		if (invincible.cnt > 0) {
+			--invincible.cnt;
 		}
 		else {
-			isInvincible = false;
-			isFlash = false;
+			invincible.flag = false;
+			invincible.doFlash = false;
 		}
 	}
 	//-------------------------------------------------------------------
@@ -286,7 +286,7 @@ namespace Player
 			if (animCnt > frameInterval * 3) {
 				animKind = Anim::Idle;
 				state = State::Normal;
-				isFlash = true;
+				invincible.doFlash = true;
 			}
 			break;
 		}
@@ -333,11 +333,11 @@ namespace Player
 			if ((*it)->state != State::Normal) { continue; }
 			//当たり判定を基にして頭上矩形を生成
 			ML::Box2D enemyHead(
-				(*it)->hitBase.x,
-				(*it)->hitBase.y - 1,
-				(*it)->hitBase.w,
+				(*it)->GetHitBase().x,
+				(*it)->GetHitBase().y - 1,
+				(*it)->GetHitBase().w,
 				10);
-			ML::Box2D  you = enemyHead.OffsetCopy((*it)->pos);
+			ML::Box2D  you = enemyHead.OffsetCopy((*it)->GetPos());
 			//デバッグ用矩形
 #if defined(isDebugMode)
 			ge->ApplyCamera2D(you);
@@ -376,8 +376,8 @@ namespace Player
 		ChangeAnim(Anim::Hurt);
 		moveCnt = 0;
 		animCnt = 0;
-		isInvincible = true;
-		invincibleCnt = 100;
+		invincible.flag = true;
+		invincible.cnt = 100;
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -416,9 +416,7 @@ namespace Player
 	Object::Object() :
 		animKind(Anim::Idle),
 		jumpPow(),
-		isInvincible(),
-		invincibleCnt(),
-		isFlash() {	}
+		invincible() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

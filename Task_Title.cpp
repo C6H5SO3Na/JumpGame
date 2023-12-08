@@ -106,8 +106,8 @@ namespace Title
 		//段階毎の処理
 		switch (phase)
 		{
-		case 2:
-		case 1:
+		case 2://fall through
+		case 1://fall through
 		case 0:
 			text = "鯛獲る";
 			textBox.y += static_cast<int>(easing::GetPos("タイトル文字"));
