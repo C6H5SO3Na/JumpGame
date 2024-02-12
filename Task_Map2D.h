@@ -23,7 +23,7 @@ namespace Map2D
 		static WP  instance;
 		static Resource::SP  Create();
 		//共有する変数はここに追加する
-		DG::Image::SP img;
+		DG::Image::SP img, imgBG;
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BTask
@@ -50,7 +50,7 @@ namespace Map2D
 		int mapSize[2];//0:x,1:y
 		int chipSize;//チップのサイズ
 		ML::Box2D hitBase;//ピクセル単位のマップサイズを持つ
-		enum { chipKind = 16 };//マップチップの種類
+		enum { chipKind = 84 };//マップチップの種類
 		enum { X = 0, Y = 1 };//座標用
 		ML::Box2D chip[chipKind];
 		ML::Vec2 playerSpawnPos;

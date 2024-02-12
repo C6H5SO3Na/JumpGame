@@ -9,7 +9,7 @@
 //めり込まない移動処理
 void BChara::CheckMove(ML::Vec2& e_)
 {
-	Map2D::Object::SP map = ge->qa_Map;
+	shared_ptr<Map2D::Object> map = ge->qa_Map;
 	//マップが存在するか調べてからアクセス
 	if (map == nullptr) { return; }//マップがなければ判定しない(できない)
 

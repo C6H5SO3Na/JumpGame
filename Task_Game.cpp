@@ -51,7 +51,7 @@ namespace Game
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
-		map->LoadMap("./data/Map/test4.csv");
+		map->LoadMap("./data/Map/test5.csv");
 
 		//敵の生成
 		map->LoadEnemy("./data/enemy.csv");

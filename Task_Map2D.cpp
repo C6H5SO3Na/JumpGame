@@ -16,6 +16,7 @@ namespace Map2D
 	bool  Resource::Initialize()
 	{
 		img = DG::Image::Create("./data/image/Tile2.png");
+		imgBG = DG::Image::Create("./data/image/BG.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -47,8 +48,8 @@ namespace Map2D
 
 		//マップチップ情報の初期化
 		for (int c = 0; c < chipKind; ++c) {
-			int x = (c % 8);
-			int y = (c / 8);
+			int x = (c % 12);
+			int y = (c / 12);
 			chip[c] = ML::Box2D(x * chipSize, y * chipSize, chipSize, chipSize);
 		}
 		//★タスクの生成
@@ -76,6 +77,9 @@ namespace Map2D
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
+		ML::Box2D draw(0, 0, 1920, 1080);
+		ML::Box2D src(0, 0, 512, 256);
+		res->imgBG->Draw(draw, src);
 		for (int y = 0; y < mapSize[Y]; ++y) {
 			for (int x = 0; x < mapSize[X]; ++x) {
 				DrawMapChip(map[y][x], x, y);
@@ -90,7 +94,7 @@ namespace Map2D
 			return;//マップ番号が-1(空白)の場合は描画しない
 		}
 		ML::Box2D draw(x * chipSize, y * chipSize, chipSize, chipSize);
-		ML::Box2D src(map % 10 * chipSize, map / 10 * chipSize, chipSize, chipSize);
+		ML::Box2D src(map % 12 * chipSize, map / 12 * chipSize, chipSize, chipSize);
 		ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
 	}
@@ -118,7 +122,7 @@ namespace Map2D
 			}
 		}
 
-		//マップチップの縦横情報を入手
+		//プレイヤのスポーン地点を入手
 		{
 			string lineText;
 			getline(fin, lineText);
