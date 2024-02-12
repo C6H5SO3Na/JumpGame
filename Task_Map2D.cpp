@@ -4,8 +4,9 @@
 #include  "MyPG.h"
 #include  "Task_Map2D.h"
 #include  "Task_Enemy00.h"
+#include  "Task_GoalFlag.h"
 #include  "Task_Game.h"
-#include "assert.h"
+#include <assert.h>
 
 namespace Map2D
 {
@@ -14,7 +15,8 @@ namespace Map2D
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		img = DG::Image::Create("./data/image/Dark_lvl0.png");
+		img = DG::Image::Create("./data/image/Tile2.png");
+		imgBG = DG::Image::Create("./data/image/BG.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -46,8 +48,8 @@ namespace Map2D
 
 		//マップチップ情報の初期化
 		for (int c = 0; c < chipKind; ++c) {
-			int x = (c % 8);
-			int y = (c / 8);
+			int x = (c % 12);
+			int y = (c / 12);
 			chip[c] = ML::Box2D(x * chipSize, y * chipSize, chipSize, chipSize);
 		}
 		//★タスクの生成
@@ -75,8 +77,11 @@ namespace Map2D
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		for (int y = 0; y < mapSize[1]; ++y) {
-			for (int x = 0; x < mapSize[0]; ++x) {
+		ML::Box2D draw(0, 0, 1920, 1080);
+		ML::Box2D src(0, 0, 512, 256);
+		res->imgBG->Draw(draw, src);
+		for (int y = 0; y < mapSize[Y]; ++y) {
+			for (int x = 0; x < mapSize[X]; ++x) {
 				DrawMapChip(map[y][x], x, y);
 			}
 		}
@@ -89,7 +94,7 @@ namespace Map2D
 			return;//マップ番号が-1(空白)の場合は描画しない
 		}
 		ML::Box2D draw(x * chipSize, y * chipSize, chipSize, chipSize);
-		ML::Box2D src(map % 10 * chipSize, map / 10 * chipSize, chipSize, chipSize);
+		ML::Box2D src(map % 12 * chipSize, map / 12 * chipSize, chipSize, chipSize);
 		ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
 	}
@@ -117,12 +122,12 @@ namespace Map2D
 			}
 		}
 
-		//マップチップの縦横情報を入手
+		//プレイヤのスポーン地点を入手
 		{
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			float pos[2];//x:0,y:0
+			float pos[2] = {};//x:0,y:0
 			for (int i = 0; i < 2; ++i) {
 				string  tc;
 				getline(ss_lt, tc, ',');
@@ -131,18 +136,18 @@ namespace Map2D
 				ss << tc;
 				ss >> pos[i];
 			}
-			playerSpawnPos = ML::Vec2(static_cast<float>(pos[0] * chipSize + chipSize / 2),
-				static_cast<float>(pos[1] * chipSize));
+			playerSpawnPos = ML::Vec2(static_cast<float>(pos[X] * chipSize + chipSize / 2),
+				static_cast<float>(pos[Y] * chipSize + chipSize / 2));
 		}
 
 		//マップの当たり判定を定義
-		hitBase = ML::Box2D(0, 0, mapSize[0] * chipSize, mapSize[1] * chipSize);
+		hitBase = ML::Box2D(0, 0, mapSize[X] * chipSize, mapSize[Y] * chipSize);
 
-		for (int y = 0; y < mapSize[1]; ++y) {
+		for (int y = 0; y < mapSize[Y]; ++y) {
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			for (int x = 0; x < mapSize[0]; ++x) {
+			for (int x = 0; x < mapSize[X]; ++x) {
 				string  tc;
 				getline(ss_lt, tc, ',');
 
@@ -268,16 +273,18 @@ namespace Map2D
 			ge->camera2D.x = m.right - ge->camera2D.w;
 		}
 
-		//上にはスクロールしない
-		//if (c.bottom > m.bottom) {
-		ge->camera2D.y = m.bottom - ge->camera2D.h;
-		//}
 		if (c.left < m.left) {
 			ge->camera2D.x = m.left;
 		}
-		//if (c.top < m.top) {
-		//	ge->camera2D.y = m.top;
-		//}
+
+		if (ge->qa_Player != nullptr || c.bottom > m.bottom) {
+			ge->camera2D.y = m.bottom - ge->camera2D.h;
+		}
+
+		if (ge->qa_Player != nullptr || c.top < m.top) {
+			ge->camera2D.y = m.top;
+		}
+
 		//マップがカメラより小さい場合
 		if (hitBase.w < ge->camera2D.w) {
 			ge->camera2D.x = m.left;

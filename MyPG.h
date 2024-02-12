@@ -94,7 +94,7 @@ namespace  MyPG
 
 		bool isDead = false;//やられたか否か
 		bool isGameOver = false; //ゲームオーバーフラグ
-		bool GameClearFlag = false;//クリアフラグ
+		bool isClear = false;//クリアフラグ
 		bool unHitEnemy = false;//敵との当たり判定
 		int GameOverCnt = 0;
 		int MaxGameOver = 0;
@@ -109,9 +109,8 @@ namespace  MyPG
 
 		//bool TransparentFlag = false; //透明フラグ
 		//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
-		//現在、intとfloatに対応
-		int Clamp(int x, int low, int high);
-		float Clamp(float x, float low, float high);
+		template<typename T>
+		T Clamp(T x, T low, T high);
 
 		//カメラの座標を適用
 		void ApplyCamera2D(ML::Box2D& draw);

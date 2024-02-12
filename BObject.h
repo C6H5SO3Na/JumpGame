@@ -23,6 +23,10 @@ protected:
 		int max;
 	};
 	Life life;
+
+	ML::Vec2 pos;//プレイヤ座標
+	ML::Box2D hitBase;//当たり判定範囲
+
 public:
 	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	//キャラの状態
@@ -35,11 +39,9 @@ public:
 		Right = 1, Left = -1
 	};
 
-	ML::Vec2 pos;//プレイヤ座標
-	ML::Box2D hitBase;//当たり判定範囲
-
+	int	moveCnt;//行動処理用カウンタ
 	int	animCnt;//アニメーション処理用カウンタ
-
+	int score;//スコア
 	State state;
 
 	//メンバ変数に最低限の初期化を行う
@@ -50,16 +52,45 @@ public:
 		, animCnt()
 		, fallSpeed()
 		, isHitFloor()
-		, angle(Angle_LR::Right)
 		, state(State::Non)
-		, life()
+		, life{ 0, 0 }
 		, score()
 	{
 	}
 	virtual ~BObject() {}//デストラクタ
 
+	//足元接触判定
+	bool CheckFoot();
+	//頭上接触判定
+	bool CheckHead();
+	//左判定
+	bool CheckLeftSide();
+	//右判定
+	bool CheckRightSide();
+	//穴に落ちたかの判定
+	bool CheckFallHole();
 	//矩形の座標の中心を中央にして定義する
 	ML::Box2D CenterBox(int w, int h);
 	//Box2D型の各要素に一定の値を掛ける(拡大用)
 	ML::Box2D MultiplyBox2D(ML::Box2D box2D, float n);
+	//ライフの増減
+	void LifeOperation(int addLife);
+	//座標セット
+	void SetPos(ML::Vec2 p) { pos = p; }
+	//座標取得
+	ML::Vec2 GetPos() { return pos; }
+	//当たり判定取得
+	ML::Box2D GetHitBase() { return hitBase; }
+	//ライフをセット
+	void SetLife(int now, int max) { life = { now,max }; }
+	//現在のライフ取得
+	int GetNowLife()
+	{
+		return life.now;
+	}
+	//最大ライフ取得
+	int GetMaxLife()
+	{
+		return life.max;
+	}
 };

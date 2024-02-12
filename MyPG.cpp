@@ -9,19 +9,12 @@
 namespace MyPG
 {
 	//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
-	int MyGameEngine::Clamp(int x, int low, int high)
+	template<typename T>
+	inline T MyGameEngine::Clamp(T x, T low, T high)
 	{
 		assert(low <= high);
 		return min(max(x, low), high);
 	}
-
-	float MyGameEngine::Clamp(float x, float low, float high)
-	{
-		assert(low <= high);
-		return min(max(x, low), high);
-	}
-
-
 
 	void MyGameEngine::ApplyCamera2D(ML::Box2D& draw)
 	{
@@ -76,10 +69,10 @@ namespace MyPG
 					//描画サイズ
 					e->drawSizeX = e->drawSizeY = 50;
 					//出現位置
-					//e->pos.x = (float)(rand() % ge->screen2DWidth);
-					//e->pos.y = (float)(ge->screen2DHeight+ 30);
-					e->pos.x = GetRandom((float)0.f, (float)ge->screen2DWidth);
-					e->pos.y = (float)(0);
+					//e->pos.x = static_cast<float>(rand() % ge->screen2DWidth);
+					//e->pos.y = static_cast<float>(ge->screen2DHeight+ 30);
+					e->pos.x = GetRandom(0.f, static_cast<float>(ge->screen2DWidth));
+					e->pos.y = 0.f;
 
 					e->addAlpha = -0.005f;
 					e->countMax = GetRandom(50, 100);
@@ -115,8 +108,8 @@ namespace MyPG
 				//描画サイズ
 				e->drawSizeX = e->drawSizeY = 30;
 				//出現位置
-				e->pos.x = GetRandom((float)0.f, (float)ge->screen2DWidth);
-				e->pos.y = GetRandom((float)0.f, (float)ge->screen2DHeight);
+				e->pos.x = GetRandom(0.f, static_cast<float>(ge->screen2DWidth));
+				e->pos.y = GetRandom(0.f, static_cast<float>(ge->screen2DHeight));
 				//拡大率　デフォルトが1なので本来は設定不要
 				e->scale = 3.0f;
 
@@ -130,8 +123,8 @@ namespace MyPG
 				e->filename = "data/effect/myst.png";
 				e->resSizeX = e->resSizeY = 80;
 				e->drawSizeX = e->drawSizeY = 80;
-				e->pos.x = GetRandom((float)0.f, (float)ge->screen2DWidth);
-				e->pos.y = GetRandom((float)0.f, (float)ge->screen2DHeight);
+				e->pos.x = GetRandom(0.f, static_cast<float>(ge->screen2DWidth));
+				e->pos.y = GetRandom(0.f, static_cast<float>(ge->screen2DHeight));
 				e->addAlpha = -0.06f;
 			}
 			break;
@@ -140,8 +133,8 @@ namespace MyPG
 				e->filename = "data/effect/myst.png";
 				e->resSizeX = e->resSizeY = 80;
 				e->drawSizeX = e->drawSizeY = 80;
-				e->pos.x = GetRandom((float)0.f, (float)ge->screen2DWidth);
-				e->pos.y = GetRandom((float)0.f, (float)ge->screen2DHeight);
+				e->pos.x = GetRandom(0.f, static_cast<float>(ge->screen2DWidth));
+				e->pos.y = GetRandom(0.f, static_cast<float>(ge->screen2DHeight));
 				e->addAlpha = -0.06f;
 
 				e->moveVec.x = -2.0f;
@@ -153,8 +146,8 @@ namespace MyPG
 				e->filename = "data/effect/getready.png";
 				e->resSizeX = e->drawSizeX = 545;
 				e->resSizeY = e->drawSizeY = 105;
-				e->pos.x = (float)ge->screen2DWidth / 2;
-				e->pos.y = (float)ge->screen2DHeight / 2;
+				e->pos.x = static_cast<float>(ge->screen2DWidth / 2);
+				e->pos.y = static_cast<float>(ge->screen2DHeight / 2);
 
 				//1秒で消滅
 				e->countMax = 60;
@@ -165,8 +158,8 @@ namespace MyPG
 				e->filename = "data/effect/start.png";
 				e->resSizeX = e->drawSizeX = 247;
 				e->resSizeY = e->drawSizeY = 101;
-				e->pos.x = (float)ge->screen2DWidth / 2;
-				e->pos.y = (float)ge->screen2DHeight / 2;
+				e->pos.x = static_cast<float>(ge->screen2DWidth / 2);
+				e->pos.y = static_cast<float>(ge->screen2DHeight / 2);
 
 				//1秒で消滅
 				e->countMax = 60;
@@ -215,10 +208,10 @@ namespace MyPG
 			if (auto e = Effect00::Object::Create(true)) {
 				e->filename = "data/effect/black.png";
 				e->resSizeX = e->resSizeY = 256;
-				e->drawSizeX = (int)ge->screen2DWidth;
-				e->drawSizeY = (int)ge->screen2DHeight;
-				e->pos.x = (float)ge->screen2DWidth / 2;
-				e->pos.y = (float)ge->screen2DHeight / 2;
+				e->drawSizeX = ge->screen2DWidth + 1000;//動きながらに対応できるよう大きめに
+				e->drawSizeY = ge->screen2DHeight;
+				e->pos.x = static_cast<float>(ge->camera2D.x + ge->screen2DWidth / 2);
+				e->pos.y = static_cast<float>(ge->camera2D.y + ge->screen2DHeight / 2);
 				e->fade = true;
 				e->addAngle = 2.f;
 				e->angle = 0.f;
@@ -229,10 +222,10 @@ namespace MyPG
 			if (auto e = Effect00::Object::Create(true)) {
 				e->filename = "data/effect/white.png";
 				e->resSizeX = e->resSizeY = 256;
-				e->drawSizeX = (int)ge->screen2DWidth;
-				e->drawSizeY = (int)ge->screen2DHeight;
-				e->pos.x = (float)ge->screen2DWidth / 2;
-				e->pos.y = (float)ge->screen2DHeight / 2;
+				e->drawSizeX = ge->screen2DWidth + 1000;//動きながらに対応できるよう大きめに
+				e->drawSizeY = ge->screen2DHeight;
+				e->pos.x = static_cast<float>(ge->camera2D.x + ge->screen2DWidth / 2);
+				e->pos.y = static_cast<float>(ge->camera2D.y + ge->screen2DHeight / 2);
 				e->fade = true;
 				e->addAngle = 2.f;
 				e->angle = 0.f;
@@ -417,12 +410,14 @@ ge->debugRect(me, DEBUGRECTMODE::RED , -ge->camera2D.x, -ge->camera2D.y);
 			false,							//	フルスクリーンモード
 			480,							//	2D描画用解像度X(現在非対応）
 			270,							//	2D描画用解像度Y(現在非対応）
-			"自主制作3",	//	ウインドウタイトル
-			"GPG",							//	ウィンドウクラス名
+			"JumpGame",	//	ウインドウタイトル
+			"自主制作",							//	ウィンドウクラス名
 			1,//UpDate呼び出し頻度　↓のRender呼び出し頻度との比率で決まる１以上を指定すること
 			1 //Render呼び出し頻度　↑のUpDate呼び出し頻度との比率で決まる１以上を指定すること
 			//例えば、120Hz固定のPCで、60Hzと同等の状態で動かす場合、1U/2Rで設定すれば、UpDateの呼び出しが1/2になる
 		) {
+		c = nullptr;//警告を防止
+
 		//seting.txtによるリフレッシュレート調整の為追加
 		ifstream  fin("./data/Shader/seting.txt");
 		if (fin) {
@@ -486,7 +481,7 @@ ge->debugRect(me, DEBUGRECTMODE::RED , -ge->camera2D.x, -ge->camera2D.y);
 			D3DXVECTOR3(0.0f, 0.0f, 0.0f),	//	カメラ位置
 			D3DXVECTOR3(0.0f, 1.0f, 0.0f),		//	カメラの上方向ベクトル
 			ML::ToRadian(60.0f), 10.0f, 300.0f,	//	視野角・視野距離
-			(float)this->screenWidth / (float)this->screenHeight);		//	画面比率
+			static_cast<float>(this->screenWidth / this->screenHeight));		//	画面比率
 		this->dgi->EffectState().param.bgColor = ML::Color(1, 1, 1, 1);
 		this->camera[3] = this->camera[2] = this->camera[1] = this->camera[0];
 

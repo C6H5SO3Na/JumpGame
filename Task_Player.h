@@ -51,16 +51,22 @@ namespace Player
 			Idle, Walk, Jump, Fall, Hurt, Clear, Dead
 		};
 
+		struct Invincible {
+			bool doFlash;//点滅フラグ
+			bool flag;//無敵フラグ
+			int cnt;//無敵カウント
+		};
+
 		void Operation();
 		void Animation();
 		bool CheckHitEnemyHead();
+		bool CheckHitGoalFlag();
 		void ChangeAnim(Anim anim);
 		void DamageOperation();
-		bool isFlash;//点滅フラグ
-		bool isInvincible;//無敵フラグ
-		int invincibleCnt;//無敵カウント
+		bool GetInvincibleflag() { return invincible.flag; }
 	private:
 		Anim animKind;
 		float jumpPow;
+		Invincible invincible;
 	};
 }

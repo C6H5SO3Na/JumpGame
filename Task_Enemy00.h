@@ -23,12 +23,12 @@ namespace Enemy00
 		static   WP  instance;
 		static  Resource::SP  Create();
 		//共有する変数はここに追加する
-		DG::Image::SP img,img0;
+		DG::Image::SP img[2], img0;
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BEnemy
 	{
-	//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
 		virtual  ~Object();
 		typedef  shared_ptr<Object>		SP;
@@ -44,16 +44,20 @@ namespace Enemy00
 		void  UpDate()			override;//「実行」１フレーム毎に行う処理
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
-	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
+		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
+	public:
+		enum class Type {
+			Normal, Jumping
+		};
+		void Move();
+		void Animation();
+		void SetType(Type t) { type = t; }
 	private:
 		enum class Anim {
 			Move, Dead
 		};
-		//追加したい変数・メソッドはここに追加する
 		Anim animKind = Anim::Move;
-		//float jumpPow = 0.f;
-	public:
-		void Move();
-		void Anim();
+		float jumpPow = 0.f;
+		Type type = Type::Normal;
 	};
 }

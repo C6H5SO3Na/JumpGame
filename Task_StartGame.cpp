@@ -35,8 +35,7 @@ namespace StartGame
 		//リソースクラス生成orリソース共有
 		this->res = Resource::Create();
 
-		//デバッグ用の矩形
-		render2D_Priority[1] = 0.f;
+		render2D_Priority[1] = 1.0f;
 
 		//★タスクの生成
 
@@ -60,11 +59,29 @@ namespace StartGame
 	void  Object::UpDate()
 	{
 		auto inp = ge->in1->GetState();
-
-		//Aボタンが押されたら
-		if (inp.B1.down) {
-			--ge->remaining;
-			Kill();//次のタスクへ
+		switch (phase){
+		case 0:
+			++cnt;
+			//フェードインまで待つ
+			if (cnt >= 45) {
+				++phase;
+				cnt = 0;
+			}
+			break;
+		case 1:
+			//Aボタンが押されたら
+			if (inp.B1.down) {
+				ge->CreateEffect(99, ML::Vec2());
+				++phase;
+			}
+			break;
+		case 2:
+			++cnt;
+			//完全にフェードアウトしたら
+			if (cnt >= 45) {
+				Kill();//次のタスクへ
+			}
+			break;
 		}
 	}
 	//-------------------------------------------------------------------

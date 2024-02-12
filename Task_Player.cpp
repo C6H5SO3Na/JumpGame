@@ -1,11 +1,13 @@
 //-------------------------------------------------------------------
 //プレイヤ
 //-------------------------------------------------------------------
-//#define MYDEBUG
+//#define isDebugMode
 #include "MyPG.h"
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
 #include "Task_Map2D.h"
+#include "Task_Effect00.h"
+#include "Task_GoalFlag.h"
 #include <assert.h>
 #include "randomLib.h"
 
@@ -39,11 +41,10 @@ namespace Player
 		render2D_Priority[1] = 0.5f;
 		state = State::Normal;
 		angle = Angle_LR::Right;
-		hitBase = CenterBox(32 * 2, 64 * 2);
+		hitBase = CenterBox(28 * 2, 64 * 2);
 		moveVec = ML::Vec2(8.f, 8.f);
 		jumpPow = -17.f;
-		life.now = 3;
-		life.max = 5;
+		SetLife(5, 5);
 		//★タスクの生成
 
 		return  true;
@@ -66,7 +67,7 @@ namespace Player
 	void  Object::UpDate()
 	{
 		Operation();
-		if (state != State::Dead && !isInvincible && !CheckHitEnemyHead()) {//敵を踏んでいなければ
+		if (state != State::Dead && !invincible.flag && !CheckHitEnemyHead()) {//敵を踏んでいなければ
 			auto enemies = ge->GetTasks<Enemy00::Object>("敵");
 			for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 				(*it)->CheckHitPlayer();
@@ -83,7 +84,7 @@ namespace Player
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		if (isFlash && moveCnt % 2 == 0) { return; }
+		if (invincible.doFlash && moveCnt % 2 == 0) { return; }
 		Animation();
 		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
 		ge->ApplyCamera2D(draw);
@@ -103,6 +104,7 @@ namespace Player
 		if (state == State::Non) { return; }
 		ML::Vec2 est(0.f, 0.f);
 		auto inp = ge->in1->GetState();
+		static int effectNum = 1;
 		switch (state) {
 			//動いているとき
 		case State::Normal:
@@ -125,13 +127,18 @@ namespace Player
 					ChangeAnim(Anim::Walk);
 				}
 			}
-
-#if defined(isDebugMode)
-			//デバッグ用　自爆コマンド
-			if (inp.B3.down) {
-				state = State::Dead;
+//#if defined(isDebugMode)
+			//デバッグ用 エフェクトテスト
+			if (inp.LStick.BU.down) {
+				++effectNum;
 			}
-#endif
+			if (inp.LStick.BD.down) {
+				--effectNum;
+			}
+			if (inp.B3.down) {
+				ge->CreateEffect(effectNum, ML::Vec2(pos.x, pos.y + static_cast<float>(drawBase.h) / 2));
+			}
+//#endif
 
 			//ジャンプ
 			if (inp.B1.down) {
@@ -151,6 +158,11 @@ namespace Player
 				ChangeAnim(Anim::Idle);
 			}
 
+			if (CheckHitGoalFlag()) {
+				state = State::Clear;
+				ChangeAnim(Anim::Clear);
+				break;
+			}
 
 			CheckMove(est);
 
@@ -183,12 +195,16 @@ namespace Player
 
 			//死亡時にも重力を働かせる
 			est.y += fallSpeed;
-
 			CheckMove(est);
+
 			break;
 
-			//クリア時
+		//クリア時
 		case State::Clear:
+			ge->isClear = true;
+			//重力を働かせる
+			est.y += fallSpeed;
+			CheckMove(est);
 			break;
 		}
 
@@ -212,6 +228,7 @@ namespace Player
 			fallSpeed += ML::Gravity(32) * 6.f;//重力加速
 		}
 		//カメラの位置を再調整
+		//関数化できる?
 		{
 			//プレイヤを画面のどこに置くか（今回は画面中央）
 			int px = ge->camera2D.w / 2;
@@ -230,12 +247,12 @@ namespace Player
 		}
 		++moveCnt;
 
-		if (invincibleCnt > 0) {
-			--invincibleCnt;
+		if (invincible.cnt > 0) {
+			--invincible.cnt;
 		}
 		else {
-			isInvincible = false;
-			isFlash = false;
+			invincible.flag = false;
+			invincible.doFlash = false;
 		}
 	}
 	//-------------------------------------------------------------------
@@ -278,7 +295,7 @@ namespace Player
 			if (animCnt > frameInterval * 3) {
 				animKind = Anim::Idle;
 				state = State::Normal;
-				isFlash = true;
+				invincible.doFlash = true;
 			}
 			break;
 		}
@@ -291,6 +308,9 @@ namespace Player
 		}
 		case Anim::Clear:
 		{
+			int frameInterval = 8;//アニメーションの間隔フレーム
+			animCnt = min(animCnt, 5 * frameInterval - 1);
+			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 5, drawBase.w, drawBase.h);
 			break;
 		}
 		}
@@ -320,16 +340,16 @@ namespace Player
 		ge->ApplyCamera2D(me);
 		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
 #endif
-		auto enemies = ge->qa_Enemies;
+		shared_ptr<vector<BEnemy::SP>> enemies = ge->qa_Enemies;
 		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 			if ((*it)->state != State::Normal) { continue; }
 			//当たり判定を基にして頭上矩形を生成
 			ML::Box2D enemyHead(
-				(*it)->hitBase.x,
-				(*it)->hitBase.y - 1,
-				(*it)->hitBase.w,
+				(*it)->GetHitBase().x,
+				(*it)->GetHitBase().y - 1,
+				(*it)->GetHitBase().w,
 				10);
-			ML::Box2D  you = enemyHead.OffsetCopy((*it)->pos);
+			ML::Box2D  you = enemyHead.OffsetCopy((*it)->GetPos());
 			//デバッグ用矩形
 #if defined(isDebugMode)
 			ge->ApplyCamera2D(you);
@@ -347,16 +367,45 @@ namespace Player
 				ChangeAnim(Anim::Jump);
 				ge->CreateEffect(8, ML::Vec2(static_cast<float>(you.x), static_cast<float>(you.y)));
 				return true;
+			}
 		}
-	}
 		return false;
-}
+	}
+	//-------------------------------------------------------------------
+	//ゴール旗との当たり判定
+	bool Object::CheckHitGoalFlag()
+	{
+		if (state == State::Non) { return false; }
+		//プレイヤ
+		ML::Box2D  me = hitBase.OffsetCopy(pos);
+		//デバッグ用矩形
+#if defined(isDebugMode)
+		ge->ApplyCamera2D(me);
+		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
+#endif
+		GoalFlag::Object::SP goalFlag = ge->GetTask<GoalFlag::Object>("オブジェクト","ゴール旗");
+		if (goalFlag == nullptr) { return false; }
+		if (goalFlag->state == State::Non) { return false; }
+		//ゴール旗
+		ML::Box2D  you = goalFlag->GetHitBase().OffsetCopy(goalFlag->GetPos());
+		//デバッグ用矩形
+#if defined(isDebugMode)
+		ge->ApplyCamera2D(you);
+		ge->debugRect(you, ge->DEBUGRECTMODE::RED);
+#endif
+		if (you.Hit(me)) {
+			ge->score += goalFlag->score;
+			ge->CreateEffect(2, ML::Vec2(static_cast<float>(me.x), static_cast<float>(me.y)));
+			return true;
+		}
+		return false;
+	}
 	//-------------------------------------------------------------------
 	//アニメーションをチェンジ
 	void Object::ChangeAnim(Anim anim)
 	{
 		animKind = anim;
-		if (anim == Anim::Jump || anim == Anim::Dead) {
+		if (anim == Anim::Jump || anim == Anim::Dead || anim == Anim::Clear) {
 			animCnt = 0;//アニメーション用のカウントをリセット
 		}
 	}
@@ -368,8 +417,8 @@ namespace Player
 		ChangeAnim(Anim::Hurt);
 		moveCnt = 0;
 		animCnt = 0;
-		isInvincible = true;
-		invincibleCnt = 100;
+		invincible.flag = true;
+		invincible.cnt = 100;
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -408,9 +457,7 @@ namespace Player
 	Object::Object() :
 		animKind(Anim::Idle),
 		jumpPow(),
-		isInvincible(),
-		invincibleCnt(),
-		isFlash() {	}
+		invincible() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

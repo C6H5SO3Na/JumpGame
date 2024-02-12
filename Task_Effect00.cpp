@@ -147,7 +147,7 @@ namespace  Effect00
 				this->img = DG::Image::Create(filename);
 			}
 			else {
-				this->img = DG::Image::Create("./data/image/¯-01.png");
+				this->img = DG::Image::Create("./data/effect/myst.png");
 			}
 		}
 

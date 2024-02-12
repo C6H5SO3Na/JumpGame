@@ -47,6 +47,10 @@ namespace Game
 	public:
 		//追加したい変数・メソッドはここに追加する
 		void SpawnEnemy(ML::Vec2 pos, int kind);
-		int deadCnt; //やられてからの経過時間
+
+	private:
+		int cnt; //時間計測用のカウンタ
+		int afterDeadPhase;//やられてからの処理段階
+		int afterClearPhase;//クリアしてからの処理段階
 	};
 }
