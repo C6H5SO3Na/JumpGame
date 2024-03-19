@@ -154,8 +154,13 @@ namespace Map2D
 				stringstream ss;
 				ss << tc;
 				ss >> map[y][x];
+
+				if (map[y][x] == 100) {
+					shared_ptr<GoalFlag::Object> goalFlag = GoalFlag::Object::Create(true);
+					goalFlag->SetPos(ML::Vec2(x * 64.f, y * 64.f));
 				}
 			}
+		}
 
 		//ƒtƒ@ƒCƒ‹‚ð•Â‚¶‚é
 		fin.close();

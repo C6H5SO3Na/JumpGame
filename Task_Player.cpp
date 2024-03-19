@@ -67,7 +67,7 @@ namespace Player
 	void  Object::UpDate()
 	{
 		Operation();
-		if (state != State::Dead && !invincible.flag && !CheckHitEnemyHead()) {//“G‚ð“¥‚ñ‚Å‚¢‚È‚¯‚ê‚Î
+		if (state != State::Dead && !CheckHitEnemyHead()) {//“G‚ð“¥‚ñ‚Å‚¢‚È‚¯‚ê‚Î
 			auto enemies = ge->GetTasks<Enemy00::Object>("“G");
 			for (auto it = enemies->begin(); it != enemies->end(); ++it) {
 				(*it)->CheckHitPlayer();
