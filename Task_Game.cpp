@@ -5,6 +5,7 @@
 #include "Task_Game.h"
 #include "Task_StartGame.h"
 #include "Task_Result.h"
+#include "Task_Ending.h"
 
 #include "Task_Map2D.h"
 #include "Task_StageInfo.h"
@@ -51,7 +52,7 @@ namespace Game
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
-		map->LoadMap("./data/Map/test5.csv");
+		map->LoadMap("./data/Map/stage1"+to_string(ge->stage) + ".csv");
 
 		//敵の生成
 		map->LoadEnemy("./data/enemy.csv");
@@ -90,7 +91,11 @@ namespace Game
 					auto startGame = StartGame::Object::Create(true);
 				}
 			}
+			else if(ge->stage >= ge->maxStage){
+				auto ending = Ending::Object::Create(true);
+			}
 			else {
+				++ge->stage;
 				auto startGame = StartGame::Object::Create(true);
 			}
 		}

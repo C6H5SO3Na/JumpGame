@@ -103,7 +103,7 @@ namespace Map2D
 	bool Object::LoadMap(const string& fpath_)
 	{
 		ifstream fin(fpath_);
-		if (!fin) {
+		if (!fin.is_open()) {
 			assert(!"“Ç‚İ‚İ¸”s");
 			return false;
 		}
@@ -158,6 +158,7 @@ namespace Map2D
 				if (map[y][x] == 100) {
 					shared_ptr<GoalFlag::Object> goalFlag = GoalFlag::Object::Create(true);
 					goalFlag->SetPos(ML::Vec2(x * 64.f, y * 64.f));
+					map[y][x] = -1;//“–‚½‚è”»’è‚ğ–³Œø‚É‚·‚é
 				}
 			}
 		}
@@ -172,7 +173,7 @@ namespace Map2D
 	{
 		auto game = ge->GetTask<Game::Object>("–{•Ò“Š‡");
 		ifstream fin(fpath_);
-		if (!fin) {
+		if (!fin.is_open()) {
 			assert(!"“Ç‚İ‚İ¸”s");
 			return false;
 		}

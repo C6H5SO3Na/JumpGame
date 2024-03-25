@@ -100,6 +100,7 @@ namespace  MyPG
 		int MaxGameOver = 0;
 
 		int stage = 0;//ステージ
+		int maxStage = 3;//最大ステージ数
 		int remaining = 0;//残機数
 		int score = 0;//スコア
 
