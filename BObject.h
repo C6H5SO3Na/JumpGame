@@ -60,15 +60,15 @@ public:
 	virtual ~BObject() {}//デストラクタ
 
 	//足元接触判定
-	bool CheckFoot();
+	bool CheckFoot() const;
 	//頭上接触判定
-	bool CheckHead();
+	bool CheckHead() const;
 	//左判定
-	bool CheckLeftSide();
+	bool CheckLeftSide() const;
 	//右判定
-	bool CheckRightSide();
+	bool CheckRightSide() const;
 	//穴に落ちたかの判定
-	bool CheckFallHole();
+	bool CheckFallHole() const;
 	//矩形の座標の中心を中央にして定義する
 	ML::Box2D CenterBox(int w, int h);
 	//Box2D型の各要素に一定の値を掛ける(拡大用)
@@ -78,18 +78,18 @@ public:
 	//座標セット
 	void SetPos(ML::Vec2 p) { pos = p; }
 	//座標取得
-	ML::Vec2 GetPos() { return pos; }
+	ML::Vec2 GetPos() const { return pos; }
 	//当たり判定取得
-	ML::Box2D GetHitBase() { return hitBase; }
+	ML::Box2D GetHitBase() const { return hitBase; }
 	//ライフをセット
 	void SetLife(int now, int max) { life = { now,max }; }
 	//現在のライフ取得
-	int GetNowLife()
+	int GetNowLife() const
 	{
 		return life.now;
 	}
 	//最大ライフ取得
-	int GetMaxLife()
+	int GetMaxLife() const
 	{
 		return life.max;
 	}

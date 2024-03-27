@@ -373,7 +373,7 @@ namespace Player
 	}
 	//-------------------------------------------------------------------
 	//ƒS[ƒ‹Šø‚Æ‚Ì“–‚½‚è”»’è
-	bool Object::CheckHitGoalFlag()
+	bool Object::CheckHitGoalFlag() const
 	{
 		if (state == State::Non) { return false; }
 		//ƒvƒŒƒCƒ„

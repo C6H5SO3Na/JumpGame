@@ -65,6 +65,6 @@ namespace Map2D
 
 		int map[1000][1000];//ˆê‰ž1000*1000
 
-		ML::Vec2 GetPlayerSpawnpos() { return playerSpawnPos; }
+		ML::Vec2 GetPlayerSpawnpos()const { return playerSpawnPos; }
 	};
 }

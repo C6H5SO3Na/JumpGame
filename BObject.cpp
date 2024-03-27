@@ -7,7 +7,7 @@
 
 //-------------------------------------------------------------------
 //足元接触判定
-bool BObject::CheckFoot()
+bool BObject::CheckFoot() const
 {
 	//当たり判定を基にして足元矩形を生成
 	ML::Box2D foot(
@@ -25,7 +25,7 @@ bool BObject::CheckFoot()
 
 //-------------------------------------------------------------------
 //頭上の当たり判定
-bool BObject::CheckHead()
+bool BObject::CheckHead() const
 {
 	//当たり判定を基にして頭上矩形を生成
 	ML::Box2D head(
@@ -42,7 +42,7 @@ bool BObject::CheckHead()
 }
 //-------------------------------------------------------------------
 //左側の当たり判定
-bool  BObject::CheckLeftSide()
+bool  BObject::CheckLeftSide() const
 {
 	//当たり判定を基にして左1マスの矩形を生成
 	ML::Box2D leftSide(
@@ -59,7 +59,7 @@ bool  BObject::CheckLeftSide()
 }
 //-------------------------------------------------------------------
 //右側の当たり判定
-bool  BObject::CheckRightSide()
+bool  BObject::CheckRightSide() const
 {
 	//当たり判定を基にして右1マスの矩形を生成
 	ML::Box2D rightSide(
@@ -76,7 +76,7 @@ bool  BObject::CheckRightSide()
 }
 //-------------------------------------------------------------------
 //穴に落ちたかの判定
-bool BObject::CheckFallHole()
+bool BObject::CheckFallHole() const
 {
 	if (ge->qa_Map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	return pos.y > ge->screen2DHeight - hitBase.y;//キャラクタ上部の座標が画面下の座標を超えたときtrueを返す

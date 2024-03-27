@@ -60,10 +60,10 @@ namespace Player
 		void Operation();
 		void Animation();
 		bool CheckHitEnemyHead();
-		bool CheckHitGoalFlag();
+		bool CheckHitGoalFlag() const;
 		void ChangeAnim(Anim anim);
 		void DamageOperation();
-		bool GetInvincibleflag() { return invincible.flag; }
+		bool GetInvincibleflag() const { return invincible.flag; }
 	private:
 		Anim animKind;
 		float jumpPow;

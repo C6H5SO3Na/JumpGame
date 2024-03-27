@@ -32,6 +32,6 @@ public:
 
 	//敵共通メソッド
 	//カメラとの当たり判定
-	bool CheckHitCamera2D();
+	bool CheckHitCamera2D() const;
 	void CheckHitPlayer();
 };

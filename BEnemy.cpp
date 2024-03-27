@@ -7,7 +7,7 @@
 
 //-------------------------------------------------------------------
 //ƒJƒƒ‰‚Æ‚Ì“–‚½‚è”»’è
-bool BEnemy::CheckHitCamera2D()
+bool BEnemy::CheckHitCamera2D() const
 {
 	if (state == State::Non) { return false; }
 	//ƒvƒŒƒCƒ„‚Æ“–‚½‚è”»’è
