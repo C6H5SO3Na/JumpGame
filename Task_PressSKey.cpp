@@ -1,23 +1,24 @@
 //-------------------------------------------------------------------
-//ゲームオーバー、結果表示
+//Press S Key
 //-------------------------------------------------------------------
-#include "MyPG.h"
-#include "Task_Result.h"
-#include "Task_Title.h"
-
-namespace Result
+#include  "MyPG.h"
+#include  "Task_PressSKey.h"
+#include "sound.h"
+namespace PressSKey
 {
 	Resource::WP  Resource::instance;
 	//-------------------------------------------------------------------
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
+		img = DG::Image::Create("./data/image/PressSKey.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
 	//リソースの解放
 	bool  Resource::Finalize()
 	{
+		img.reset();
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -30,8 +31,16 @@ namespace Result
 		this->res = Resource::Create();
 
 		//★データ初期化
-		
-		//★タスクの生成
+		render2D_Priority[1] = 1.0f;
+		alpha = 1.0f;
+		amount = 0.01f;
+		scale = 0.75f;
+		hasPushedKey = false;
+		cnt = 0;
+		//ファイル読み込み
+		se::LoadFile("PushButton", "./data/sound/se/ok.wav");
+
+
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -43,7 +52,6 @@ namespace Result
 
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			auto title = Title::Object::Create(true);
 		}
 
 		return  true;
@@ -53,18 +61,35 @@ namespace Result
 	void  Object::UpDate()
 	{
 		auto inp = ge->in1->GetState();
-		if (inp.B1.down) {
-			Kill();
+
+		if (inp.ST.down)
+		{
+			if (!hasPushedKey) {
+				hasPushedKey = true;
+				se::Play("PushButton");
+				amount *= 10;
+			}
+		}
+		if (hasPushedKey) {
+			cnt++;
+		}
+		if (alpha >= 1.0f || alpha <= 0.0f) {
+			amount = -amount;
+		}
+		alpha += amount;
+
+		if (cnt == 60) {
+			this->Kill();
 		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ge->Dbg_ToDisplay(100, 100, "GameOver");
-		ge->Dbg_ToDisplay(100, 120, "Push B1");
+		ML::Box2D src(0, 0, 1228, 197);
+		ML::Box2D draw(ge->screen2DWidth / 4, ge->screen2DHeight / 2 + 100, src.w, src.h);
+		res->img->Draw(draw, src, ML::Color(alpha, 1.f, 1.f, 1.f));
 	}
-
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -77,7 +102,7 @@ namespace Result
 			ob->me = ob;
 			if (flagGameEnginePushBack_) {
 				ge->PushBack(ob);//ゲームエンジンに登録
-				
+
 			}
 			if (!ob->B_Initialize()) {
 				ob->Kill();//イニシャライズに失敗したらKill
@@ -99,7 +124,7 @@ namespace Result
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() {	}
+	Object::Object():alpha(),amount() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

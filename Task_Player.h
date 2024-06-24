@@ -51,22 +51,74 @@ namespace Player
 			Idle, Walk, Jump, Fall, Hurt, Clear, Dead
 		};
 
-		struct Invincible {
-			bool doFlash;//点滅フラグ
-			bool flag;//無敵フラグ
-			int cnt;//無敵カウント
+		class Invincible {
+			bool doFlash = false;// 点滅フラグ
+			bool flag = false;//無敵フラグ
+			int cnt = 0;//無敵カウント
+		public:
+			//無敵か否かを取得
+			bool isInvincible() const { return flag; }
+
+			//点滅開始
+			void startFlash() { doFlash = true; }
+
+			//点滅中かを取得
+			bool isFlash() const { return doFlash; }
+			//開始
+			void start()
+			{
+				flag = true;
+				cnt = 100;
+			}
+
+			//処理
+			void operation()
+			{
+				if (!isInvincible()) { return; }
+				if (cnt > 0) {
+					--cnt;
+				}
+				else {
+					flag = false;
+					doFlash = false;
+				}
+			}
+		};
+
+		class Life {
+			int now = 0;
+			int max = 0;
+		public:
+			//コンストラクタ
+			Life(const int& now_, const int& max_)
+			{
+				now = now_;
+				max = max_;
+			}
+			Life() {};
+			//ライフを加える
+			void addNow(const int& n) { now += n; }
+			//現在のライフ取得
+			int getNow() const { return now; }
+			//最大ライフ取得
+			int getMax() const { return max; }
 		};
 
 		void Operation();
 		void Animation();
 		bool CheckHitEnemyHead();
 		bool CheckHitGoalFlag() const;
-		void ChangeAnim(Anim anim);
+		void ChangeAnim(const Anim& anim);
 		void DamageOperation();
-		bool GetInvincibleflag() const { return invincible.flag; }
+		void Dead();
+		//ライフの増減
+		void LifeOperation(const int& addLife);
+
+		Invincible invincible;
+
+		Life life;
 	private:
 		Anim animKind;
 		float jumpPow;
-		Invincible invincible;
 	};
 }

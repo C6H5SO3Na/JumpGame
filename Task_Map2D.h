@@ -57,9 +57,9 @@ namespace Map2D
 
 	public:
 		bool LoadEnemy(const string& fpath_);
-		void DrawMapChip(int map, int x, int y);
+		void DrawMapChip(const int& map, const int& x, const int& y);
 		bool LoadMap(const string& fpath_);
-		bool CheckHit(ML::Box2D hit_);
+		bool CheckHit(const ML::Box2D& hit_);
 		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
 		//void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);
 

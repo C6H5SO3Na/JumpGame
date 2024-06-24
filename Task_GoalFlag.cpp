@@ -67,11 +67,9 @@ namespace GoalFlag
 	//u‚Q‚c•`‰æv‚PƒtƒŒ[ƒ€–ˆ‚És‚¤ˆ—
 	void  Object::Render2D_AF()
 	{
-		{
-			ML::Box2D draw = drawBase.OffsetCopy(pos);
-			ge->ApplyCamera2D(draw);
-			res->img->Draw(draw, src);
-		}
+		ML::Box2D draw = drawBase.OffsetCopy(pos);
+		draw = ge->ApplyCamera2D(draw);
+		res->img->Draw(draw, src);
 	}
 	//-------------------------------------------------------------------
 	//ˆ—

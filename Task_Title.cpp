@@ -5,7 +5,8 @@
 #include "Task_Title.h"
 #include "Task_StartGame.h"
 #include "Task_StageEditor.h"
-//#include "randomLib.h"
+#include "Task_PressSKey.h"
+#include "sound.h"
 #include "easing.h"
 
 namespace Title
@@ -15,7 +16,8 @@ namespace Title
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		font = DG::Font::Create("HG創英プレゼンスEB", 30, 60);
+		imgLogo = DG::Image::Create("./data/image/TitleLogo.png");
+		imgBG = DG::Image::Create("./data/image/Title.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -35,9 +37,15 @@ namespace Title
 
 		//★データ初期化
 		render2D_Priority[1] = 1.0f;
+		isFadeout = false;
 		//イージングセット
 		easing::Set("タイトル文字", easing::EXPOOUT, -100, 100, 60);
+		//BGM
+		bgm::LoadFile("Title", "./data/Sound/BGM/Title.mp3");
+		bgm::Play("Title");
 		//★タスクの生成
+		auto pressStartKey = PressSKey::Object::Create(true);
+
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -45,13 +53,16 @@ namespace Title
 	bool  Object::Finalize()
 	{
 		//★データ＆タスク解放
+		//BGM停止
+		bgm::Stop("Title");
+		ge->KillAll_G("UI");
+		//ゲーム開始時の準備
 		ge->stage = 1;
-		ge->remaining = 5;
+		ge->remaining = 3;
 		ge->score = 0;
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
 			auto game = StartGame::Object::Create(true);
-			//auto game = StageEditor::Object::Create(true);
 		}
 
 		return  true;
@@ -76,20 +87,20 @@ namespace Title
 			}
 			break;
 		case 2:
-			if (inp.B1.down) {
-				++phase;
-				ge->CreateEffect(99, ML::Vec2());
+			//PressStartKeyが消えたら画面推移
+			if (ge->GetTask<PressSKey::Object>(PressSKey::defGroupName, PressSKey::defName) == nullptr)
+			{
+				if (!isFadeout) {
+					ge->StartCounter("Fadeout", 45); //フェードは90フレームなので半分の45で切り替え
+					ge->CreateEffect(99, ML::Vec2());
+					isFadeout = true;
+				}
 			}
-			break;
-		case 3:
-			++mainCnt;
-			if (mainCnt > 45) {
-				++phase;
-			}
-			break;
 
-		case 4:
-			Kill();
+			if (ge->getCounterFlag("Fadeout") == ge->LIMIT) {
+				this->Kill();
+			}
+			break;
 		}
 		easing::UpDate();
 	}
@@ -97,11 +108,16 @@ namespace Title
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ge->Dbg_ToDisplay(100, 100, "Title");
-		ge->Dbg_ToDisplay(100, 120, "Push B1");
+		//
+		{
+			ML::Box2D draw(0, 0, ge->screen2DWidth, ge->screen2DHeight);
+			ML::Box2D src(0, 0, 1920, 1080);
+			res->imgBG->Draw(draw, src);
+		}
 
 		//テキストボックス
-		ML::Box2D textBox(ge->screen2DWidth / 2 - 200, 0, 1000, 1000);
+		ML::Box2D src(0, 0, 1228, 197);
+		ML::Box2D draw(ge->screen2DWidth / 4 - 100, 0, src.w, src.h);
 		string text;
 		//段階毎の処理
 		switch (phase)
@@ -109,9 +125,8 @@ namespace Title
 		case 2://fall through
 		case 1://fall through
 		case 0:
-			text = "鯛獲る";
-			textBox.y += static_cast<int>(easing::GetPos("タイトル文字"));
-			res->font->DrawF(textBox, text, DG::Font::x1);
+			draw.y += static_cast<int>(easing::GetPos("タイトル文字"));
+			res->imgLogo->Draw(draw, src);
 			break;
 		}
 	}
@@ -150,7 +165,7 @@ namespace Title
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() {	}
+	Object::Object():isFadeout() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

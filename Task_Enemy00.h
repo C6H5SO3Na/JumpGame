@@ -23,7 +23,7 @@ namespace Enemy00
 		static   WP  instance;
 		static  Resource::SP  Create();
 		//ã§óLÇ∑ÇÈïœêîÇÕÇ±Ç±Ç…í«â¡Ç∑ÇÈ
-		DG::Image::SP img[2], img0;
+		DG::Image::SP img[2];
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BEnemy
@@ -51,7 +51,9 @@ namespace Enemy00
 		};
 		void Move();
 		void Animation();
+		void Draw();
 		void SetType(Type t) { type = t; }
+
 	private:
 		enum class Anim {
 			Move, Dead

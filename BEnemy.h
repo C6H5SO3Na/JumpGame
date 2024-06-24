@@ -34,4 +34,5 @@ public:
 	//ƒJƒƒ‰‚Æ‚Ì“–‚½‚è”»’è
 	bool CheckHitCamera2D() const;
 	void CheckHitPlayer();
+	void Dead();
 };

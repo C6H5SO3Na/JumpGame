@@ -27,6 +27,8 @@ bool BObject::CheckFoot() const
 //頭上の当たり判定
 bool BObject::CheckHead() const
 {
+	Map2D::Object::SP map = ge->qa_Map;
+	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//当たり判定を基にして頭上矩形を生成
 	ML::Box2D head(
 		hitBase.x,
@@ -35,8 +37,6 @@ bool BObject::CheckHead() const
 		1);
 	head.Offset(pos);
 
-	Map2D::Object::SP map = ge->qa_Map;
-	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//マップと接触判定
 	return  map->CheckHit(head);
 }
@@ -44,6 +44,9 @@ bool BObject::CheckHead() const
 //左側の当たり判定
 bool  BObject::CheckLeftSide() const
 {
+
+	Map2D::Object::SP map = ge->qa_Map;
+	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//当たり判定を基にして左1マスの矩形を生成
 	ML::Box2D leftSide(
 		hitBase.x - 1,
@@ -52,8 +55,6 @@ bool  BObject::CheckLeftSide() const
 		hitBase.h);
 	leftSide.Offset(pos);
 
-	Map2D::Object::SP map = ge->qa_Map;
-	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//マップと接触判定
 	return  map->CheckHit(leftSide);
 }
@@ -61,6 +62,9 @@ bool  BObject::CheckLeftSide() const
 //右側の当たり判定
 bool  BObject::CheckRightSide() const
 {
+	Map2D::Object::SP map = ge->qa_Map;
+	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
+
 	//当たり判定を基にして右1マスの矩形を生成
 	ML::Box2D rightSide(
 		hitBase.w + hitBase.x,
@@ -69,8 +73,6 @@ bool  BObject::CheckRightSide() const
 		hitBase.h);
 	rightSide.Offset(pos);
 
-	Map2D::Object::SP map = ge->qa_Map;
-	if (map == nullptr) { return false; }//マップがなければ判定しない(できない)
 	//マップと接触判定
 	return  map->CheckHit(rightSide);
 }
@@ -83,25 +85,14 @@ bool BObject::CheckFallHole() const
 }
 //-------------------------------------------------------------------
 //矩形の座標の中心を中央にして定義する
-ML::Box2D BObject::CenterBox(int w, int h)
+ML::Box2D BObject::CenterBox(const int& w, const int& h)
 {
 	return ML::Box2D(-w / 2, -h / 2, w, h);
 }
 //-------------------------------------------------------------------
 //Box2D型の各要素に一定の値を掛ける(拡大用)
-ML::Box2D BObject::MultiplyBox2D(ML::Box2D box, float n)
+ML::Box2D BObject::MultiplyBox2D(const ML::Box2D& box, const float& n)
 {
 	return ML::Box2D(int(box.x * n), int(box.y * n),
 		int(box.w * n), int(box.h * n));
-}
-//-------------------------------------------------------------------
-//ライフの増減
-void BObject::LifeOperation(int addLife)
-{
-	life.now += addLife;
-	if (life.now <= 0) {
-		state = State::Dead;
-		moveCnt = 0;
-		animCnt = 0;
-	}
 }

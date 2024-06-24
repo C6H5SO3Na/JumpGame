@@ -1,34 +1,27 @@
 //-------------------------------------------------------------------
-//ゲーム本編
+//ゲームオーバー、結果表示
 //-------------------------------------------------------------------
-//#define DEBUG
 #include "MyPG.h"
-#include "Task_Game.h"
-#include "Task_StartGame.h"
 #include "Task_GameOver.h"
-#include "Task_Ending.h"
+#include "Task_Title.h"
+#include "Task_PressSKey.h"
+#include "Sound.h"
 
-#include "Task_Map2D.h"
-#include "Task_StageInfo.h"
-#include "Task_Player.h"
-#include "Task_Enemy00.h"
-#include "randomLib.h"
-#include "sound.h"
-#include <assert.h>
-
-namespace Game
+namespace GameOver
 {
 	Resource::WP  Resource::instance;
 	//-------------------------------------------------------------------
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
+		img = DG::Image::Create("./data/image/GameOver.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
 	//リソースの解放
 	bool  Resource::Finalize()
 	{
+		img.reset();
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -41,69 +34,26 @@ namespace Game
 		this->res = Resource::Create();
 
 		//★データ初期化
-		ge->isDead = false;
-		ge->isClear = false;
-		//デバッグ用の矩形
-#ifdef DEBUG
-		render2D_Priority[1] = 0.f;
-		ge->debugRectLoad();
-#endif
-		ge->stage = 3;
+		render2D_Priority[1] = 1.0f;
+		isFadeout = false;
 		//★タスクの生成
-		//マップの生成
-		auto map = Map2D::Object::Create(true);
-		map->LoadMap("./data/map/stage"+to_string(ge->stage) + ".csv");
+		auto pressStartKey = PressSKey::Object::Create(true);
 
-		//敵の生成
-		map->LoadEnemy("./data/enemy/enemyStage" + to_string(ge->stage) + ".csv");
-
-		//スポーン プレイヤ
-		auto player = Player::Object::Create(true);
-		player->SetPos(map->GetPlayerSpawnpos());
-
-		//ステージ情報表示
-		auto stageInfo = StageInfo::Object::Create(true);
-
-		//BGM
-		bgm::LoadFile("Main", "./data/Sound/BGM/Game.mp3");
-		bgm::LoadFile("StageClear", "./data/Sound/BGM/StageClear.mp3");
-		bgm::Play("Main");
-
+		//BGM(ジングル)
+		se::LoadFile("GameOver", "./data/Sound/BGM/GameOver.wav");
+		se::Play("GameOver");
 		return  true;
 	}
 	//-------------------------------------------------------------------
 	//「終了」タスク消滅時に１回だけ行う処理
 	bool  Object::Finalize()
 	{
-		bgm::Stop("Main");
 		//★データ＆タスク解放
-		ge->KillAll_G("プレイヤ");
-		ge->KillAll_G("フィールド");
-		ge->KillAll_G("敵");
-		ge->KillAll_G("オブジェクト");
-		ge->KillAll_G("ステージ情報");
-		ge->debugRectReset();
+
 
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			
-			if (ge->isDead) {
-				//ゲームオーバー画面に推移
-				if (ge->remaining <= 0) {
-					auto result = GameOver::Object::Create(true);
-				}
-				else {
-					--ge->remaining;
-					auto startGame = StartGame::Object::Create(true);
-				}
-			}
-			else if(ge->stage >= ge->maxStage){
-				auto ending = Ending::Object::Create(true);
-			}
-			else {
-				++ge->stage;
-				auto startGame = StartGame::Object::Create(true);
-			}
+			auto title = Title::Object::Create(true);
 		}
 
 		return  true;
@@ -112,61 +62,30 @@ namespace Game
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
-		//プレイヤの検出数を減らす
-		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
-		//敵の検出数を減らす
-		ge->qa_Enemies = ge->GetTasks<BEnemy>(Enemy00::defGroupName);
-		//マップの検出数を減らす
-		ge->qa_Map = ge->GetTask<Map2D::Object>(Map2D::defGroupName);
 		auto inp = ge->in1->GetState();
-
-		//クリアしたら or やられたら
-		if (ge->isClear || ge->isDead) {
-			switch (nextStagePhase) {
-			case 0:
-				if (ge->isClear){
-					bgm::Stop("Main");
-					bgm::Play("StageClear");
-				}
-				ge->StartCounter("ClearCount", 60 * 3);
-				++nextStagePhase;
-				break;
-			case 1:
-				if (ge->getCounterFlag("ClearCount") == ge->LIMIT) {
-					++nextStagePhase;
-				}
-				break;
-			case 2:
+		//PressStartKeyが消えたら画面推移
+		if (ge->GetTask<PressSKey::Object>(PressSKey::defGroupName, PressSKey::defName) == nullptr)
+		{
+			if (!isFadeout) {
+				ge->StartCounter("Fadeout2", 45); //フェードは90フレームなので半分の45で切り替え
 				ge->CreateEffect(99, ML::Vec2());
-				ge->StartCounter("FadeoutCount", 45);
-				++nextStagePhase;
-				break;
-			case 3:
-				if (ge->getCounterFlag("FadeoutCount") == ge->LIMIT) {
-					bgm::Stop("StageClear");
-					Kill();//次のタスクへ
-				}
-				break;
+				isFadeout = true;
 			}
+		}
+
+		if (ge->getCounterFlag("Fadeout2") == ge->LIMIT) {
+			Kill();
 		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		//デバッグ矩形表示
-#ifdef DEBUG
-		ge->debugRectDraw();
-#endif
+		ML::Box2D draw(0, 0, ge->screen2DWidth, ge->screen2DHeight);
+		ML::Box2D src(0, 0, 1920, 1080);
+		res->img->Draw(draw, src);
 	}
-	//-------------------------------------------------------------------
-	//敵のスポーン
-	void Object::SpawnEnemy(const ML::Vec2& pos, const int& kind)
-	{
-		auto enemy = Enemy00::Object::Create(true);
-		enemy->SetPos(pos);
-		enemy->SetType(static_cast<Enemy00::Object::Type>(kind));
-	}
+
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -179,7 +98,7 @@ namespace Game
 			ob->me = ob;
 			if (flagGameEnginePushBack_) {
 				ge->PushBack(ob);//ゲームエンジンに登録
-
+				
 			}
 			if (!ob->B_Initialize()) {
 				ob->Kill();//イニシャライズに失敗したらKill
@@ -201,7 +120,7 @@ namespace Game
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() :cnt(),nextStagePhase(), afterClearPhase() {	}
+	Object::Object():isFadeout() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

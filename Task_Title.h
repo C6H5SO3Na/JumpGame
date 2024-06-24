@@ -23,7 +23,8 @@ namespace Title
 		static   WP  instance;
 		static  Resource::SP  Create();
 		//共有する変数はここに追加する
-		shared_ptr<DG::Font> font;
+		DG::Image::SP imgLogo;
+		DG::Image::SP imgBG;
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BTask
@@ -49,5 +50,6 @@ namespace Title
 		//追加したい変数・メソッドはここに追加する
 		int mainCnt = 0;
 		int phase = 0;
+		bool isFadeout;
 	};
 }

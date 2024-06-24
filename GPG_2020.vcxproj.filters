@@ -35,12 +35,6 @@
     <Filter Include="MyPG\ソース ファイル\Task\StartGame">
       <UniqueIdentifier>{cf241c11-ca19-43ec-8e5c-bc9f0e908fed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MyPG\ソース ファイル\Task\Result">
-      <UniqueIdentifier>{91141150-1893-446e-b784-55cf5c3afa48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ソース ファイル\Task\StageEditor">
-      <UniqueIdentifier>{236ce858-3bb8-42a7-bdbc-508f171fa378}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MyPG\ヘッダー ファイル">
       <UniqueIdentifier>{e062b9f5-2489-4ae8-b9bf-07a29eec6029}</UniqueIdentifier>
     </Filter>
@@ -53,17 +47,23 @@
     <Filter Include="MyPG\ヘッダー ファイル\Task\Game">
       <UniqueIdentifier>{273c6e15-5712-482a-bf2f-ea5e2a1442ec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\Result">
-      <UniqueIdentifier>{fdc067cb-3a7e-4bc5-8e0f-84abae992613}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\StageEditor">
-      <UniqueIdentifier>{e71852fc-c42e-4be3-8665-bd41f7bb2e03}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MyPG\ヘッダー ファイル\Task\StartGame">
       <UniqueIdentifier>{1168619e-1ed4-4112-8120-7bc2db9ae478}</UniqueIdentifier>
     </Filter>
     <Filter Include="MyPG\ヘッダー ファイル\Task\Title">
       <UniqueIdentifier>{4371358d-e3ff-4cb5-b019-bf227b4258a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MyPG\ソース ファイル\Task\GameOver">
+      <UniqueIdentifier>{91141150-1893-446e-b784-55cf5c3afa48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MyPG\ヘッダー ファイル\Task\GameOver">
+      <UniqueIdentifier>{fdc067cb-3a7e-4bc5-8e0f-84abae992613}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MyPG\ヘッダー ファイル\Task\Common">
+      <UniqueIdentifier>{7b3cfdaf-8d9f-409c-9a9b-fc836b850c86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MyPG\ソース ファイル\Task\Common">
+      <UniqueIdentifier>{7ef7d959-2b0c-40de-8bc1-24b531e1c2dc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -127,9 +127,6 @@
     <ClCompile Include="sound.cpp">
       <Filter>Lib</Filter>
     </ClCompile>
-    <ClCompile Include="Task_Effect00.cpp">
-      <Filter>Lib</Filter>
-    </ClCompile>
     <ClCompile Include="Task_Title.cpp">
       <Filter>MyPG\ソース ファイル\Task\Title</Filter>
     </ClCompile>
@@ -151,14 +148,11 @@
     <ClCompile Include="Task_StartGame.cpp">
       <Filter>MyPG\ソース ファイル\Task\StartGame</Filter>
     </ClCompile>
-    <ClCompile Include="Task_Result.cpp">
-      <Filter>MyPG\ソース ファイル\Task\Result</Filter>
+    <ClCompile Include="Task_GameOver.cpp">
+      <Filter>MyPG\ソース ファイル\Task\GameOver</Filter>
     </ClCompile>
     <ClCompile Include="Task_StageInfo.cpp">
       <Filter>MyPG\ソース ファイル\Task\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Task_StageEditor.cpp">
-      <Filter>MyPG\ソース ファイル\Task\StageEditor</Filter>
     </ClCompile>
     <ClCompile Include="Task_GoalFlag.cpp">
       <Filter>MyPG\ソース ファイル\Task\Game</Filter>
@@ -176,6 +170,12 @@
       <Filter>MyPG\ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="WinMain.cpp">
+      <Filter>MyPG\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Task_PressSKey.cpp">
+      <Filter>MyPG\ソース ファイル\Task\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Task_Effect00.cpp">
       <Filter>MyPG\ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -237,9 +237,6 @@
     <ClInclude Include="sound.h">
       <Filter>Lib</Filter>
     </ClInclude>
-    <ClInclude Include="Task_Effect00.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
     <ClInclude Include="Task_Enemy00.h">
       <Filter>MyPG\ヘッダー ファイル\Task\Game</Filter>
     </ClInclude>
@@ -261,11 +258,8 @@
     <ClInclude Include="Task_Ending.h">
       <Filter>MyPG\ヘッダー ファイル\Task\Ending</Filter>
     </ClInclude>
-    <ClInclude Include="Task_StageEditor.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\StageEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="Task_Result.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Result</Filter>
+    <ClInclude Include="Task_GameOver.h">
+      <Filter>MyPG\ヘッダー ファイル\Task\GameOver</Filter>
     </ClInclude>
     <ClInclude Include="Task_Title.h">
       <Filter>MyPG\ヘッダー ファイル\Task\Title</Filter>
@@ -283,6 +277,12 @@
       <Filter>MyPG\ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MyPG.h">
+      <Filter>MyPG\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_PressSKey.h">
+      <Filter>MyPG\ヘッダー ファイル\Task\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_Effect00.h">
       <Filter>MyPG\ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

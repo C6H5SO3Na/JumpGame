@@ -16,15 +16,14 @@ namespace Enemy00
 	{
 		img[0] = DG::Image::Create("data/image/pipo-simpleenemy01b.png");
 		img[1] = DG::Image::Create("data/image/pipo-simpleenemy01c.png");
-		img0 = DG::Image::Create("./data/image/boxBlue.bmp");
 		return true;
 	}
 	//-------------------------------------------------------------------
 	//リソースの解放
 	bool  Resource::Finalize()
 	{
-		for (int i = 0; i < size(img); ++i) {
-			img[i].reset();
+		for (DG::Image::SP i : img) {
+			i.reset();
 		}
 		return true;
 	}
@@ -68,6 +67,8 @@ namespace Enemy00
 	void  Object::UpDate()
 	{
 		Move();
+
+		//死亡判定
 		if (state == State::Non) {
 			Kill();
 		}
@@ -77,19 +78,15 @@ namespace Enemy00
 	void  Object::Render2D_AF()
 	{
 		Animation();
-		{
-			ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
-			ge->ApplyCamera2D(draw);
-			res->img[static_cast<int>(type)]->Draw(draw, src);
-		}
+		Draw();
 	}
 	//-------------------------------------------------------------------
 	//敵の動き
 	void Object::Move()
 	{
 		if (!CheckHitCamera2D() || state == State::Non) { return; }//消滅したかカメラの範囲外のとき、動作しない
-		ML::Vec2 est(0.f, 0.f);
-		auto inp = ge->in1->GetState();
+
+		ML::Vec2 est;
 		//左右移動
 		est.x = moveVec.x * angle;
 		//ジャンプ
@@ -100,13 +97,6 @@ namespace Enemy00
 			}
 		}
 		est.y += fallSpeed;
-
-		////完全に止まっているときは止まっているときのアニメーション
-		////ジャンプ中はジャンプのアニメーションをする
-		//if (est == ML::Vec2() && animKind != Anim::Jump) {
-		//	animKind = Anim::Idle;
-		//}
-
 		CheckMove(est);
 
 		if (CheckLeftSide()) {
@@ -119,10 +109,6 @@ namespace Enemy00
 		//足元接触判定
 		isHitFloor = CheckFoot();
 		if (isHitFloor) {
-			////ジャンプアニメーションの場合解除
-			//if (animKind == Anim::Jump) {
-			//	animKind = Anim::Idle;
-			//}
 			fallSpeed = 0.f;//落下速度0
 		}
 		else {
@@ -138,7 +124,7 @@ namespace Enemy00
 
 		//穴に落ちたら消滅させる
 		if (CheckFallHole()) {
-			state = State::Non;
+			Dead();
 		}
 		++moveCnt;
 		++animCnt;
@@ -148,19 +134,26 @@ namespace Enemy00
 	void Object::Animation()
 	{
 		int animAngleTmp = 32;//drawにおけるh座標 左の場合32
-		if (angle == Angle_LR::Right) {//右だったら64にする
+		if (angle == Angle_LR::Right) {
 			animAngleTmp = 64;
 		}
 
+		int frameInterval = 0;//アニメーションの間隔フレーム
 		switch (animKind) {
 		case Anim::Move:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			drawBase = CenterBox(32, 32);
 			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w, animAngleTmp, drawBase.w, drawBase.h);
 			break;
 		}
-		}
+	}
+	//-------------------------------------------------------------------
+	//スプライト描画
+	void Object::Draw()
+	{
+		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
+		draw = ge->ApplyCamera2D(draw);
+		res->img[static_cast<int>(type)]->Draw(draw, src);
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド

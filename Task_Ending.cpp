@@ -4,6 +4,8 @@
 #include "MyPG.h"
 #include "Task_Ending.h"
 #include "Task_Title.h"
+#include "Task_PressSKey.h"
+#include "Sound.h"
 
 namespace Ending
 {
@@ -12,12 +14,14 @@ namespace Ending
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
+		img = DG::Image::Create("./data/image/Ending.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
 	//リソースの解放
 	bool  Resource::Finalize()
 	{
+		img.reset();
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -30,8 +34,15 @@ namespace Ending
 		this->res = Resource::Create();
 
 		//★データ初期化
-		
+		render2D_Priority[1] = 1.0f;
+		isFadeout = false;
+
+		//BGM
+		bgm::LoadFile("GameClear", "./data/Sound/BGM/Ending.mp3");
+		bgm::Play("GameClear");
 		//★タスクの生成
+		auto pressStartKey = PressSKey::Object::Create(true);
+
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -39,7 +50,7 @@ namespace Ending
 	bool  Object::Finalize()
 	{
 		//★データ＆タスク解放
-
+		bgm::Stop("GameClear");
 
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
@@ -53,7 +64,17 @@ namespace Ending
 	void  Object::UpDate()
 	{
 		auto inp = ge->in1->GetState();
-		if (inp.B1.down) {
+		//PressStartKeyが消えたら画面推移
+		if (ge->GetTask<PressSKey::Object>(PressSKey::defGroupName, PressSKey::defName) == nullptr)
+		{
+			if (!isFadeout) {
+				ge->StartCounter("Fadeout", 45); //フェードは90フレームなので半分の45で切り替え
+				ge->CreateEffect(99, ML::Vec2());
+				isFadeout = true;
+			}
+		}
+
+		if (ge->getCounterFlag("Fadeout") == ge->LIMIT) {
 			Kill();
 		}
 	}
@@ -61,8 +82,9 @@ namespace Ending
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ge->Dbg_ToDisplay(100, 100, "End");
-		ge->Dbg_ToDisplay(100, 120, "Push B1");
+		ML::Box2D draw(0, 0, ge->screen2DWidth, ge->screen2DHeight);
+		ML::Box2D src(0, 0, 1920, 1080);
+		res->img->Draw(draw, src);
 	}
 
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★

@@ -1,7 +1,7 @@
 //-------------------------------------------------------------------
 //プレイヤ
 //-------------------------------------------------------------------
-//#define isDebugMode
+//#define DEBUG
 #include "MyPG.h"
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
@@ -9,6 +9,7 @@
 #include "Task_Effect00.h"
 #include "Task_GoalFlag.h"
 #include <assert.h>
+#include "sound.h"
 #include "randomLib.h"
 
 namespace Player
@@ -44,9 +45,13 @@ namespace Player
 		hitBase = CenterBox(28 * 2, 64 * 2);
 		moveVec = ML::Vec2(8.f, 8.f);
 		jumpPow = -17.f;
-		SetLife(5, 5);
-		//★タスクの生成
 
+		//SE
+		se::LoadFile("Jump", "./data/sound/SE/Jump.wav");
+		se::LoadFile("Damage", "./data/sound/SE/Damage.wav");
+		se::LoadFile("Explosion", "./data/sound/SE/Explosion.wav");
+		se::LoadFile("Dead", "./data/sound/SE/Dead.wav");
+		//★タスクの生成
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -75,24 +80,23 @@ namespace Player
 		}
 
 		//穴に落ちたら消滅させる
-		if (CheckFallHole()) {
-			ge->isDead = true;
-			state = State::Non;
+		if (CheckFallHole() && state != State::Dead) {
+			Dead();
 		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		if (invincible.doFlash && moveCnt % 2 == 0) { return; }
+		if (invincible.isFlash() && moveCnt % 2 == 0) { return; }
 		Animation();
 		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
-		ge->ApplyCamera2D(draw);
+		draw = ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
 		//デバッグ用矩形
-#if defined(isDebugMode)
+#if defined(DEBUG)
 		ML::Box2D  me = hitBase.OffsetCopy(pos);
-		ge->ApplyCamera2D(me);
+		me = ge->ApplyCamera2D(me);
 		ge->debugRect(me);
 #endif
 	}
@@ -114,7 +118,7 @@ namespace Player
 				angle = Angle_LR::Left;
 
 				//ジャンプ中でないとき歩くアニメーション
-				if (fallSpeed == 0.f) {
+				if (fallSpeed == 0.f && animKind != Anim::Walk) {
 					ChangeAnim(Anim::Walk);
 				}
 			}
@@ -123,28 +127,17 @@ namespace Player
 				angle = Angle_LR::Right;
 
 				//ジャンプ中でないとき歩くアニメーション
-				if (fallSpeed == 0.f) {
+				if (fallSpeed == 0.f && animKind != Anim::Walk) {
 					ChangeAnim(Anim::Walk);
 				}
 			}
-//#if defined(isDebugMode)
-			//デバッグ用 エフェクトテスト
-			if (inp.LStick.BU.down) {
-				++effectNum;
-			}
-			if (inp.LStick.BD.down) {
-				--effectNum;
-			}
-			if (inp.B3.down) {
-				ge->CreateEffect(effectNum, ML::Vec2(pos.x, pos.y + static_cast<float>(drawBase.h) / 2));
-			}
-//#endif
 
 			//ジャンプ
 			if (inp.B1.down) {
 				if (isHitFloor) {//着地中のみジャンプ開始できる
 					ChangeAnim(Anim::Jump);
 					fallSpeed = jumpPow;
+					se::Play("Jump");
 				}
 			}
 			if (inp.B1.up && fallSpeed < 0) {//ジャンプボタンが離れた瞬間かつ上昇中の場合
@@ -176,15 +169,18 @@ namespace Player
 			//被弾時
 		case State::Hit:
 			//被弾時には上にいかないようにする
-			fallSpeed = max(0.f, fallSpeed);
+			//fallSpeed = max(0.f, fallSpeed);
 
 			//被弾時にも重力を働かせる
 			est.y += fallSpeed;
 			CheckMove(est);
+			if (!invincible.isInvincible()) {
+				state = State::Normal;
+			}
 			break;
+
 			//死亡時
 		case State::Dead:
-			ge->isDead = true;
 			//死亡アニメーションでないときは死亡アニメーションにする
 			if (animKind != Anim::Dead) {
 				ChangeAnim(Anim::Dead);
@@ -199,7 +195,7 @@ namespace Player
 
 			break;
 
-		//クリア時
+			//クリア時
 		case State::Clear:
 			ge->isClear = true;
 			//重力を働かせる
@@ -246,73 +242,54 @@ namespace Player
 			}
 		}
 		++moveCnt;
-
-		if (invincible.cnt > 0) {
-			--invincible.cnt;
-		}
-		else {
-			invincible.flag = false;
-			invincible.doFlash = false;
-		}
+		++animCnt;
+		invincible.operation();
 	}
 	//-------------------------------------------------------------------
 	//アニメーション
 	void Object::Animation()
 	{
 		drawBase = CenterBox(100, 64);//すべてのアニメーションにおいて縦横比は同じ
+		int frameInterval = 0;//アニメーションの間隔フレーム
 		switch (animKind) {
 		case Anim::Idle:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			src = ML::Box2D((animCnt / frameInterval) % 4 * drawBase.w, 0, drawBase.w, drawBase.h);
 			break;
-		}
 		case Anim::Walk:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			src = ML::Box2D((animCnt / frameInterval) % 7 * drawBase.w, drawBase.h, drawBase.w, drawBase.h);
 			break;
-		}
 		case Anim::Jump:
-		{
-			int frameInterval = 11;//アニメーションの間隔フレーム
+			frameInterval = 11;
 			src = ML::Box2D((animCnt / frameInterval) % 6 * drawBase.w, drawBase.h * 2, drawBase.w, drawBase.h);
 			if (animCnt / frameInterval / 6 >= 1) {
 				ChangeAnim(Anim::Fall);
 			}
 			break;
-		}
 		case Anim::Fall:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w + drawBase.w * 4, 0, drawBase.w, drawBase.h);
 			break;
-		}
 		case Anim::Hurt:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			src = ML::Box2D((animCnt / frameInterval) % 4 * drawBase.w, drawBase.h * 3, drawBase.w, drawBase.h);
 			if (animCnt > frameInterval * 3) {
 				animKind = Anim::Idle;
 				state = State::Normal;
-				invincible.doFlash = true;
+				invincible.startFlash();
 			}
 			break;
-		}
 		case Anim::Dead:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			animCnt = min(animCnt, 5 * frameInterval - 1);
 			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
 			break;
-		}
 		case Anim::Clear:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			animCnt = min(animCnt, 5 * frameInterval - 1);
 			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 5, drawBase.w, drawBase.h);
 			break;
-		}
 		}
 		//左向き反転
 		if (angle == Angle_LR::Left &&
@@ -320,7 +297,6 @@ namespace Player
 			drawBase.x = -drawBase.x;
 			drawBase.w = -drawBase.w;
 		}
-		++animCnt;
 	}
 	//-------------------------------------------------------------------
 	//敵の頭との当たり判定
@@ -336,13 +312,13 @@ namespace Player
 		//敵の頭上と当たり判定
 		ML::Box2D  me = playerFoot.OffsetCopy(pos);
 		//デバッグ用矩形
-#if defined(isDebugMode)
-		ge->ApplyCamera2D(me);
-		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
+#if defined(DEBUG)
+		ML::Box2D debugMe = ge->ApplyCamera2D(me);
+		ge->debugRect(debugMe, ge->DEBUGRECTMODE::GREEN);
 #endif
 		shared_ptr<vector<BEnemy::SP>> enemies = ge->qa_Enemies;
 		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
-			if ((*it)->state != State::Normal) { continue; }
+			if ((*it)->GetState() != State::Normal) { continue; }
 			//当たり判定を基にして頭上矩形を生成
 			ML::Box2D enemyHead(
 				(*it)->GetHitBase().x,
@@ -351,23 +327,22 @@ namespace Player
 				10);
 			ML::Box2D  you = enemyHead.OffsetCopy((*it)->GetPos());
 			//デバッグ用矩形
-#if defined(isDebugMode)
-			ge->ApplyCamera2D(you);
-			ge->debugRect(you, ge->DEBUGRECTMODE::RED);
+#if defined(DEBUG)
+			ML::Box2D debugYou = ge->ApplyCamera2D(you);
+			ge->debugRect(debugYou, ge->DEBUGRECTMODE::RED);
 #endif
 			if (you.Hit(me)) {
-				if (fallSpeed <= 0.f) {//プレイヤが落下中でなければ無効
-					return false;
-				}
-				(*it)->state = State::Non;
-				(*it)->moveCnt = 0;
-				(*it)->animCnt = 0;
-				ge->score += (*it)->score;
+				if (fallSpeed <= 0.f) { continue; }//プレイヤが落下中でなければ無効
+				(*it)->Dead();
+				ge->score += (*it)->GetScore();
+				se::Play("Explosion");
+				ge->CreateEffect(8, ML::Vec2(static_cast<float>(you.x), static_cast<float>(you.y)));//爆発エフェクト
+
 				fallSpeed = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
 				ChangeAnim(Anim::Jump);
-				ge->CreateEffect(8, ML::Vec2(static_cast<float>(you.x), static_cast<float>(you.y)));
 				return true;
 			}
+
 		}
 		return false;
 	}
@@ -378,36 +353,29 @@ namespace Player
 		if (state == State::Non) { return false; }
 		//プレイヤ
 		ML::Box2D  me = hitBase.OffsetCopy(pos);
-		//デバッグ用矩形
-#if defined(isDebugMode)
-		ge->ApplyCamera2D(me);
-		ge->debugRect(me, ge->DEBUGRECTMODE::GREEN);
-#endif
-		GoalFlag::Object::SP goalFlag = ge->GetTask<GoalFlag::Object>("オブジェクト","ゴール旗");
+
+		GoalFlag::Object::SP goalFlag = ge->GetTask<GoalFlag::Object>("オブジェクト", "ゴール旗");
 		if (goalFlag == nullptr) { return false; }
-		if (goalFlag->state == State::Non) { return false; }
+		if (goalFlag->GetState() == State::Non) { return false; }
 		//ゴール旗
 		ML::Box2D  you = goalFlag->GetHitBase().OffsetCopy(goalFlag->GetPos());
+
 		//デバッグ用矩形
-#if defined(isDebugMode)
-		ge->ApplyCamera2D(you);
-		ge->debugRect(you, ge->DEBUGRECTMODE::RED);
+#if defined(DEBUG)
+		ML::Box2D debugYou = ge->ApplyCamera2D(you);
+		ge->debugRect(debugYou, ge->DEBUGRECTMODE::RED);
 #endif
 		if (you.Hit(me)) {
-			ge->score += goalFlag->score;
-			ge->CreateEffect(2, ML::Vec2(static_cast<float>(me.x), static_cast<float>(me.y)));
 			return true;
 		}
 		return false;
 	}
 	//-------------------------------------------------------------------
 	//アニメーションをチェンジ
-	void Object::ChangeAnim(Anim anim)
+	void Object::ChangeAnim(const Anim& anim)
 	{
 		animKind = anim;
-		if (anim == Anim::Jump || anim == Anim::Dead || anim == Anim::Clear) {
-			animCnt = 0;//アニメーション用のカウントをリセット
-		}
+		animCnt = 0;
 	}
 	//-------------------------------------------------------------------
 	//ダメージを受けた時の処理
@@ -417,8 +385,28 @@ namespace Player
 		ChangeAnim(Anim::Hurt);
 		moveCnt = 0;
 		animCnt = 0;
-		invincible.flag = true;
-		invincible.cnt = 100;
+		invincible.start();
+		se::Play("Damage");
+	}
+	//-------------------------------------------------------------------
+	//ライフの増減
+	void Object::LifeOperation(const int& addLife)
+	{
+		life.addNow(addLife);
+		if (life.getNow() <= 0) {
+			Dead();
+		}
+	}
+	//-------------------------------------------------------------------
+	//死亡処理
+	void Object::Dead()
+	{
+		state = State::Dead;
+		ge->isDead = true;
+		moveCnt = 0;
+		animCnt = 0;
+		bgm::Stop("Main");
+		se::Play("Dead");
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -457,7 +445,8 @@ namespace Player
 	Object::Object() :
 		animKind(Anim::Idle),
 		jumpPow(),
-		invincible() {	}
+		invincible(),
+		life(5, 5) {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

@@ -10,15 +10,16 @@ namespace MyPG
 {
 	//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
 	template<typename T>
-	inline T MyGameEngine::Clamp(T x, T low, T high)
+	inline T MyGameEngine::Clamp(const T& x, const T& low, const T& high)
 	{
 		assert(low <= high);
 		return min(max(x, low), high);
 	}
 
-	void MyGameEngine::ApplyCamera2D(ML::Box2D& draw)
+	//座標をカメラの座標に変換
+	ML::Box2D MyGameEngine::ApplyCamera2D(const ML::Box2D& draw)
 	{
-		draw.Offset(-camera2D.x, -camera2D.y);
+		return draw.OffsetCopy(-camera2D.x, -camera2D.y);
 	}
 
 	void MyGameEngine::InitCounter() {

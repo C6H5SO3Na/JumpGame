@@ -16,7 +16,7 @@ namespace Map2D
 	bool  Resource::Initialize()
 	{
 		img = DG::Image::Create("./data/image/Tile2.png");
-		imgBG = DG::Image::Create("./data/image/BG.png");
+		imgBG = DG::Image::Create("./data/image/GameBG.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -77,9 +77,13 @@ namespace Map2D
 	//u‚Q‚c•`‰æv‚PƒtƒŒ[ƒ€–ˆ‚És‚¤ˆ—
 	void  Object::Render2D_AF()
 	{
-		ML::Box2D draw(0, 0, 1920, 1080);
-		ML::Box2D src(0, 0, 512, 256);
-		res->imgBG->Draw(draw, src);
+		for (int i = 0; i < 10; ++i) {
+			ML::Box2D src(0, 0, 1920, 1080);
+			ML::Box2D draw(i * src.w, 0, src.w, src.h);
+			draw = ge->ApplyCamera2D(draw);
+			res->imgBG->Draw(draw, src);
+		}
+
 		for (int y = 0; y < mapSize[Y]; ++y) {
 			for (int x = 0; x < mapSize[X]; ++x) {
 				DrawMapChip(map[y][x], x, y);
@@ -88,14 +92,14 @@ namespace Map2D
 	}
 	//-------------------------------------------------------------------
 	//ƒ}ƒbƒvƒ`ƒbƒv•`‰æ
-	void Object::DrawMapChip(int map, int x, int y)
+	void Object::DrawMapChip(const int& map, const int& x, const int& y)
 	{
 		if (map == -1) {
 			return;//ƒ}ƒbƒv”Ô†‚ª-1(‹ó”’)‚Ìê‡‚Í•`‰æ‚µ‚È‚¢
 		}
 		ML::Box2D draw(x * chipSize, y * chipSize, chipSize, chipSize);
 		ML::Box2D src(map % 12 * chipSize, map / 12 * chipSize, chipSize, chipSize);
-		ge->ApplyCamera2D(draw);
+		draw = ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
 	}
 	//-------------------------------------------------------------------
@@ -178,15 +182,26 @@ namespace Map2D
 			return false;
 		}
 
-		for (int i = 0; i < 5; ++i) {
+		int n;//“G‚Ì”
+		{
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-
 			string  tc;
+			getline(ss_lt, tc, ',');
 
+			stringstream ss;
+			ss << tc;
+			ss >> n;
+		}
+
+		for (int i = 0; i < n; ++i) {
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
 			ML::Vec2 pos;
 			int enemyKind;
+			string  tc;
 			{
 				stringstream ss;
 				getline(ss_lt, tc, ',');
@@ -207,7 +222,6 @@ namespace Map2D
 				ss << tc;
 				ss >> enemyKind;
 			}
-
 			game->SpawnEnemy(pos, enemyKind);
 		}
 
@@ -217,7 +231,7 @@ namespace Map2D
 	}
 	//-------------------------------------------------------------------
 	//“–‚½‚è”»’è
-	bool Object::CheckHit(ML::Box2D hit_)
+	bool Object::CheckHit(const ML::Box2D& hit_)
 	{
 		ML::Rect r = { hit_.x,
 						hit_.y,

@@ -33,13 +33,21 @@ void BEnemy::CheckHitPlayer()
 	ML::Box2D  me = hitBase.OffsetCopy(pos);
 	Player::Object::SP player = ge->qa_Player;
 
-	if (player->state != State::Normal || player->GetInvincibleflag()) { return; }
+	if (player->GetState() != State::Normal || player->invincible.isInvincible()) { return; }
 
 	ML::Box2D  you = player->GetHitBase().OffsetCopy(player->GetPos());
 	if (you.Hit(me)) {
 		player->LifeOperation(-1);
-		if (player->state != State::Dead) {//死んでいないときはダメージを受ける演出を入れる
+		if (player->GetState() != State::Dead) {//死んでいないときはダメージを受ける演出を入れる
 			player->DamageOperation();
 		}
 	}
+}
+//-------------------------------------------------------------------
+//死亡処理
+void BEnemy::Dead()
+{
+	state = State::Non;
+	moveCnt = 0;
+	animCnt = 0;
 }

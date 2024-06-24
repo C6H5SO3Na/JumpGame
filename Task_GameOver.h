@@ -1,14 +1,14 @@
 #pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
-//エンディング
+//ゲームオーバー、結果表示
 //-------------------------------------------------------------------
 #include "GameEngine_Ver3_83.h"
 
-namespace Ending
+namespace GameOver
 {
 	//タスクに割り当てるグループ名と固有名
-	const  string  defGroupName("エンディング");	//グループ名
+	const  string  defGroupName("ゲームオーバー");	//グループ名
 	const  string  defName("NoName");	//タスク名
 	//-------------------------------------------------------------------
 	class  Resource : public BResource

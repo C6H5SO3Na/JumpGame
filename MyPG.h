@@ -99,9 +99,9 @@ namespace  MyPG
 		int GameOverCnt = 0;
 		int MaxGameOver = 0;
 
-		int stage = 0;//ステージ
+		int stage = 1;//ステージ
 		int maxStage = 3;//最大ステージ数
-		int remaining = 0;//残機数
+		int remaining = 3;//残機数
 		int score = 0;//スコア
 
 		//bool Jump2Check = false;	//ジャンプ2判定
@@ -111,10 +111,10 @@ namespace  MyPG
 		//bool TransparentFlag = false; //透明フラグ
 		//変数の上限値、下限値をチェックし、それらを超えない範囲で返す
 		template<typename T>
-		T Clamp(T x, T low, T high);
+		T Clamp(const T& x, const T& low, const T& high);
 
 		//カメラの座標を適用
-		void ApplyCamera2D(ML::Box2D& draw);
+		ML::Box2D ApplyCamera2D(const ML::Box2D& draw);
 
 		//----------------------------------------------
 		FPSCounter* c;
