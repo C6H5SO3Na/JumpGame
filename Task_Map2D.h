@@ -55,16 +55,23 @@ namespace Map2D
 		ML::Box2D chip[chipKind];
 		ML::Vec2 playerSpawnPos;
 
-	public:
-		bool LoadEnemy(const string& fpath_);
-		void DrawMapChip(const int& map, const int& x, const int& y);
-		bool LoadMap(const string& fpath_);
-		bool CheckHit(const ML::Box2D& hit_);
-		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
+		void DrawMapChip(const int& map, const int& x, const int& y);//マップチップで描画
+
+		//配列からロード
+		template<typename T>
+		void ImportArray(ifstream& fin, T* const arr, const int& n);
+		template<typename T>
+		void ImportArray(ifstream& fin, T* const arr, const int& xSize, const int& ySize);
+
 		//void ImportArrayFromCSV(ifstream fin, float arr[], int xLoopTime, int yLoopTime);
 
-		int map[1000][1000];//一応1000*1000
+		int map[1000][1000] = {};//一応1000*1000
 
+	public:
+		bool LoadMap(const string& fpath_);
+		bool LoadEnemy(const string& fpath_);//敵情報の読み込み
+		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
+		bool CheckHit(const ML::Box2D& hit_);
 		ML::Vec2 GetPlayerSpawnpos()const { return playerSpawnPos; }
 	};
 }

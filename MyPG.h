@@ -7,7 +7,6 @@
 //-----------------------------------------------------------------------------------------------
 
 #include "fpscounter.h"
-#include "BEnemy.h"
 #include "task_Map2D.h"
 #include "task_Player.h"
 #include "task_Effect00.h"
@@ -78,7 +77,7 @@ namespace  MyPG
 
 		//ゲームエンジンに追加したいものは下に加える
 		//敵の検出処理を節約
-		shared_ptr<vector<BEnemy::SP>> qa_Enemies;
+		shared_ptr<vector<BChara::SP>> qa_Enemies;
 		//マップの検出処理を節約
 		Map2D::Object::SP qa_Map;
 		//プレイヤの検出処理を節約

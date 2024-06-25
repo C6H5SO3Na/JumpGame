@@ -1,4 +1,4 @@
-//#pragma warning(disable:4996)
+#pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
 //プレイヤ
@@ -34,7 +34,8 @@ namespace Player
 		typedef  shared_ptr<Object>		SP;
 		typedef  weak_ptr<Object>		WP;
 		//生成窓口 引数はtrueでタスクシステムへ自動登録
-		static  Object::SP  Create(bool flagGameEnginePushBack_);
+		static  Object::SP  Create(bool flagGameEnginePushBack_);	
+		static void  Spawn(const ML::Vec2& pos);//タスク生成&パラメーター指定
 		Resource::SP	res;
 	private:
 		Object();
@@ -47,9 +48,9 @@ namespace Player
 		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	public:
 		//追加したい変数・メソッドはここに追加する
-		enum class Anim {
-			Idle, Walk, Jump, Fall, Hurt, Clear, Dead
-		};
+		//enum class Anim {
+		//	Idle, Walk, Jump, Fall, Hurt, Clear, Dead
+		//};
 
 		class Invincible {
 			bool doFlash = false;// 点滅フラグ
@@ -95,7 +96,9 @@ namespace Player
 				now = now_;
 				max = max_;
 			}
-			Life() {};
+			//デフォルトコンストラクタ禁止
+			Life() = delete;
+
 			//ライフを加える
 			void addNow(const int& n) { now += n; }
 			//現在のライフ取得
@@ -104,21 +107,119 @@ namespace Player
 			int getMax() const { return max; }
 		};
 
+		Life life;
+
+	private:
+		//Normal, Hit
+		//Idle, Walk, Jump, Fall, Hurt, Clear, Dead
+
+		//ポリモーフィズム
+		//状態の抽象インターフェース
+		class StateBase {
+		public:
+			virtual ~StateBase() {}
+			virtual void think() = 0;
+			virtual void move() = 0;
+			virtual void anim() = 0;
+		private:
+			ML::Box2D animTable_;
+		};
+
+		//ニュートラル
+		class IdleState :public StateBase {
+		public:
+			IdleState(Object* ptr) :owner_(ptr) {}
+			void think() override;
+			void move() override;
+			void anim() override;
+		private:
+			Object* owner_;
+		};
+
+		//歩行
+		class WalkState :public StateBase {
+		public:
+			WalkState(Object* ptr) :owner_(ptr) {}
+			void think() override;
+			void move() override;
+			void anim() override;
+		private:
+			Object* owner_;
+		};
+
+		//ジャンプ
+		class JumpState :public StateBase {
+		public:
+			JumpState(Object* ptr) :owner_(ptr) {}
+			void think() override;
+			void move() override;
+			void anim() override;
+		private:
+			Object* owner_;
+		};
+
+		//落下
+		class FallState :public StateBase {
+		public:
+			FallState(Object* ptr) :owner_(ptr) {}
+			void think() override;
+			void move() override;
+			void anim() override;
+		private:
+			Object* owner_;
+		};
+
+		//被弾
+		class HurtState :public StateBase {
+		public:
+			HurtState(Object* ptr) :owner_(ptr) {}
+			void think() override;
+			void move() override;
+			void anim() override;
+		private:
+			Object* owner_;
+		};
+
+		//被弾
+		class ClearState :public StateBase {
+		public:
+			ClearState(Object* ptr) :owner_(ptr) {}
+			void think() override;
+			void move() override;
+			void anim() override;
+		private:
+			Object* owner_;
+		};
+
+		//被弾
+		class DeadState :public StateBase {
+		public:
+			DeadState(Object* ptr) :owner_(ptr) {}
+			void think() override;
+			void move() override;
+			void anim() override;
+		private:
+			Object* owner_;
+		};
+
+		StateBase* state;
+
+		//Anim animKind;
+		float jumpPow;
+		void Think();
+		void Move();
 		void Operation();
 		void Animation();
 		bool CheckHitEnemyHead();
-		bool CheckHitGoalFlag() const;
-		void ChangeAnim(const Anim& anim);
+		void ChangeState(StateBase* const state);
 		void DamageOperation();
-		void Dead();
+		void Recieved(const int& power) override;
+		void Dead() override;
 		//ライフの増減
 		void LifeOperation(const int& addLife);
 
 		Invincible invincible;
 
-		Life life;
-	private:
-		Anim animKind;
-		float jumpPow;
+		XI::VGamePad input;
 	};
 }

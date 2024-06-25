@@ -40,11 +40,11 @@ namespace Player
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
-		state = State::Normal;
 		angle = Angle_LR::Right;
 		hitBase = CenterBox(28 * 2, 64 * 2);
-		moveVec = ML::Vec2(8.f, 8.f);
+		maxSpeed = 8.f;
 		jumpPow = -17.f;
+		attackPower = 1;
 
 		//SE
 		se::LoadFile("Jump", "./data/sound/SE/Jump.wav");
@@ -71,16 +71,11 @@ namespace Player
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
+		input = ge->in1->GetState();
 		Operation();
-		if (state != State::Dead && !CheckHitEnemyHead()) {//敵を踏んでいなければ
-			auto enemies = ge->GetTasks<Enemy00::Object>("敵");
-			for (auto it = enemies->begin(); it != enemies->end(); ++it) {
-				(*it)->CheckHitPlayer();
-			}
-		}
 
 		//穴に落ちたら消滅させる
-		if (CheckFallHole() && state != State::Dead) {
+		if (CheckFallHole()) {
 			Dead();
 		}
 	}
@@ -105,124 +100,10 @@ namespace Player
 	//プレイヤの操作処理
 	void Object::Operation()
 	{
-		if (state == State::Non) { return; }
-		ML::Vec2 est(0.f, 0.f);
-		auto inp = ge->in1->GetState();
-		static int effectNum = 1;
-		switch (state) {
-			//動いているとき
-		case State::Normal:
-			//左右移動
-			if (inp.LStick.BL.on) {
-				est.x -= moveVec.x;
-				angle = Angle_LR::Left;
+		Think();
+		Move();
 
-				//ジャンプ中でないとき歩くアニメーション
-				if (fallSpeed == 0.f && animKind != Anim::Walk) {
-					ChangeAnim(Anim::Walk);
-				}
-			}
-			if (inp.LStick.BR.on) {
-				est.x += moveVec.x;
-				angle = Angle_LR::Right;
 
-				//ジャンプ中でないとき歩くアニメーション
-				if (fallSpeed == 0.f && animKind != Anim::Walk) {
-					ChangeAnim(Anim::Walk);
-				}
-			}
-
-			//ジャンプ
-			if (inp.B1.down) {
-				if (isHitFloor) {//着地中のみジャンプ開始できる
-					ChangeAnim(Anim::Jump);
-					fallSpeed = jumpPow;
-					se::Play("Jump");
-				}
-			}
-			if (inp.B1.up && fallSpeed < 0) {//ジャンプボタンが離れた瞬間かつ上昇中の場合
-				fallSpeed = 0.f;//落下速度0(小ジャンプ)
-			}
-			est.y += fallSpeed;
-
-			//完全に止まっているときは止まっているときのアニメーション
-			//ジャンプ中、被弾中、歩行中はそれぞれのアニメーションをする
-			if (est == ML::Vec2() && animKind != Anim::Jump && animKind != Anim::Hurt) {
-				ChangeAnim(Anim::Idle);
-			}
-
-			if (CheckHitGoalFlag()) {
-				state = State::Clear;
-				ChangeAnim(Anim::Clear);
-				break;
-			}
-
-			CheckMove(est);
-
-			//ジャンプでない落下中は落下のアニメーションをする
-			if (!isHitFloor && animKind != Anim::Jump) {
-				ChangeAnim(Anim::Fall);
-			}
-
-			break;
-
-			//被弾時
-		case State::Hit:
-			//被弾時には上にいかないようにする
-			//fallSpeed = max(0.f, fallSpeed);
-
-			//被弾時にも重力を働かせる
-			est.y += fallSpeed;
-			CheckMove(est);
-			if (!invincible.isInvincible()) {
-				state = State::Normal;
-			}
-			break;
-
-			//死亡時
-		case State::Dead:
-			//死亡アニメーションでないときは死亡アニメーションにする
-			if (animKind != Anim::Dead) {
-				ChangeAnim(Anim::Dead);
-			}
-
-			//死亡時には上にいかないようにする
-			fallSpeed = max(0.f, fallSpeed);
-
-			//死亡時にも重力を働かせる
-			est.y += fallSpeed;
-			CheckMove(est);
-
-			break;
-
-			//クリア時
-		case State::Clear:
-			ge->isClear = true;
-			//重力を働かせる
-			est.y += fallSpeed;
-			CheckMove(est);
-			break;
-		}
-
-		//頭上判定
-		if (fallSpeed < 0.f) {//上昇中
-			if (CheckHead()) {
-				fallSpeed = 0.f;//上昇力を無効にする
-			}
-		}
-
-		//足元接触判定
-		isHitFloor = CheckFoot();
-		if (isHitFloor) {
-			//ジャンプアニメーションの場合解除
-			if (animKind == Anim::Jump) {
-				ChangeAnim(Anim::Idle);
-			}
-			fallSpeed = 0.f;//落下速度0
-		}
-		else {
-			fallSpeed += ML::Gravity(32) * 6.f;//重力加速
-		}
 		//カメラの位置を再調整
 		//関数化できる?
 		{
@@ -246,51 +127,337 @@ namespace Player
 		invincible.operation();
 	}
 	//-------------------------------------------------------------------
+	//思考
+	void Object::Think()
+	{
+		state->think();
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::Move()
+	{
+		if (moveVec.y < 0 || !CheckFoot()) {
+			moveVec.y += ML::Gravity(32) * 6.f;//重力加速
+		}
+		else {
+			moveVec.y = 0;
+		}
+
+		if (moveVec.x < 0) {
+			moveVec.x = min(moveVec.x + 1.f, 0);
+		}
+		else {
+			moveVec.x = max(moveVec.x - 1.f, 0);
+		}
+		state->move();
+
+		//移動処理
+		ML::Vec2 est = moveVec;
+		CheckMove(est);
+	}
+
+	//-------------------------------------------------------------------
+	//思考
+	void Object::IdleState::think()
+	{
+		//足元接触判定
+		owner_->isHitFloor = owner_->CheckFoot();
+		//ジャンプ
+		if (owner_->input.B1.down) {
+			if (owner_->isHitFloor) {//着地中のみジャンプ開始できる
+				owner_->ChangeState(new JumpState(owner_));
+				return;
+			}
+		}
+		//左右移動
+		if (owner_->input.LStick.BL.on ||
+			owner_->input.LStick.BR.on) {
+			owner_->ChangeState(new WalkState(owner_));
+			return;
+		}
+
+		//ゴール旗の判定
+		if (owner_->CheckHit(ge->GetTask<GoalFlag::Object>("オブジェクト", "ゴール旗"))) {
+			owner_->ChangeState(new ClearState(owner_));
+			return;
+		}
+
+		//足場がなかったら落下状態へ
+		if (!owner_->isHitFloor) {
+			owner_->ChangeState(new FallState(owner_));
+			return;
+		}
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::IdleState::move()
+	{
+	}
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::IdleState::anim()
+	{
+		owner_->drawBase = owner_->CenterBox(100, 64);
+		int frameInterval = 8;
+		owner_->src = ML::Box2D(
+			(owner_->animCnt / frameInterval) % 4 * owner_->drawBase.w,
+			0,
+			owner_->drawBase.w,
+			owner_->drawBase.h
+		);
+	}
+	//-------------------------------------------------------------------
+	//思考
+	void Object::WalkState::think()
+	{
+		//足元接触判定
+		owner_->isHitFloor = owner_->CheckFoot();
+
+		//左右入力がないときはIdleステートへ
+		if (owner_->input.LStick.BL.off &&
+			owner_->input.LStick.BR.off) {
+			owner_->ChangeState(new IdleState(owner_));
+			return;
+		}
+
+		//ジャンプ
+		if (owner_->input.B1.down) {
+			if (owner_->isHitFloor) {//着地中のみジャンプ開始できる
+				owner_->ChangeState(new JumpState(owner_));
+				return;
+			}
+		}
+
+		//ゴール旗の判定
+		if (owner_->CheckHit(ge->GetTask<GoalFlag::Object>("オブジェクト", "ゴール旗"))) {
+			owner_->ChangeState(new ClearState(owner_));
+			return;
+		}
+
+		//落下状態へ
+		if (!owner_->isHitFloor) {
+			owner_->ChangeState(new FallState(owner_));
+			return;
+		}
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::WalkState::move()
+	{
+		//左右移動
+		if (owner_->input.LStick.BL.on) {
+			owner_->moveVec.x = -owner_->maxSpeed;
+			owner_->angle = Angle_LR::Left;
+		}
+
+		if (owner_->input.LStick.BR.on) {
+			owner_->moveVec.x = +owner_->maxSpeed;
+			owner_->angle = Angle_LR::Right;
+		}
+	}
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::WalkState::anim()
+	{
+		owner_->drawBase = owner_->CenterBox(100, 64);
+		int frameInterval = 8;
+		owner_->src = ML::Box2D(
+			(owner_->animCnt / frameInterval) % 7 * owner_->drawBase.w,
+			owner_->drawBase.h,
+			owner_->drawBase.w,
+			owner_->drawBase.h
+		);
+	}
+	//-------------------------------------------------------------------
+	//思考
+	void Object::JumpState::think()
+	{
+		if (owner_->CheckHit(ge->GetTask<GoalFlag::Object>("オブジェクト", "ゴール旗"))) {
+			owner_->ChangeState(new ClearState(owner_));
+			return;
+		}
+
+		//足元接触判定
+		owner_->isHitFloor = owner_->CheckFoot();
+		if (owner_->moveCnt > 0 && owner_->isHitFloor) {
+			owner_->ChangeState(new IdleState(owner_));
+			return;
+		}
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::JumpState::move()
+	{
+		//初速設定&SE
+		if (owner_->moveCnt == 0) {
+			owner_->moveVec.y = owner_->jumpPow;
+			se::Play("Jump");
+		}
+		//左右移動
+		if (owner_->input.LStick.BL.on) {
+			owner_->moveVec.x = -owner_->maxSpeed;
+			owner_->angle = Angle_LR::Left;
+		}
+
+		if (owner_->input.LStick.BR.on) {
+			owner_->moveVec.x = +owner_->maxSpeed;
+			owner_->angle = Angle_LR::Right;
+		}
+
+		//ジャンプ解除
+		if (owner_->input.B1.up && owner_->moveVec.y < 0) {//ジャンプボタンが離れた瞬間かつ上昇中の場合
+			owner_->moveVec.y = 0.f;//落下速度0(小ジャンプ)
+		}
+
+		//頭上接触判定
+		if (owner_->CheckHead()) {
+			owner_->moveVec.y = 0.f;//ジャンプ解除
+		}
+	}
+
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::JumpState::anim()
+	{
+		owner_->drawBase = owner_->CenterBox(100, 64);
+		int frameInterval = 11;
+		owner_->src = ML::Box2D(
+			(owner_->animCnt / frameInterval) % 6 * owner_->drawBase.w,
+			owner_->drawBase.h * 2,
+			owner_->drawBase.w,
+			owner_->drawBase.h
+		);
+	}
+	//-------------------------------------------------------------------
+	//思考
+	void Object::FallState::think()
+	{
+		//ゴール判定
+		if (owner_->CheckHit(ge->GetTask<GoalFlag::Object>("オブジェクト", "ゴール旗"))) {
+			owner_->ChangeState(new ClearState(owner_));
+			return;
+		}
+
+		//足元接触判定
+		owner_->isHitFloor = owner_->CheckFoot();
+		if (owner_->isHitFloor) {
+			owner_->ChangeState(new IdleState(owner_));
+			return;
+		}
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::FallState::move()
+	{
+		//左右移動
+		if (owner_->input.LStick.BL.on) {
+			owner_->moveVec.x = -owner_->maxSpeed;
+			owner_->angle = Angle_LR::Left;
+		}
+
+		if (owner_->input.LStick.BR.on) {
+			owner_->moveVec.x = +owner_->maxSpeed;
+			owner_->angle = Angle_LR::Right;
+		}
+	}
+
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::FallState::anim()
+	{
+		owner_->drawBase = owner_->CenterBox(100, 64);
+		int frameInterval = 8;
+		owner_->src = ML::Box2D(
+			(owner_->animCnt / frameInterval) % 3 * owner_->drawBase.w + owner_->drawBase.w * 4,
+			0,
+			owner_->drawBase.w,
+			owner_->drawBase.h
+		);
+	}
+	//-------------------------------------------------------------------
+	//思考
+	void Object::HurtState::think()
+	{
+		if (owner_->animCnt > 24) {
+			owner_->invincible.startFlash();
+			owner_->ChangeState(new IdleState(owner_));
+		}
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::HurtState::move()
+	{
+	}
+
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::HurtState::anim()
+	{
+		owner_->drawBase = owner_->CenterBox(100, 64);
+		int frameInterval = 8;
+		owner_->src = ML::Box2D((owner_->animCnt / frameInterval) % 4 * owner_->drawBase.w,
+			owner_->drawBase.h * 3,
+			owner_->drawBase.w,
+			owner_->drawBase.h
+		);
+	}
+	//-------------------------------------------------------------------
+	//思考
+	void Object::ClearState::think()
+	{
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::ClearState::move()
+	{
+		ge->isClear = true;
+	}
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::ClearState::anim()
+	{
+		owner_->drawBase = owner_->CenterBox(100, 64);
+		int frameInterval = 8;
+		owner_->animCnt = min(owner_->animCnt, 5 * frameInterval - 1);
+		owner_->src = ML::Box2D(
+			(owner_->animCnt / frameInterval) % 5 * owner_->drawBase.w,
+			owner_->drawBase.h * 5,
+			owner_->drawBase.w,
+			owner_->drawBase.h
+		);
+	}
+	//-------------------------------------------------------------------
+	//思考
+	void Object::DeadState::think()
+	{
+	}
+	//-------------------------------------------------------------------
+	//行動
+	void Object::DeadState::move()
+	{
+		//死亡時には上にいかないようにする
+		owner_->moveVec.y = max(0.f, owner_->moveVec.y);
+	}
+
+	//-------------------------------------------------------------------
+	//アニメーション
+	void Object::DeadState::anim()
+	{
+		owner_->drawBase = owner_->CenterBox(100, 64);
+		int frameInterval = 8;
+		owner_->animCnt = min(owner_->animCnt, 5 * frameInterval - 1);
+		owner_->src = ML::Box2D(
+			(owner_->animCnt / frameInterval) % 5 * owner_->drawBase.w,
+			owner_->drawBase.h * 4,
+			owner_->drawBase.w,
+			owner_->drawBase.h
+		);
+	}
+	//-------------------------------------------------------------------
 	//アニメーション
 	void Object::Animation()
 	{
-		drawBase = CenterBox(100, 64);//すべてのアニメーションにおいて縦横比は同じ
-		int frameInterval = 0;//アニメーションの間隔フレーム
-		switch (animKind) {
-		case Anim::Idle:
-			frameInterval = 8;
-			src = ML::Box2D((animCnt / frameInterval) % 4 * drawBase.w, 0, drawBase.w, drawBase.h);
-			break;
-		case Anim::Walk:
-			frameInterval = 8;
-			src = ML::Box2D((animCnt / frameInterval) % 7 * drawBase.w, drawBase.h, drawBase.w, drawBase.h);
-			break;
-		case Anim::Jump:
-			frameInterval = 11;
-			src = ML::Box2D((animCnt / frameInterval) % 6 * drawBase.w, drawBase.h * 2, drawBase.w, drawBase.h);
-			if (animCnt / frameInterval / 6 >= 1) {
-				ChangeAnim(Anim::Fall);
-			}
-			break;
-		case Anim::Fall:
-			frameInterval = 8;
-			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w + drawBase.w * 4, 0, drawBase.w, drawBase.h);
-			break;
-		case Anim::Hurt:
-			frameInterval = 8;
-			src = ML::Box2D((animCnt / frameInterval) % 4 * drawBase.w, drawBase.h * 3, drawBase.w, drawBase.h);
-			if (animCnt > frameInterval * 3) {
-				animKind = Anim::Idle;
-				state = State::Normal;
-				invincible.startFlash();
-			}
-			break;
-		case Anim::Dead:
-			frameInterval = 8;
-			animCnt = min(animCnt, 5 * frameInterval - 1);
-			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 4, drawBase.w, drawBase.h);
-			break;
-		case Anim::Clear:
-			frameInterval = 8;
-			animCnt = min(animCnt, 5 * frameInterval - 1);
-			src = ML::Box2D((animCnt / frameInterval) % 5 * drawBase.w, drawBase.h * 5, drawBase.w, drawBase.h);
-			break;
-		}
+		state->anim();
 		//左向き反転
 		if (angle == Angle_LR::Left &&
 			drawBase.w >= 0) {
@@ -302,7 +469,7 @@ namespace Player
 	//敵の頭との当たり判定
 	bool Object::CheckHitEnemyHead()
 	{
-		if (state == State::Non) { return false; }
+		bool rtv = false;
 		//当たり判定を基にして足元矩形を生成
 		ML::Box2D playerFoot(
 			hitBase.x,
@@ -316,73 +483,47 @@ namespace Player
 		ML::Box2D debugMe = ge->ApplyCamera2D(me);
 		ge->debugRect(debugMe, ge->DEBUGRECTMODE::GREEN);
 #endif
-		shared_ptr<vector<BEnemy::SP>> enemies = ge->qa_Enemies;
-		for (auto it = enemies->begin(); it != enemies->end(); ++it) {
-			if ((*it)->GetState() != State::Normal) { continue; }
+		auto enemies = ge->qa_Enemies;
+		for_each(enemies->begin(), enemies->end(), [&](auto iter) {
+			if (iter->GetState() != State::Normal) { return; }
 			//当たり判定を基にして頭上矩形を生成
 			ML::Box2D enemyHead(
-				(*it)->GetHitBase().x,
-				(*it)->GetHitBase().y - 1,
-				(*it)->GetHitBase().w,
+				iter->GetHitBase().x,
+				iter->GetHitBase().y - 1,
+				iter->GetHitBase().w,
 				10);
-			ML::Box2D  you = enemyHead.OffsetCopy((*it)->GetPos());
+			ML::Box2D  you = enemyHead.OffsetCopy(iter->GetPos());
 			//デバッグ用矩形
 #if defined(DEBUG)
 			ML::Box2D debugYou = ge->ApplyCamera2D(you);
 			ge->debugRect(debugYou, ge->DEBUGRECTMODE::RED);
 #endif
 			if (you.Hit(me)) {
-				if (fallSpeed <= 0.f) { continue; }//プレイヤが落下中でなければ無効
-				(*it)->Dead();
-				ge->score += (*it)->GetScore();
-				se::Play("Explosion");
-				ge->CreateEffect(8, ML::Vec2(static_cast<float>(you.x), static_cast<float>(you.y)));//爆発エフェクト
-
-				fallSpeed = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
-				ChangeAnim(Anim::Jump);
-				return true;
+				if (moveVec.y <= 0.f) { return; }//プレイヤが落下中でなければ無効
+				iter->Recieved(attackPower);
+				moveVec.y = jumpPow / 2.f;//敵を踏んだら自動的にジャンプする
+				ChangeState(new JumpState(this));
+				rtv = true;
+				return;
 			}
 
-		}
-		return false;
+			});
+		return rtv;
 	}
 	//-------------------------------------------------------------------
-	//ゴール旗との当たり判定
-	bool Object::CheckHitGoalFlag() const
+	//状態変更
+	void Object::ChangeState(StateBase* const state_)
 	{
-		if (state == State::Non) { return false; }
-		//プレイヤ
-		ML::Box2D  me = hitBase.OffsetCopy(pos);
-
-		GoalFlag::Object::SP goalFlag = ge->GetTask<GoalFlag::Object>("オブジェクト", "ゴール旗");
-		if (goalFlag == nullptr) { return false; }
-		if (goalFlag->GetState() == State::Non) { return false; }
-		//ゴール旗
-		ML::Box2D  you = goalFlag->GetHitBase().OffsetCopy(goalFlag->GetPos());
-
-		//デバッグ用矩形
-#if defined(DEBUG)
-		ML::Box2D debugYou = ge->ApplyCamera2D(you);
-		ge->debugRect(debugYou, ge->DEBUGRECTMODE::RED);
-#endif
-		if (you.Hit(me)) {
-			return true;
-		}
-		return false;
-	}
-	//-------------------------------------------------------------------
-	//アニメーションをチェンジ
-	void Object::ChangeAnim(const Anim& anim)
-	{
-		animKind = anim;
+		delete state_;
+		this->state = state_;
+		moveCnt = 0;
 		animCnt = 0;
 	}
 	//-------------------------------------------------------------------
 	//ダメージを受けた時の処理
 	void Object::DamageOperation()
 	{
-		state = State::Hit;
-		ChangeAnim(Anim::Hurt);
+		ChangeState(new HurtState(this));
 		moveCnt = 0;
 		animCnt = 0;
 		invincible.start();
@@ -398,13 +539,21 @@ namespace Player
 		}
 	}
 	//-------------------------------------------------------------------
+	//受け身の処理
+	void Object::Recieved(const int& power)
+	{
+		if (invincible.isInvincible()) { return; }
+		LifeOperation(-power);
+		if (life.getNow() >= 0) {//死んでいないときはダメージを受ける演出を入れる
+			DamageOperation();
+		}
+	}
+	//-------------------------------------------------------------------
 	//死亡処理
 	void Object::Dead()
 	{
-		state = State::Dead;
+		Kill();
 		ge->isDead = true;
-		moveCnt = 0;
-		animCnt = 0;
 		bgm::Stop("Main");
 		se::Play("Dead");
 	}
@@ -443,7 +592,7 @@ namespace Player
 	}
 	//-------------------------------------------------------------------
 	Object::Object() :
-		animKind(Anim::Idle),
+		state(new IdleState(this)),
 		jumpPow(),
 		invincible(),
 		life(5, 5) {	}
@@ -467,4 +616,11 @@ namespace Player
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
 	Resource::~Resource() { this->Finalize(); }
+	//-------------------------------------------------------------------
+	//タスク生成&パラメーター指定
+	void  Object::Spawn(const ML::Vec2& pos)
+	{
+		auto enemy = Create(true);
+		enemy->pos = pos;
+	}
 }

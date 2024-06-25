@@ -58,8 +58,7 @@ namespace Game
 		map->LoadEnemy("./data/enemy/enemyStage" + to_string(ge->stage) + ".csv");
 
 		//スポーン プレイヤ
-		auto player = Player::Object::Create(true);
-		player->SetPos(map->GetPlayerSpawnpos());
+		Player::Object::Spawn(map->GetPlayerSpawnpos());
 
 		//ステージ情報表示
 		auto stageInfo = StageInfo::Object::Create(true);
@@ -115,10 +114,9 @@ namespace Game
 		//プレイヤの検出数を減らす
 		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
 		//敵の検出数を減らす
-		ge->qa_Enemies = ge->GetTasks<BEnemy>(Enemy00::defGroupName);
+		ge->qa_Enemies = ge->GetTasks<BChara>(Enemy00::defGroupName);
 		//マップの検出数を減らす
 		ge->qa_Map = ge->GetTask<Map2D::Object>(Map2D::defGroupName);
-		auto inp = ge->in1->GetState();
 
 		//クリアしたら or やられたら
 		if (ge->isClear || ge->isDead) {
@@ -158,14 +156,6 @@ namespace Game
 #ifdef DEBUG
 		ge->debugRectDraw();
 #endif
-	}
-	//-------------------------------------------------------------------
-	//敵のスポーン
-	void Object::SpawnEnemy(const ML::Vec2& pos, const int& kind)
-	{
-		auto enemy = Enemy00::Object::Create(true);
-		enemy->SetPos(pos);
-		enemy->SetType(static_cast<Enemy00::Object::Type>(kind));
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド

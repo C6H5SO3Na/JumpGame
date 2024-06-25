@@ -5,7 +5,6 @@
 #include  "Task_Map2D.h"
 #include  "Task_Enemy00.h"
 #include  "Task_GoalFlag.h"
-#include  "Task_Game.h"
 #include <assert.h>
 
 namespace Map2D
@@ -33,18 +32,12 @@ namespace Map2D
 		//スーパークラス初期化
 		__super::Initialize(defGroupName, defName, true);
 		//リソースクラス生成orリソース共有
-		this->res = Resource::Create();
+		res = Resource::Create();
 
 		//★データ初期化
 		chipSize = 64;//チップのサイズ
 
 		render2D_Priority[1] = 0.9f;
-		//マップのゼロクリア
-		for (int y = 0; y < size(map); ++y) {
-			for (int x = 0; x < size(map[y]); ++x) {
-				map[y][x] = 0;
-			}
-		}
 
 		//マップチップ情報の初期化
 		for (int c = 0; c < chipKind; ++c) {
@@ -62,7 +55,7 @@ namespace Map2D
 	{
 		//★データ＆タスク解放
 
-		if (!ge->QuitFlag() && this->nextTaskCreate) {
+		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
 		}
 
@@ -103,6 +96,44 @@ namespace Map2D
 		res->img->Draw(draw, src);
 	}
 	//-------------------------------------------------------------------
+	//配列に一行分のデータをインポート
+	template<typename T>
+	void Object::ImportArray(ifstream& fin, T* const arr, const int& n)
+	{
+		string lineText;
+		getline(fin, lineText);
+		istringstream  ss_lt(lineText);
+		for (int i = 0; i < n; ++i) {
+			string  tc;
+			getline(ss_lt, tc, ',');
+
+			stringstream ss;
+			ss << tc;
+			ss >> *(arr + i);
+		}
+	}
+
+	//-------------------------------------------------------------------
+	//二次元配列に複数行分のデータをインポート
+	template<typename T>
+	void Object::ImportArray(ifstream& fin, T* const arr, const int& xSize, const int& ySize)
+	{
+		for (int y = 0; y < ySize; ++y) {
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
+			for (int x = 0; x < xSize; ++x) {
+				string  tc;
+				getline(ss_lt, tc, ',');
+
+				stringstream ss;
+				ss << tc;
+				//ss >> map[y][x];
+				ss >> *(arr + x + y * 1000);
+			}
+		}
+	}
+	//-------------------------------------------------------------------
 	//マップのロード
 	bool Object::LoadMap(const string& fpath_)
 	{
@@ -112,56 +143,23 @@ namespace Map2D
 			return false;
 		}
 		//マップチップの縦横情報を入手
-		{
-			string lineText;
-			getline(fin, lineText);
-			istringstream  ss_lt(lineText);
-			for (int i = 0; i < 2; ++i) {
-				string  tc;
-				getline(ss_lt, tc, ',');
-
-				stringstream ss;
-				ss << tc;
-				ss >> mapSize[i];
-			}
-		}
+		ImportArray(fin, mapSize, 2);
 
 		//プレイヤのスポーン地点を入手
-		{
-			string lineText;
-			getline(fin, lineText);
-			istringstream  ss_lt(lineText);
-			float pos[2] = {};//x:0,y:0
-			for (int i = 0; i < 2; ++i) {
-				string  tc;
-				getline(ss_lt, tc, ',');
-
-				stringstream ss;
-				ss << tc;
-				ss >> pos[i];
-			}
-			playerSpawnPos = ML::Vec2(static_cast<float>(pos[X] * chipSize + chipSize / 2),
-				static_cast<float>(pos[Y] * chipSize + chipSize / 2));
-		}
+		float pos[2] = {};//x:0,y:0
+		ImportArray(fin, pos, 2);
+		playerSpawnPos = ML::Vec2(static_cast<float>(pos[X] * chipSize + chipSize / 2),
+			static_cast<float>(pos[Y] * chipSize + chipSize / 2));
 
 		//マップの当たり判定を定義
 		hitBase = ML::Box2D(0, 0, mapSize[X] * chipSize, mapSize[Y] * chipSize);
 
+		ImportArray(fin, &map[0][0], mapSize[X], mapSize[Y]);
+
 		for (int y = 0; y < mapSize[Y]; ++y) {
-			string lineText;
-			getline(fin, lineText);
-			istringstream  ss_lt(lineText);
 			for (int x = 0; x < mapSize[X]; ++x) {
-				string  tc;
-				getline(ss_lt, tc, ',');
-
-				stringstream ss;
-				ss << tc;
-				ss >> map[y][x];
-
 				if (map[y][x] == 100) {
-					shared_ptr<GoalFlag::Object> goalFlag = GoalFlag::Object::Create(true);
-					goalFlag->SetPos(ML::Vec2(x * 64.f, y * 64.f));
+					GoalFlag::Object::Spawn(ML::Vec2(x * 64.f, y * 64.f));
 					map[y][x] = -1;//当たり判定を無効にする
 				}
 			}
@@ -175,7 +173,6 @@ namespace Map2D
 	//敵の配置のロード
 	bool Object::LoadEnemy(const string& fpath_)
 	{
-		auto game = ge->GetTask<Game::Object>("本編統括");
 		ifstream fin(fpath_);
 		if (!fin.is_open()) {
 			assert(!"読み込み失敗");
@@ -222,7 +219,7 @@ namespace Map2D
 				ss << tc;
 				ss >> enemyKind;
 			}
-			game->SpawnEnemy(pos, enemyKind);
+			Enemy00::Object::Spawn(pos, enemyKind);
 		}
 
 		//ファイルを閉じる
@@ -236,24 +233,22 @@ namespace Map2D
 		ML::Rect r = { hit_.x,
 						hit_.y,
 						hit_.x + hit_.w,
-						hit_.y + hit_.h };
+						hit_.y + hit_.h
+		};
 		//矩形がマップ外に出ていたらサイズを変更する
 		ML::Rect m = {
 			hitBase.x,
 			hitBase.y,
 			hitBase.x + hitBase.w,
-			hitBase.x + hitBase.h
+			hitBase.y + hitBase.h
 		};
 		//範囲外を壁にする方法
 		if (r.left < m.left) { return true; }		//左に飛び出している
-		//if (r.top < m.top) { return true; }			//上に飛び出している//上下は判定を無効にする
 		if (r.right > m.right) { return true; }		//右に飛び出している
-		//if (r.bottom > m.bottom) { return true; }	//下に飛び出している//上下は判定を無効にする
+
 		//範囲外を壁にしない方法
-		//r.left = max(r.left, m.left);			//左に飛び出している
-		r.top = max(r.top, m.top);				//上に飛び出している//上下は判定を無効にする
-		//r.right = min(r.right, m.right);		//右に飛び出している
-		r.bottom = min(r.bottom, m.bottom);		//下に飛び出している//上下は判定を無効にする
+		r.top = max(r.top, m.top);				//上に飛び出している
+		r.bottom = min(r.bottom, m.bottom);		//下に飛び出している
 
 		//ループ範囲調整
 		int sx = r.left / chipSize;
@@ -286,7 +281,7 @@ namespace Map2D
 			hitBase.x,
 			hitBase.y,
 			hitBase.x + hitBase.w,
-			hitBase.x + hitBase.h
+			hitBase.y + hitBase.h
 		};
 		//カメラの位置を調整
 		if (c.right > m.right) {
@@ -297,11 +292,11 @@ namespace Map2D
 			ge->camera2D.x = m.left;
 		}
 
-		if (ge->qa_Player != nullptr || c.bottom > m.bottom) {
+		if (c.bottom > m.bottom) {
 			ge->camera2D.y = m.bottom - ge->camera2D.h;
 		}
 
-		if (ge->qa_Player != nullptr || c.top < m.top) {
+		if (c.top < m.top) {
 			ge->camera2D.y = m.top;
 		}
 
@@ -338,13 +333,13 @@ namespace Map2D
 	//-------------------------------------------------------------------
 	bool  Object::B_Initialize()
 	{
-		return  this->Initialize();
+		return  Initialize();
 	}
 	//-------------------------------------------------------------------
-	Object::~Object() { this->B_Finalize(); }
+	Object::~Object() { B_Finalize(); }
 	bool  Object::B_Finalize()
 	{
-		auto  rtv = this->Finalize();
+		auto  rtv = Finalize();
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
@@ -368,5 +363,5 @@ namespace Map2D
 	//-------------------------------------------------------------------
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
-	Resource::~Resource() { this->Finalize(); }
+	Resource::~Resource() { Finalize(); }
 }

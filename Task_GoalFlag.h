@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------
 //ゴール旗
 //-------------------------------------------------------------------
-#include "BObject.h"
+#include "BChara.h"
 
 namespace GoalFlag
 {
@@ -26,7 +26,7 @@ namespace GoalFlag
 		DG::Image::SP img;
 	};
 	//-------------------------------------------------------------------
-	class  Object : public  BObject
+	class  Object : public  BChara
 	{
 		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
@@ -35,6 +35,7 @@ namespace GoalFlag
 		typedef  weak_ptr<Object>		WP;
 		//生成窓口 引数はtrueでタスクシステムへ自動登録
 		static  Object::SP  Create(bool flagGameEnginePushBack_);
+		static void  Spawn(const ML::Vec2& pos);
 		Resource::SP	res;
 	private:
 		Object();
@@ -47,5 +48,7 @@ namespace GoalFlag
 		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	private:
 		void Oparation();
+		void Recieved(const int& power) override;
+		void Dead() override;
 	};
 }

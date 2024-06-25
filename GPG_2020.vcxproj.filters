@@ -35,32 +35,8 @@
     <Filter Include="MyPG\ソース ファイル\Task\StartGame">
       <UniqueIdentifier>{cf241c11-ca19-43ec-8e5c-bc9f0e908fed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル">
-      <UniqueIdentifier>{e062b9f5-2489-4ae8-b9bf-07a29eec6029}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task">
-      <UniqueIdentifier>{826eb609-b6f2-4d5c-aa61-51041911b0d5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\Ending">
-      <UniqueIdentifier>{6954e298-3308-4da5-a122-600e6652bf48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\Game">
-      <UniqueIdentifier>{273c6e15-5712-482a-bf2f-ea5e2a1442ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\StartGame">
-      <UniqueIdentifier>{1168619e-1ed4-4112-8120-7bc2db9ae478}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\Title">
-      <UniqueIdentifier>{4371358d-e3ff-4cb5-b019-bf227b4258a2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MyPG\ソース ファイル\Task\GameOver">
       <UniqueIdentifier>{91141150-1893-446e-b784-55cf5c3afa48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\GameOver">
-      <UniqueIdentifier>{fdc067cb-3a7e-4bc5-8e0f-84abae992613}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MyPG\ヘッダー ファイル\Task\Common">
-      <UniqueIdentifier>{7b3cfdaf-8d9f-409c-9a9b-fc836b850c86}</UniqueIdentifier>
     </Filter>
     <Filter Include="MyPG\ソース ファイル\Task\Common">
       <UniqueIdentifier>{7ef7d959-2b0c-40de-8bc1-24b531e1c2dc}</UniqueIdentifier>
@@ -160,12 +136,6 @@
     <ClCompile Include="BChara.cpp">
       <Filter>MyPG\ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="BEnemy.cpp">
-      <Filter>MyPG\ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="BObject.cpp">
-      <Filter>MyPG\ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="MyPG.cpp">
       <Filter>MyPG\ソース ファイル</Filter>
     </ClCompile>
@@ -238,52 +208,46 @@
       <Filter>Lib</Filter>
     </ClInclude>
     <ClInclude Include="Task_Enemy00.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Game</Filter>
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
     </ClInclude>
     <ClInclude Include="Task_Game.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Game</Filter>
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
     </ClInclude>
     <ClInclude Include="Task_GoalFlag.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Game</Filter>
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
     </ClInclude>
     <ClInclude Include="Task_Map2D.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Game</Filter>
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
     </ClInclude>
     <ClInclude Include="Task_Player.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Game</Filter>
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
     </ClInclude>
     <ClInclude Include="Task_StageInfo.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Task_Ending.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Ending</Filter>
-    </ClInclude>
-    <ClInclude Include="Task_GameOver.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\GameOver</Filter>
-    </ClInclude>
-    <ClInclude Include="Task_Title.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Title</Filter>
-    </ClInclude>
-    <ClInclude Include="Task_StartGame.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\StartGame</Filter>
-    </ClInclude>
-    <ClInclude Include="BChara.h">
-      <Filter>MyPG\ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="BObject.h">
-      <Filter>MyPG\ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="BEnemy.h">
-      <Filter>MyPG\ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="MyPG.h">
-      <Filter>MyPG\ヘッダー ファイル</Filter>
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
     </ClInclude>
     <ClInclude Include="Task_PressSKey.h">
-      <Filter>MyPG\ヘッダー ファイル\Task\Common</Filter>
+      <Filter>MyPG\ソース ファイル\Task\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_Ending.h">
+      <Filter>MyPG\ソース ファイル\Task\Ending</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_GameOver.h">
+      <Filter>MyPG\ソース ファイル\Task\GameOver</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_StartGame.h">
+      <Filter>MyPG\ソース ファイル\Task\StartGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_Title.h">
+      <Filter>MyPG\ソース ファイル\Task\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="BChara.h">
+      <Filter>MyPG\ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MyPG.h">
+      <Filter>MyPG\ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Task_Effect00.h">
-      <Filter>MyPG\ヘッダー ファイル</Filter>
+      <Filter>MyPG\ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

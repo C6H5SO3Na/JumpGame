@@ -46,8 +46,5 @@ namespace GameOver
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 
 		bool isFadeout;
-	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
-	public:
-		//追加したい変数・メソッドはここに追加する
 	};
 }

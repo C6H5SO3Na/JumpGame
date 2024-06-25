@@ -1,5 +1,5 @@
 ﻿#include "MyPG.h"
-#include "Task_Title.h"
+#include "Task_StartGame.h"
 
 #include "randomLib.h"
 #include "sound.h"
@@ -523,7 +523,7 @@ ge->debugRect(me, DEBUGRECTMODE::RED , -ge->camera2D.x, -ge->camera2D.y);
 		this->dgi->EffectState().param.bgColor = ML::Color(0, 0.0f, 0.0f, 0.0f);
 
 		//初期実行タスク生成＆ゲームエンジンに登録
-		auto  ft = Title::Object::Create(true);
+		auto  ft = StartGame::Object::Create(true);
 
 		//------------------------------------------------------------------------------------
 		//レイヤー毎の描画のON/OFF

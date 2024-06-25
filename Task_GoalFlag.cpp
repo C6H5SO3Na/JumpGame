@@ -35,7 +35,7 @@ namespace GoalFlag
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
-		state = State::Normal;
+		state_ = State::Normal;
 		hitBase = drawBase = CenterBox(32 * 2, 32 * 2);
 		src = ML::Box2D(0, 0, 32, 32);
 
@@ -59,7 +59,7 @@ namespace GoalFlag
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
-		if (state == State::Non) {
+		if (state_ == State::Non) {
 			Kill();
 		}
 	}
@@ -75,6 +75,18 @@ namespace GoalFlag
 	//処理
 	void Object::Oparation()
 	{
+	}
+	//-------------------------------------------------------------------
+	//受け身処理
+	void Object::Recieved(const int& power)
+	{
+		Dead();
+	}
+	//-------------------------------------------------------------------
+	//死亡処理
+	void Object::Dead()
+	{
+		Kill();
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -131,4 +143,11 @@ namespace GoalFlag
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
 	Resource::~Resource() { this->Finalize(); }
+	//-------------------------------------------------------------------
+	//タスク生成&パラメーター指定
+	void  Object::Spawn(const ML::Vec2& pos)
+	{
+		auto enemy = Create(true);
+		enemy->pos = pos;
+	}
 }

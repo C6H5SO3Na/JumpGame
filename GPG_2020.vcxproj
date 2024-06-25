@@ -122,8 +122,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BChara.cpp" />
-    <ClCompile Include="BEnemy.cpp" />
-    <ClCompile Include="BObject.cpp" />
     <ClCompile Include="DG2014\DG2014_DGObject.cpp" />
     <ClCompile Include="DG2014\DG2014_Effect.cpp" />
     <ClCompile Include="DG2014\DG2014_Font.cpp" />
@@ -161,8 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BChara.h" />
-    <ClInclude Include="BEnemy.h" />
-    <ClInclude Include="BObject.h" />
     <ClInclude Include="DG2014\DG2014_DGObject.h" />
     <ClInclude Include="DG2014\DG2014_Effect.h" />
     <ClInclude Include="DG2014\DG2014_Font.h" />

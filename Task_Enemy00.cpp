@@ -5,6 +5,7 @@
 #include "Task_Enemy00.h"
 #include "Task_Player.h"
 #include "Task_Map2D.h"
+#include "sound.h"
 #include <assert.h>
 
 namespace Enemy00
@@ -38,13 +39,14 @@ namespace Enemy00
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
-		state = State::Normal;
+		state_ = State::Normal;
 		angle = Angle_LR::Left;
 		hitBase = CenterBox(32 * 2, 32 * 2);
 		moveVec = ML::Vec2(5.f, 5.f);
 		src = ML::Box2D(0, 0, 32, 32);
 		score = 100;
 		jumpPow = -10.f;
+		attackPower = 1;
 
 		//★タスクの生成
 
@@ -67,11 +69,9 @@ namespace Enemy00
 	void  Object::UpDate()
 	{
 		Move();
-
-		//死亡判定
-		if (state == State::Non) {
-			Kill();
-		}
+		//if (!ge->qa_Player->CheckHitEnemyHead()) {
+			CheckHit(ge->qa_Player);
+		//}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
@@ -84,8 +84,7 @@ namespace Enemy00
 	//敵の動き
 	void Object::Move()
 	{
-		if (!CheckHitCamera2D() || state == State::Non) { return; }//消滅したかカメラの範囲外のとき、動作しない
-
+		if (!CheckHitCamera2D()) { return; }//カメラの範囲外のとき、動作しない
 		ML::Vec2 est;
 		//左右移動
 		est.x = moveVec.x * angle;
@@ -155,6 +154,40 @@ namespace Enemy00
 		draw = ge->ApplyCamera2D(draw);
 		res->img[static_cast<int>(type)]->Draw(draw, src);
 	}
+
+	//-------------------------------------------------------------------
+	//受け身の処理
+	void Object::Recieved(const int& power)
+	{
+		Dead();
+		ge->score += GetScore();
+		se::Play("Explosion");
+		ge->CreateEffect(8, pos);//爆発エフェクト
+	}
+	//-------------------------------------------------------------------
+	//カメラとの当たり判定
+	bool Object::CheckHitCamera2D() const
+	{
+		//プレイヤと当たり判定
+		ML::Box2D  me = hitBase.OffsetCopy(pos);
+		int n = 400;//カメラ矩形より指定した数両端に広げる
+		ML::Box2D  you(
+			ge->camera2D.x - n,
+			ge->camera2D.y,
+			ge->camera2D.w + n * 2,
+			ge->camera2D.h
+		);
+		if (you.Hit(me)) {
+			return true;
+		}
+		return false;
+	}
+	//-------------------------------------------------------------------
+	//受け身の処理
+	void Object::Dead()
+	{
+		Kill();
+	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -210,4 +243,12 @@ namespace Enemy00
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
 	Resource::~Resource() { this->Finalize(); }
+	//-------------------------------------------------------------------
+	//タスク生成&パラメーター指定
+	void Object::Spawn(const ML::Vec2& pos, const int& kind)
+	{
+		auto enemy = Enemy00::Object::Create(true);
+		enemy->pos = pos;
+		enemy->type = static_cast<Type>(kind);
+	}
 }
