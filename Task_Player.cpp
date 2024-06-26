@@ -507,7 +507,6 @@ namespace Player
 #endif
 		auto enemies = ge->qa_Enemies;
 		for_each(enemies->begin(), enemies->end(), [&](auto iter) {
-			if (iter->GetState() != State::Normal) { return; }
 			//“–‚½‚è”»’è‚ðŠî‚É‚µ‚Ä“ªã‹éŒ`‚ð¶¬
 			ML::Box2D enemyHead(
 				iter->GetHitBase().x,

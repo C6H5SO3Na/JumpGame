@@ -35,7 +35,6 @@ namespace GoalFlag
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
-		state_ = State::Normal;
 		hitBase = drawBase = CenterBox(32 * 2, 32 * 2);
 		src = ML::Box2D(0, 0, 32, 32);
 
@@ -61,9 +60,6 @@ namespace GoalFlag
 	{
 		Think();
 		Move();
-		if (state_ == State::Non) {
-			Kill();
-		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理

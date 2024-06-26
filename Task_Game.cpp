@@ -48,7 +48,6 @@ namespace Game
 		render2D_Priority[1] = 0.f;
 		ge->debugRectLoad();
 #endif
-		ge->stage = 3;
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
@@ -89,19 +88,19 @@ namespace Game
 			if (ge->isDead) {
 				//ゲームオーバー画面に推移
 				if (ge->remaining <= 0) {
-					auto result = GameOver::Object::Create(true);
+					GameOver::Object::Create(true);
 				}
 				else {
 					--ge->remaining;
-					auto startGame = StartGame::Object::Create(true);
+					StartGame::Object::Create(true);
 				}
 			}
 			else if(ge->stage >= ge->maxStage){
-				auto ending = Ending::Object::Create(true);
+				Ending::Object::Create(true);
 			}
 			else {
 				++ge->stage;
-				auto startGame = StartGame::Object::Create(true);
+				StartGame::Object::Create(true);
 			}
 		}
 

@@ -12,11 +12,6 @@ public:
 	typedef  shared_ptr<BChara>	SP;
 	typedef  weak_ptr<BChara>	WP;
 
-	//キャラの状態
-	enum class State {
-		Normal, Hit, Clear, Dead, Non
-	};
-
 	//左右の向き(2D横視点ゲーム専用)
 	enum Angle_LR {
 		Right = 1, Left = -1
@@ -31,7 +26,6 @@ protected:
 	ML::Vec2 pos;//プレイヤ座標
 	ML::Box2D hitBase;//当たり判定範囲
 
-	State state_;
 	int	moveCnt;//行動処理用カウンタ
 	int	animCnt;//アニメーション処理用カウンタ
 	int score;//スコア
@@ -77,7 +71,6 @@ public:
 		, animCnt(0)
 		, fallSpeed(0.f)
 		, isHitFloor(false)
-		, state_(State::Non)
 		, score(0)
 		, attackPower(0)
 		, maxSpeed(0.f)
@@ -94,6 +87,4 @@ public:
 	ML::Vec2 GetPos() const { return pos; }
 	//当たり判定取得
 	ML::Box2D GetHitBase() const { return hitBase; }
-	//状態取得
-	State GetState() const { return state_; }
 };

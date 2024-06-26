@@ -39,7 +39,7 @@ namespace Enemy00
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
-		state_ = State::Normal;
+		render2D_Priority[1] = 0.5f;
 		angle = Angle_LR::Left;
 		hitBase = CenterBox(64, 64);
 		moveVec = ML::Vec2(5.f, 5.f);
@@ -70,8 +70,10 @@ namespace Enemy00
 	{
 		Think();
 		Move();
-		if (!ge->qa_Player->CheckHitEnemyHead()) {
-			CheckHit(ge->qa_Player);
+		if (ge->qa_Player != nullptr) {
+			if (!ge->qa_Player->CheckHitEnemyHead()) {
+				CheckHit(ge->qa_Player);
+			}
 		}
 	}
 	//-------------------------------------------------------------------
@@ -85,6 +87,7 @@ namespace Enemy00
 	//思考
 	void Object::Think()
 	{
+		//空実装
 	}
 	//-------------------------------------------------------------------
 	//行動

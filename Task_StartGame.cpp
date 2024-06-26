@@ -14,7 +14,7 @@ namespace StartGame
 	bool  Resource::Initialize()
 	{
 		font = DG::Font::Create("‚l‚r –¾’©", 30, 60);
-		stageImg = DG::Image::Create("./data/image/Stage" + to_string(ge->stage) + ".png");
+		stageImg = DG::Image::Create("./data/image/Stage" + to_string(ge->stage) + ".jpg");
 		playerImg = DG::Image::Create("./data/image/Idle_KG_1.png");
 		return true;
 	}
