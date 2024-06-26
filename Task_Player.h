@@ -46,12 +46,7 @@ namespace Player
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
-	public:
-		//追加したい変数・メソッドはここに追加する
-		//enum class Anim {
-		//	Idle, Walk, Jump, Fall, Hurt, Clear, Dead
-		//};
-
+		//無敵状態管理クラス
 		class Invincible {
 			bool doFlash = false;// 点滅フラグ
 			bool flag = false;//無敵フラグ
@@ -106,13 +101,10 @@ namespace Player
 			//最大ライフ取得
 			int getMax() const { return max; }
 		};
-
+	public:
 		Life life;
-
+		bool CheckHitEnemyHead();
 	private:
-		//Normal, Hit
-		//Idle, Walk, Jump, Fall, Hurt, Clear, Dead
-
 		//ポリモーフィズム
 		//状態の抽象インターフェース
 		class StateBase {
@@ -204,22 +196,20 @@ namespace Player
 
 		StateBase* state;
 
-		//Anim animKind;
 		float jumpPow;
-		void Think();
-		void Move();
+		void Think() override;
+		void Move() override;
 		void Operation();
 		void Animation();
-		bool CheckHitEnemyHead();
 		void ChangeState(StateBase* const state);
 		void DamageOperation();
 		void Recieved(const int& power) override;
 		void Dead() override;
 		//ライフの増減
 		void LifeOperation(const int& addLife);
+		void AdjustCameraPlayer() const;
 
 		Invincible invincible;
-
 		XI::VGamePad input;
 	};
 }

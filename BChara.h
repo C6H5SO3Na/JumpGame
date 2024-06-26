@@ -58,12 +58,12 @@ protected:
 	bool CheckFallHole() const;
 	//矩形の座標の中心を中央にして定義する
 	ML::Box2D CenterBox(const int& w, const int& h);
-	//Box2D型の各要素に一定の値を掛ける(拡大用)
-	ML::Box2D MultiplyBox2D(const ML::Box2D& box2D, const float& n);
 	//スコア取得
 	int GetScore()const { return score; }
 
 	virtual void Dead() = 0;
+	virtual void Think() = 0;
+	virtual void Move() = 0;
 public:
 	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	//キャラの状態

@@ -88,13 +88,6 @@ ML::Box2D BChara::CenterBox(const int& w, const int& h)
 	return ML::Box2D(-w / 2, -h / 2, w, h);
 }
 //-------------------------------------------------------------------
-//Box2DŒ^‚ÌŠe—v‘f‚Éˆê’è‚Ì’l‚ğŠ|‚¯‚é(Šg‘å—p)
-ML::Box2D BChara::MultiplyBox2D(const ML::Box2D& box, const float& n)
-{
-	return ML::Box2D(int(box.x * n), int(box.y * n),
-		int(box.w * n), int(box.h * n));
-}
-//-------------------------------------------------------------------
 //‚ß‚è‚Ü‚È‚¢ˆÚ“®ˆ—
 void BChara::CheckMove(ML::Vec2& e_)
 {

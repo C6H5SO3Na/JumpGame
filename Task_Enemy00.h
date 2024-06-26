@@ -50,12 +50,13 @@ namespace Enemy00
 		enum class Type {
 			Normal, Jumping
 		};
-		void Move();
 		void Animation();
 		void Draw();
 		void SetType(Type t) { type = t; }
 		void Recieved(const int& power) override;
 		void Dead() override;
+		void Think() override;
+		void Move() override;
 		bool CheckHitCamera2D() const;
 
 	private:

@@ -15,8 +15,8 @@ namespace Enemy00
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		img[0] = DG::Image::Create("data/image/pipo-simpleenemy01b.png");
-		img[1] = DG::Image::Create("data/image/pipo-simpleenemy01c.png");
+		img[0] = DG::Image::Create("data/image/enemy1.png");
+		img[1] = DG::Image::Create("data/image/enemy2.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -41,9 +41,9 @@ namespace Enemy00
 		render2D_Priority[1] = 0.5f;
 		state_ = State::Normal;
 		angle = Angle_LR::Left;
-		hitBase = CenterBox(32 * 2, 32 * 2);
+		hitBase = CenterBox(64, 64);
 		moveVec = ML::Vec2(5.f, 5.f);
-		src = ML::Box2D(0, 0, 32, 32);
+		src = ML::Box2D(0, 0, 64, 64);
 		score = 100;
 		jumpPow = -10.f;
 		attackPower = 1;
@@ -68,10 +68,11 @@ namespace Enemy00
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
+		Think();
 		Move();
-		//if (!ge->qa_Player->CheckHitEnemyHead()) {
+		if (!ge->qa_Player->CheckHitEnemyHead()) {
 			CheckHit(ge->qa_Player);
-		//}
+		}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
@@ -81,7 +82,12 @@ namespace Enemy00
 		Draw();
 	}
 	//-------------------------------------------------------------------
-	//敵の動き
+	//思考
+	void Object::Think()
+	{
+	}
+	//-------------------------------------------------------------------
+	//行動
 	void Object::Move()
 	{
 		if (!CheckHitCamera2D()) { return; }//カメラの範囲外のとき、動作しない
@@ -91,13 +97,13 @@ namespace Enemy00
 		//ジャンプ
 		if (type == Type::Jumping) {
 			if (isHitFloor) {//着地中のみジャンプ開始できる
-				//animKind = Anim::Jump;
 				fallSpeed = jumpPow;
 			}
 		}
 		est.y += fallSpeed;
 		CheckMove(est);
 
+		//方向転換
 		if (CheckLeftSide()) {
 			angle = Angle_LR::Right;
 		}
@@ -132,16 +138,16 @@ namespace Enemy00
 	//アニメーション
 	void Object::Animation()
 	{
-		int animAngleTmp = 32;//drawにおけるh座標 左の場合32
+		int animAngleTmp = 64;//drawにおけるh座標 左の場合32
 		if (angle == Angle_LR::Right) {
-			animAngleTmp = 64;
+			animAngleTmp = 128;
 		}
 
 		int frameInterval = 0;//アニメーションの間隔フレーム
 		switch (animKind) {
 		case Anim::Move:
 			frameInterval = 8;
-			drawBase = CenterBox(32, 32);
+			drawBase = CenterBox(64, 64);
 			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w, animAngleTmp, drawBase.w, drawBase.h);
 			break;
 		}
@@ -150,7 +156,7 @@ namespace Enemy00
 	//スプライト描画
 	void Object::Draw()
 	{
-		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
+		ML::Box2D draw = drawBase.OffsetCopy(pos);
 		draw = ge->ApplyCamera2D(draw);
 		res->img[static_cast<int>(type)]->Draw(draw, src);
 	}

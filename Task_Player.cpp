@@ -41,7 +41,7 @@ namespace Player
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
 		angle = Angle_LR::Right;
-		hitBase = CenterBox(28 * 2, 64 * 2);
+		hitBase = CenterBox(56, 128);
 		maxSpeed = 8.f;
 		jumpPow = -17.f;
 		attackPower = 1;
@@ -85,7 +85,7 @@ namespace Player
 	{
 		if (invincible.isFlash() && moveCnt % 2 == 0) { return; }
 		Animation();
-		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
+		ML::Box2D draw = drawBase.OffsetCopy(pos);
 		draw = ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
 		//デバッグ用矩形
@@ -102,29 +102,29 @@ namespace Player
 	{
 		Think();
 		Move();
-
-
-		//カメラの位置を再調整
-		//関数化できる?
-		{
-			//プレイヤを画面のどこに置くか（今回は画面中央）
-			int px = ge->camera2D.w / 2;
-			int py = ge->camera2D.h / 2;
-			//プレイヤを画面中央に置いたときのカメラの左上座標を求める
-			int cpx = static_cast<int>(pos.x) - px;
-			int cpy = static_cast<int>(pos.y) - py;
-			//カメラの座標を更新
-			ge->camera2D.x = cpx;
-			ge->camera2D.y = cpy;
-			//マップの外側が映らないようにカメラを調整する
-			Map2D::Object::SP map = ge->qa_Map;
-			if (map != nullptr) {
-				map->AdjustCameraPos();
-			}
-		}
+		AdjustCameraPlayer();//カメラの位置を再調整
 		++moveCnt;
 		++animCnt;
 		invincible.operation();
+	}
+	//-------------------------------------------------------------------
+	//カメラの位置を再調整
+	void Object::AdjustCameraPlayer() const
+	{
+		//プレイヤを画面のどこに置くか（今回は画面中央）
+		int px = ge->camera2D.w / 2;
+		int py = ge->camera2D.h / 2;
+		//プレイヤを画面中央に置いたときのカメラの左上座標を求める
+		int cpx = static_cast<int>(pos.x) - px;
+		int cpy = static_cast<int>(pos.y) - py;
+		//カメラの座標を更新
+		ge->camera2D.x = cpx;
+		ge->camera2D.y = cpy;
+		//マップの外側が映らないようにカメラを調整する
+		Map2D::Object::SP map = ge->qa_Map;
+		if (map != nullptr) {
+			map->AdjustCameraPos();
+		}
 	}
 	//-------------------------------------------------------------------
 	//思考
@@ -155,7 +155,8 @@ namespace Player
 		ML::Vec2 est = moveVec;
 		CheckMove(est);
 	}
-
+	//ポリモーフィズム
+	//止まっている状態
 	//-------------------------------------------------------------------
 	//思考
 	void Object::IdleState::think()
@@ -197,7 +198,7 @@ namespace Player
 	//アニメーション
 	void Object::IdleState::anim()
 	{
-		owner_->drawBase = owner_->CenterBox(100, 64);
+		owner_->drawBase = owner_->CenterBox(200, 128);
 		int frameInterval = 8;
 		owner_->src = ML::Box2D(
 			(owner_->animCnt / frameInterval) % 4 * owner_->drawBase.w,
@@ -206,6 +207,8 @@ namespace Player
 			owner_->drawBase.h
 		);
 	}
+	//ポリモーフィズム
+	//歩行状態
 	//-------------------------------------------------------------------
 	//思考
 	void Object::WalkState::think()
@@ -259,7 +262,7 @@ namespace Player
 	//アニメーション
 	void Object::WalkState::anim()
 	{
-		owner_->drawBase = owner_->CenterBox(100, 64);
+		owner_->drawBase = owner_->CenterBox(200, 128);
 		int frameInterval = 8;
 		owner_->src = ML::Box2D(
 			(owner_->animCnt / frameInterval) % 7 * owner_->drawBase.w,
@@ -268,10 +271,13 @@ namespace Player
 			owner_->drawBase.h
 		);
 	}
+	//ポリモーフィズム
+	//ジャンプ状態
 	//-------------------------------------------------------------------
 	//思考
 	void Object::JumpState::think()
 	{
+		//ゴール判定
 		if (owner_->CheckHit(ge->GetTask<GoalFlag::Object>("オブジェクト", "ゴール旗"))) {
 			owner_->ChangeState(new ClearState(owner_));
 			return;
@@ -279,8 +285,14 @@ namespace Player
 
 		//足元接触判定
 		owner_->isHitFloor = owner_->CheckFoot();
-		if (owner_->moveCnt > 0 && owner_->isHitFloor) {
+		if (owner_->moveCnt > 0.f && owner_->isHitFloor) {
 			owner_->ChangeState(new IdleState(owner_));
+			return;
+		}
+
+		//落下状態へ
+		if (owner_->moveVec.y >= 0.f) {
+			owner_->ChangeState(new FallState(owner_));
 			return;
 		}
 	}
@@ -319,8 +331,8 @@ namespace Player
 	//アニメーション
 	void Object::JumpState::anim()
 	{
-		owner_->drawBase = owner_->CenterBox(100, 64);
-		int frameInterval = 11;
+		owner_->drawBase = owner_->CenterBox(200, 128);
+		int frameInterval = 8;
 		owner_->src = ML::Box2D(
 			(owner_->animCnt / frameInterval) % 6 * owner_->drawBase.w,
 			owner_->drawBase.h * 2,
@@ -328,6 +340,8 @@ namespace Player
 			owner_->drawBase.h
 		);
 	}
+	//ポリモーフィズム
+	//落下状態
 	//-------------------------------------------------------------------
 	//思考
 	void Object::FallState::think()
@@ -365,7 +379,7 @@ namespace Player
 	//アニメーション
 	void Object::FallState::anim()
 	{
-		owner_->drawBase = owner_->CenterBox(100, 64);
+		owner_->drawBase = owner_->CenterBox(200, 128);
 		int frameInterval = 8;
 		owner_->src = ML::Box2D(
 			(owner_->animCnt / frameInterval) % 3 * owner_->drawBase.w + owner_->drawBase.w * 4,
@@ -374,6 +388,8 @@ namespace Player
 			owner_->drawBase.h
 		);
 	}
+	//ポリモーフィズム
+	//被弾状態
 	//-------------------------------------------------------------------
 	//思考
 	void Object::HurtState::think()
@@ -387,13 +403,13 @@ namespace Player
 	//行動
 	void Object::HurtState::move()
 	{
+		//空実装
 	}
-
 	//-------------------------------------------------------------------
 	//アニメーション
 	void Object::HurtState::anim()
 	{
-		owner_->drawBase = owner_->CenterBox(100, 64);
+		owner_->drawBase = owner_->CenterBox(200, 128);
 		int frameInterval = 8;
 		owner_->src = ML::Box2D((owner_->animCnt / frameInterval) % 4 * owner_->drawBase.w,
 			owner_->drawBase.h * 3,
@@ -401,10 +417,13 @@ namespace Player
 			owner_->drawBase.h
 		);
 	}
+	//ポリモーフィズム
+	//ステージクリア状態
 	//-------------------------------------------------------------------
 	//思考
 	void Object::ClearState::think()
 	{
+		//空実装
 	}
 	//-------------------------------------------------------------------
 	//行動
@@ -416,7 +435,7 @@ namespace Player
 	//アニメーション
 	void Object::ClearState::anim()
 	{
-		owner_->drawBase = owner_->CenterBox(100, 64);
+		owner_->drawBase = owner_->CenterBox(200, 128);
 		int frameInterval = 8;
 		owner_->animCnt = min(owner_->animCnt, 5 * frameInterval - 1);
 		owner_->src = ML::Box2D(
@@ -426,10 +445,13 @@ namespace Player
 			owner_->drawBase.h
 		);
 	}
+	//ポリモーフィズム
+	//死亡状態
 	//-------------------------------------------------------------------
 	//思考
 	void Object::DeadState::think()
 	{
+		//空実装
 	}
 	//-------------------------------------------------------------------
 	//行動
@@ -443,7 +465,7 @@ namespace Player
 	//アニメーション
 	void Object::DeadState::anim()
 	{
-		owner_->drawBase = owner_->CenterBox(100, 64);
+		owner_->drawBase = owner_->CenterBox(200, 128);
 		int frameInterval = 8;
 		owner_->animCnt = min(owner_->animCnt, 5 * frameInterval - 1);
 		owner_->src = ML::Box2D(
@@ -505,16 +527,16 @@ namespace Player
 				ChangeState(new JumpState(this));
 				rtv = true;
 				return;
-			}
+	}
 
-			});
+});
 		return rtv;
 	}
 	//-------------------------------------------------------------------
 	//状態変更
 	void Object::ChangeState(StateBase* const state_)
 	{
-		delete state_;
+		delete this->state;
 		this->state = state_;
 		moveCnt = 0;
 		animCnt = 0;

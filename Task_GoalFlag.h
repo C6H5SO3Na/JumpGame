@@ -49,6 +49,8 @@ namespace GoalFlag
 	private:
 		void Oparation();
 		void Recieved(const int& power) override;
+		void Think() override;
+		void Move() override;
 		void Dead() override;
 	};
 }
