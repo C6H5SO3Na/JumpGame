@@ -1,20 +1,20 @@
 //-------------------------------------------------------------------
-//ゴール旗
+//ゲームオーバー、結果表示
 //-------------------------------------------------------------------
 #include "MyPG.h"
-#include "Task_GoalFlag.h"
-#include "Task_Player.h"
-#include "Task_Map2D.h"
-#include <assert.h>
+#include "Task_GameOver.h"
+#include "Task_Title.h"
+#include "Task_PressSKey.h"
+#include "Sound.h"
 
-namespace GoalFlag
+namespace GameOver
 {
 	Resource::WP  Resource::instance;
 	//-------------------------------------------------------------------
 	//リソースの初期化
 	bool  Resource::Initialize()
 	{
-		img = DG::Image::Create("data/image/Goal.png");
+		img = DG::Image::Create("./data/image/GameOver.png");
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -34,13 +34,14 @@ namespace GoalFlag
 		this->res = Resource::Create();
 
 		//★データ初期化
-		render2D_Priority[1] = 0.5f;
-		state_ = State::Normal;
-		hitBase = drawBase = CenterBox(32 * 2, 32 * 2);
-		src = ML::Box2D(0, 0, 32, 32);
-
+		render2D_Priority[1] = 1.0f;
+		isFadeout = false;
 		//★タスクの生成
+		auto pressStartKey = PressSKey::Object::Create(true);
 
+		//BGM(ジングル)
+		se::LoadFile("GameOver", "./data/Sound/BGM/GameOver.wav");
+		se::Play("GameOver");
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -49,8 +50,10 @@ namespace GoalFlag
 	{
 		//★データ＆タスク解放
 
+
 		if (!ge->QuitFlag() && this->nextTaskCreate) {
 			//★引き継ぎタスクの生成
+			auto title = Title::Object::Create(true);
 		}
 
 		return  true;
@@ -59,7 +62,18 @@ namespace GoalFlag
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
-		if (state_ == State::Non) {
+		auto inp = ge->in1->GetState();
+		//PressStartKeyが消えたら画面推移
+		if (ge->GetTask<PressSKey::Object>(PressSKey::defGroupName, PressSKey::defName) == nullptr)
+		{
+			if (!isFadeout) {
+				ge->StartCounter("Fadeout2", 45); //フェードは90フレームなので半分の45で切り替え
+				ge->CreateEffect(99, ML::Vec2());
+				isFadeout = true;
+			}
+		}
+
+		if (ge->getCounterFlag("Fadeout2") == ge->LIMIT) {
 			Kill();
 		}
 	}
@@ -67,27 +81,11 @@ namespace GoalFlag
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ML::Box2D draw = drawBase.OffsetCopy(pos);
-		draw = ge->ApplyCamera2D(draw);
+		ML::Box2D draw(0, 0, ge->screen2DWidth, ge->screen2DHeight);
+		ML::Box2D src(0, 0, 1920, 1080);
 		res->img->Draw(draw, src);
 	}
-	//-------------------------------------------------------------------
-	//処理
-	void Object::Oparation()
-	{
-	}
-	//-------------------------------------------------------------------
-	//受け身処理
-	void Object::Recieved(const int& power)
-	{
-		Dead();
-	}
-	//-------------------------------------------------------------------
-	//死亡処理
-	void Object::Dead()
-	{
-		Kill();
-	}
+
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -100,7 +98,7 @@ namespace GoalFlag
 			ob->me = ob;
 			if (flagGameEnginePushBack_) {
 				ge->PushBack(ob);//ゲームエンジンに登録
-
+				
 			}
 			if (!ob->B_Initialize()) {
 				ob->Kill();//イニシャライズに失敗したらKill
@@ -122,7 +120,7 @@ namespace GoalFlag
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() {	}
+	Object::Object():isFadeout() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()
@@ -143,11 +141,4 @@ namespace GoalFlag
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
 	Resource::~Resource() { this->Finalize(); }
-	//-------------------------------------------------------------------
-	//タスク生成&パラメーター指定
-	void  Object::Spawn(const ML::Vec2& pos)
-	{
-		auto enemy = Create(true);
-		enemy->pos = pos;
-	}
 }

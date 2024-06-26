@@ -28,50 +28,50 @@ namespace  Effect00
 		//スーパークラス初期化
 		__super::Initialize(defGroupName, defName, true);
 		//リソースクラス生成orリソース共有
-		this->res = Resource::Create();
+		res = Resource::Create();
 
 
 		//★データ初期化
-		this->render2D_Priority[1] = 0.f;
+		render2D_Priority[1] = 0.f;
 
 		//移動量
-		this->pos = ML::Vec2(0, 0);
-		this->moveVec = ML::Vec2(0,0);
-		this->graVec = ML::Vec2(0, 0);
+		pos = ML::Vec2(0, 0);
+		moveVec = ML::Vec2(0,0);
+		graVec = ML::Vec2(0, 0);
 
 		//角度
-		this->angle = 0.f;//ML::ToRadian((float)(rand() % 360));
-		this->addAngle = 0.f;
+		angle = 0.f;//ML::ToRadian((float)(rand() % 360));
+		addAngle = 0.f;
 
 		//α
-		this->alpha = 1.f;
-		this->addAlpha = 0.f;
+		alpha = 1.f;
+		addAlpha = 0.f;
 
 		//かくだいりつ　
-		this->scale = 1.f;
-		this->addScale = 0.f;
+		scale = 1.f;
+		addScale = 0.f;
 
 		//カウント
-		this->count = 0;
-		this->countMax = 30;
+		count = 0;
+		countMax = 30;
 
 		//リソースサイズ
-		this->resSizeX = 256;
-		this->resSizeY = 256;
-		this->drawSizeX = 64;
-		this->drawSizeY = 64;
+		resSizeX = 256;
+		resSizeY = 256;
+		drawSizeX = 64;
+		drawSizeY = 64;
 
 		//アニメ
-		this->animno = 0;
-		this->addAnim = 0.f;
-		this->animMax = 0;
-		this->animResNum = 1;
+		animno = 0;
+		addAnim = 0.f;
+		animMax = 0;
+		animResNum = 1;
 
-		this->filename = "";
+		filename = "";
 
-		this->AddRender = false;
+		AddRender = false;
 
-		this->fade = false;
+		fade = false;
 		//★タスクの生成
 
 		return  true;
@@ -81,9 +81,9 @@ namespace  Effect00
 	bool  Object::Finalize()
 	{
 		//★データ＆タスク解放
-//		this->img.reset();
+//		img.reset();
 
-		if (!ge->QuitFlag() && this->nextTaskCreate) {
+		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
 		}
 
@@ -97,7 +97,7 @@ namespace  Effect00
 			alpha = sin(ML::ToRadian(angle));
 			angle += addAngle;
 			if (angle >= 180.f) {
-				this->Kill();
+				Kill();
 			}
 		}
 		else {
@@ -116,21 +116,21 @@ namespace  Effect00
 			//消滅トリガーはカウント、アニメのみ
 			//カウント
 			//カウント消化で消滅
-			this->count++;
+			count++;
 			//カウントはアニメがある場合、消滅条件にならない
 			if (animMax == 0) {
 				if (count == countMax) {
-					this->Kill();
+					Kill();
 				}
 			}
 			//アニメーション
 			//アニメ終了で消滅
-			this->animno += this->addAnim;
+			animno += addAnim;
 
 			//アニメは0コマの場合は消滅条件にならない
 			if (animMax != 0) {
 				if ((int)animno >= animMax) {
-					this->Kill();
+					Kill();
 				}
 			}
 			//----------
@@ -142,23 +142,23 @@ namespace  Effect00
 	{
 		//指定されたファイルのロード
 //
-		if (this->count == 0) {
-			if (!this->filename.empty()) {
-				this->img = DG::Image::Create(filename);
+		if (count == 0) {
+			if (!filename.empty()) {
+				img = DG::Image::Create(filename);
 			}
 			else {
-				this->img = DG::Image::Create("./data/effect/myst.png");
+				img = DG::Image::Create("./data/effect/myst.png");
 			}
 		}
 
 		//Box2D定義のint x,y,w,hをfloatにすること
 		ML::Box2D  draw((int)(-drawSizeX / 2 * scale) ,(int)( -drawSizeY / 2 * scale),
 			(int)(drawSizeX * scale),(int)( drawSizeY * scale));
-		draw.Offset(this->pos);
+		draw.Offset(pos);
 		//
-		if (this->animResNum <= 0) this->animResNum = 1;
-		ML::Box2D  src(((int)this->animno % this->animResNum) * resSizeX,
-			((int)this->animno / this->animResNum) * resSizeY,
+		if (animResNum <= 0) animResNum = 1;
+		ML::Box2D  src(((int)animno % animResNum) * resSizeX,
+			((int)animno / animResNum) * resSizeY,
 			resSizeX, resSizeY);
 
 		//スクロール対応
@@ -166,18 +166,18 @@ namespace  Effect00
 
 		//フェードの際には利用無
 		if (fade != true) {
-			this->img->Rotation(this->angle, ML::Vec2(draw.w / 2.0f, draw.h / 2.0f));
+			img->Rotation(angle, ML::Vec2(draw.w / 2.0f, draw.h / 2.0f));
 		}
-		if (this->AddRender) {
+		if (AddRender) {
 			//現在登録されているバッファ情報をレンダリングする。
 			ge->dgi->Flush2D();
 			ge->dgi->EffectState().BS_AlphaAdd();
 		}
-		this->img->Draw(draw, src, ML::Color(this->alpha, 1, 1, 1));
+		img->Draw(draw, src, ML::Color(alpha, 1, 1, 1));
 
-		this->img->Rotation(0, ML::Vec2(draw.w / 2.0f, draw.h / 2.0f));
+		img->Rotation(0, ML::Vec2(draw.w / 2.0f, draw.h / 2.0f));
 
-		if (this->AddRender) {
+		if (AddRender) {
 			//もう一度レンダリング
 			ge->dgi->Flush2D();
 			ge->dgi->EffectState().BS_Alpha();
@@ -209,13 +209,13 @@ namespace  Effect00
 	//-------------------------------------------------------------------
 	bool  Object::B_Initialize()
 	{
-		return  this->Initialize();
+		return  Initialize();
 	}
 	//-------------------------------------------------------------------
-	Object::~Object() { this->B_Finalize(); }
+	Object::~Object() { B_Finalize(); }
 	bool  Object::B_Finalize()
 	{
-		auto  rtv = this->Finalize();
+		auto  rtv = Finalize();
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
@@ -239,5 +239,5 @@ namespace  Effect00
 	//-------------------------------------------------------------------
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
-	Resource::~Resource() { this->Finalize(); }
+	Resource::~Resource() { Finalize(); }
 }

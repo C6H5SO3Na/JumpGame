@@ -5,6 +5,7 @@
 #include "Task_Enemy00.h"
 #include "Task_Player.h"
 #include "Task_Map2D.h"
+#include "sound.h"
 #include <assert.h>
 
 namespace Enemy00
@@ -16,15 +17,14 @@ namespace Enemy00
 	{
 		img[0] = DG::Image::Create("data/image/pipo-simpleenemy01b.png");
 		img[1] = DG::Image::Create("data/image/pipo-simpleenemy01c.png");
-		img0 = DG::Image::Create("./data/image/boxBlue.bmp");
 		return true;
 	}
 	//-------------------------------------------------------------------
 	//リソースの解放
 	bool  Resource::Finalize()
 	{
-		for (int i = 0; i < size(img); ++i) {
-			img[i].reset();
+		for (DG::Image::SP i : img) {
+			i.reset();
 		}
 		return true;
 	}
@@ -39,13 +39,14 @@ namespace Enemy00
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
-		state = State::Normal;
+		state_ = State::Normal;
 		angle = Angle_LR::Left;
 		hitBase = CenterBox(32 * 2, 32 * 2);
 		moveVec = ML::Vec2(5.f, 5.f);
 		src = ML::Box2D(0, 0, 32, 32);
 		score = 100;
 		jumpPow = -10.f;
+		attackPower = 1;
 
 		//★タスクの生成
 
@@ -68,28 +69,23 @@ namespace Enemy00
 	void  Object::UpDate()
 	{
 		Move();
-		if (state == State::Non) {
-			Kill();
-		}
+		//if (!ge->qa_Player->CheckHitEnemyHead()) {
+			CheckHit(ge->qa_Player);
+		//}
 	}
 	//-------------------------------------------------------------------
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
 		Animation();
-		{
-			ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
-			ge->ApplyCamera2D(draw);
-			res->img[static_cast<int>(type)]->Draw(draw, src);
-		}
+		Draw();
 	}
 	//-------------------------------------------------------------------
 	//敵の動き
 	void Object::Move()
 	{
-		if (!CheckHitCamera2D() || state == State::Non) { return; }//消滅したかカメラの範囲外のとき、動作しない
-		ML::Vec2 est(0.f, 0.f);
-		auto inp = ge->in1->GetState();
+		if (!CheckHitCamera2D()) { return; }//カメラの範囲外のとき、動作しない
+		ML::Vec2 est;
 		//左右移動
 		est.x = moveVec.x * angle;
 		//ジャンプ
@@ -100,13 +96,6 @@ namespace Enemy00
 			}
 		}
 		est.y += fallSpeed;
-
-		////完全に止まっているときは止まっているときのアニメーション
-		////ジャンプ中はジャンプのアニメーションをする
-		//if (est == ML::Vec2() && animKind != Anim::Jump) {
-		//	animKind = Anim::Idle;
-		//}
-
 		CheckMove(est);
 
 		if (CheckLeftSide()) {
@@ -119,10 +108,6 @@ namespace Enemy00
 		//足元接触判定
 		isHitFloor = CheckFoot();
 		if (isHitFloor) {
-			////ジャンプアニメーションの場合解除
-			//if (animKind == Anim::Jump) {
-			//	animKind = Anim::Idle;
-			//}
 			fallSpeed = 0.f;//落下速度0
 		}
 		else {
@@ -138,7 +123,7 @@ namespace Enemy00
 
 		//穴に落ちたら消滅させる
 		if (CheckFallHole()) {
-			state = State::Non;
+			Dead();
 		}
 		++moveCnt;
 		++animCnt;
@@ -148,19 +133,60 @@ namespace Enemy00
 	void Object::Animation()
 	{
 		int animAngleTmp = 32;//drawにおけるh座標 左の場合32
-		if (angle == Angle_LR::Right) {//右だったら64にする
+		if (angle == Angle_LR::Right) {
 			animAngleTmp = 64;
 		}
 
+		int frameInterval = 0;//アニメーションの間隔フレーム
 		switch (animKind) {
 		case Anim::Move:
-		{
-			int frameInterval = 8;//アニメーションの間隔フレーム
+			frameInterval = 8;
 			drawBase = CenterBox(32, 32);
 			src = ML::Box2D((animCnt / frameInterval) % 3 * drawBase.w, animAngleTmp, drawBase.w, drawBase.h);
 			break;
 		}
+	}
+	//-------------------------------------------------------------------
+	//スプライト描画
+	void Object::Draw()
+	{
+		ML::Box2D draw = MultiplyBox2D(drawBase, 2.f).OffsetCopy(pos);
+		draw = ge->ApplyCamera2D(draw);
+		res->img[static_cast<int>(type)]->Draw(draw, src);
+	}
+
+	//-------------------------------------------------------------------
+	//受け身の処理
+	void Object::Recieved(const int& power)
+	{
+		Dead();
+		ge->score += GetScore();
+		se::Play("Explosion");
+		ge->CreateEffect(8, pos);//爆発エフェクト
+	}
+	//-------------------------------------------------------------------
+	//カメラとの当たり判定
+	bool Object::CheckHitCamera2D() const
+	{
+		//プレイヤと当たり判定
+		ML::Box2D  me = hitBase.OffsetCopy(pos);
+		int n = 400;//カメラ矩形より指定した数両端に広げる
+		ML::Box2D  you(
+			ge->camera2D.x - n,
+			ge->camera2D.y,
+			ge->camera2D.w + n * 2,
+			ge->camera2D.h
+		);
+		if (you.Hit(me)) {
+			return true;
 		}
+		return false;
+	}
+	//-------------------------------------------------------------------
+	//受け身の処理
+	void Object::Dead()
+	{
+		Kill();
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -217,4 +243,12 @@ namespace Enemy00
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
 	Resource::~Resource() { this->Finalize(); }
+	//-------------------------------------------------------------------
+	//タスク生成&パラメーター指定
+	void Object::Spawn(const ML::Vec2& pos, const int& kind)
+	{
+		auto enemy = Enemy00::Object::Create(true);
+		enemy->pos = pos;
+		enemy->type = static_cast<Type>(kind);
+	}
 }

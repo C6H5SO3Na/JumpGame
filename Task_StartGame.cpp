@@ -14,7 +14,7 @@ namespace StartGame
 	bool  Resource::Initialize()
 	{
 		font = DG::Font::Create("ＭＳ 明朝", 30, 60);
-		stageImg = DG::Image::Create("./data/image/Stage1.png");
+		stageImg = DG::Image::Create("./data/image/Stage" + to_string(ge->stage) + ".png");
 		playerImg = DG::Image::Create("./data/image/Idle_KG_1.png");
 		return true;
 	}
@@ -24,6 +24,7 @@ namespace StartGame
 	{
 		font.reset();
 		stageImg.reset();
+		playerImg.reset();
 		return true;
 	}
 	//-------------------------------------------------------------------
@@ -37,6 +38,7 @@ namespace StartGame
 
 		render2D_Priority[1] = 1.0f;
 
+		ge->StartCounter("FadeIn", 45);
 		//★タスクの生成
 
 		return  true;
@@ -58,27 +60,27 @@ namespace StartGame
 	//「更新」１フレーム毎に行う処理
 	void  Object::UpDate()
 	{
-		auto inp = ge->in1->GetState();
-		switch (phase){
+		switch (phase) {
 		case 0:
-			++cnt;
 			//フェードインまで待つ
-			if (cnt >= 45) {
+			if (ge->getCounterFlag("FadeIn") == ge->LIMIT) {
 				++phase;
-				cnt = 0;
+				ge->StartCounter("Start", 120);
 			}
 			break;
 		case 1:
 			//Aボタンが押されたら
-			if (inp.B1.down) {
+			if (ge->getCounterFlag("Start") == ge->LIMIT) {
+				//2Dカメラ矩形(エフェクトがずれないように)
+				ge->camera2D = ML::Box2D(0, 0, ge->screen2DWidth, ge->screen2DHeight);
 				ge->CreateEffect(99, ML::Vec2());
 				++phase;
+				ge->StartCounter("FadeOut", 45);
 			}
 			break;
 		case 2:
-			++cnt;
 			//完全にフェードアウトしたら
-			if (cnt >= 45) {
+			if (ge->getCounterFlag("FadeOut") == ge->LIMIT) {
 				Kill();//次のタスクへ
 			}
 			break;
@@ -88,9 +90,6 @@ namespace StartGame
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ge->Dbg_ToDisplay(100, 100, "StartGame");
-		ge->Dbg_ToDisplay(100, 120, "Push B1");
-
 		//ステージ数
 		{
 			ML::Box2D textBox(500, 200, 500, 200);

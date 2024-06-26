@@ -61,6 +61,7 @@ namespace StageInfo
 	//u‚Q‚c•`‰æv‚PƒtƒŒ[ƒ€–ˆ‚És‚¤ˆ—
 	void  Object::Render2D_AF()
 	{
+		//TODO:‹@”\•ªŠ„
 		{
 			ML::Box2D textBox(0, 0, 1000, 1000);
 			string scoreText = "score:" + to_string(ge->score);
@@ -80,8 +81,8 @@ namespace StageInfo
 				maxLife = 1;
 			}
 			else {
-				nowLife = ge->qa_Player->GetNowLife();
-				maxLife = ge->qa_Player->GetMaxLife();
+				nowLife = ge->qa_Player->life.getNow();
+				maxLife = ge->qa_Player->life.getMax();
 			}
 
 			float lifePer =

@@ -45,10 +45,7 @@ namespace StartGame
 		void  UpDate()			override;//「実行」１フレーム毎に行う処理
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
-	//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
-	private:
-		//追加したい変数・メソッドはここに追加する
+
 		int phase = 0;
-		int cnt = 0;
 	};
 }

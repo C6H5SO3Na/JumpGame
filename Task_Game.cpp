@@ -1,10 +1,11 @@
 //-------------------------------------------------------------------
 //ゲーム本編
 //-------------------------------------------------------------------
+//#define DEBUG
 #include "MyPG.h"
 #include "Task_Game.h"
 #include "Task_StartGame.h"
-#include "Task_Result.h"
+#include "Task_GameOver.h"
 #include "Task_Ending.h"
 
 #include "Task_Map2D.h"
@@ -12,6 +13,7 @@
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
 #include "randomLib.h"
+#include "sound.h"
 #include <assert.h>
 
 namespace Game
@@ -41,28 +43,30 @@ namespace Game
 		//★データ初期化
 		ge->isDead = false;
 		ge->isClear = false;
-
-		//2Dカメラ矩形
-		ge->camera2D = ML::Box2D(-200, -100, ge->screen2DWidth, ge->screen2DHeight);
-
 		//デバッグ用の矩形
+#ifdef DEBUG
 		render2D_Priority[1] = 0.f;
 		ge->debugRectLoad();
-
+#endif
+		ge->stage = 3;
 		//★タスクの生成
 		//マップの生成
 		auto map = Map2D::Object::Create(true);
 		map->LoadMap("./data/map/stage"+to_string(ge->stage) + ".csv");
 
 		//敵の生成
-		map->LoadEnemy("./data/enemy.csv");
+		map->LoadEnemy("./data/enemy/enemyStage" + to_string(ge->stage) + ".csv");
 
 		//スポーン プレイヤ
-		auto player = Player::Object::Create(true);
-		player->SetPos(map->GetPlayerSpawnpos());
+		Player::Object::Spawn(map->GetPlayerSpawnpos());
 
 		//ステージ情報表示
 		auto stageInfo = StageInfo::Object::Create(true);
+
+		//BGM
+		bgm::LoadFile("Main", "./data/Sound/BGM/Game.mp3");
+		bgm::LoadFile("StageClear", "./data/Sound/BGM/StageClear.mp3");
+		bgm::Play("Main");
 
 		return  true;
 	}
@@ -70,6 +74,7 @@ namespace Game
 	//「終了」タスク消滅時に１回だけ行う処理
 	bool  Object::Finalize()
 	{
+		bgm::Stop("Main");
 		//★データ＆タスク解放
 		ge->KillAll_G("プレイヤ");
 		ge->KillAll_G("フィールド");
@@ -82,9 +87,9 @@ namespace Game
 			//★引き継ぎタスクの生成
 			
 			if (ge->isDead) {
-				//残機が0未満になったらゲームオーバー画面に推移
-				if (ge->remaining < 0) {
-					auto result = Result::Object::Create(true);
+				//ゲームオーバー画面に推移
+				if (ge->remaining <= 0) {
+					auto result = GameOver::Object::Create(true);
 				}
 				else {
 					--ge->remaining;
@@ -109,47 +114,37 @@ namespace Game
 		//プレイヤの検出数を減らす
 		ge->qa_Player = ge->GetTask<Player::Object>(Player::defGroupName);
 		//敵の検出数を減らす
-		ge->qa_Enemies = ge->GetTasks<BEnemy>(Enemy00::defGroupName);
+		ge->qa_Enemies = ge->GetTasks<BChara>(Enemy00::defGroupName);
 		//マップの検出数を減らす
 		ge->qa_Map = ge->GetTask<Map2D::Object>(Map2D::defGroupName);
-		auto inp = ge->in1->GetState();
 
-		//クリアしたら
-		if (ge->isClear) {
-			++cnt;
-			switch (afterDeadPhase) {
+		//クリアしたら or やられたら
+		if (ge->isClear || ge->isDead) {
+			switch (nextStagePhase) {
 			case 0:
-				if (cnt >= 60 * 3) {//やられてしばらく経過後
-					++afterDeadPhase;
+				if (ge->isClear){
+					bgm::Stop("Main");
+					bgm::Play("StageClear");
 				}
+				ge->StartCounter("ClearCount", 60 * 3);
+				++nextStagePhase;
 				break;
 			case 1:
-				ge->CreateEffect(99, ML::Vec2());
-				++afterDeadPhase;
-			case 2:
-				//完全にフェードアウトしたら
-				if (cnt >= 60 * 3 + 45) {
-					Kill();//次のタスクへ
-				}
-			}
-		}
-		//やられたら
-		else if (ge->isDead) {
-			++cnt;
-			switch (afterDeadPhase) {
-			case 0:
-				if (cnt >= 60 * 3) {//やられてしばらく経過後
-					++afterDeadPhase;
+				if (ge->getCounterFlag("ClearCount") == ge->LIMIT) {
+					++nextStagePhase;
 				}
 				break;
-			case 1:
-				ge->CreateEffect(99, ML::Vec2());
-				++afterDeadPhase;
 			case 2:
-				//完全にフェードアウトしたら
-				if (cnt >= 60 * 3 + 45) {
+				ge->CreateEffect(99, ML::Vec2());
+				ge->StartCounter("FadeoutCount", 45);
+				++nextStagePhase;
+				break;
+			case 3:
+				if (ge->getCounterFlag("FadeoutCount") == ge->LIMIT) {
+					bgm::Stop("StageClear");
 					Kill();//次のタスクへ
 				}
+				break;
 			}
 		}
 	}
@@ -157,21 +152,10 @@ namespace Game
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		ge->Dbg_ToDisplay(100, 100, "Game");
-		ge->Dbg_ToDisplay(100, 120, "Push B1");
-
 		//デバッグ矩形表示
-#ifdef isDebugMode
+#ifdef DEBUG
 		ge->debugRectDraw();
 #endif
-	}
-	//-------------------------------------------------------------------
-	//敵のスポーン
-	void Object::SpawnEnemy(ML::Vec2 pos, int kind)
-	{
-		auto enemy = Enemy00::Object::Create(true);
-		enemy->SetPos(pos);
-		enemy->SetType(static_cast<Enemy00::Object::Type>(kind));
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -207,7 +191,7 @@ namespace Game
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() :cnt(),afterDeadPhase(), afterClearPhase() {	}
+	Object::Object() :cnt(),nextStagePhase(), afterClearPhase() {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

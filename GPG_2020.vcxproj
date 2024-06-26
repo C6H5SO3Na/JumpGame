@@ -113,6 +113,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -121,8 +122,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BChara.cpp" />
-    <ClCompile Include="BEnemy.cpp" />
-    <ClCompile Include="BObject.cpp" />
     <ClCompile Include="DG2014\DG2014_DGObject.cpp" />
     <ClCompile Include="DG2014\DG2014_Effect.cpp" />
     <ClCompile Include="DG2014\DG2014_Font.cpp" />
@@ -150,8 +149,8 @@
     <ClCompile Include="Task_GoalFlag.cpp" />
     <ClCompile Include="Task_Map2D.cpp" />
     <ClCompile Include="Task_Player.cpp" />
-    <ClCompile Include="Task_Result.cpp" />
-    <ClCompile Include="Task_StageEditor.cpp" />
+    <ClCompile Include="Task_GameOver.cpp" />
+    <ClCompile Include="Task_PressSKey.cpp" />
     <ClCompile Include="Task_StageInfo.cpp" />
     <ClCompile Include="Task_StartGame.cpp" />
     <ClCompile Include="Task_Title.cpp" />
@@ -160,8 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BChara.h" />
-    <ClInclude Include="BEnemy.h" />
-    <ClInclude Include="BObject.h" />
     <ClInclude Include="DG2014\DG2014_DGObject.h" />
     <ClInclude Include="DG2014\DG2014_Effect.h" />
     <ClInclude Include="DG2014\DG2014_Font.h" />
@@ -188,8 +185,8 @@
     <ClInclude Include="Task_GoalFlag.h" />
     <ClInclude Include="Task_Map2D.h" />
     <ClInclude Include="Task_Player.h" />
-    <ClInclude Include="Task_Result.h" />
-    <ClInclude Include="Task_StageEditor.h" />
+    <ClInclude Include="Task_GameOver.h" />
+    <ClInclude Include="Task_PressSKey.h" />
     <ClInclude Include="Task_StageInfo.h" />
     <ClInclude Include="Task_StartGame.h" />
     <ClInclude Include="Task_Title.h" />

@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------
 //敵00
 //-------------------------------------------------------------------
-#include "BEnemy.h"
+#include "BChara.h"
 
 namespace Enemy00
 {
@@ -23,10 +23,10 @@ namespace Enemy00
 		static   WP  instance;
 		static  Resource::SP  Create();
 		//共有する変数はここに追加する
-		DG::Image::SP img[2], img0;
+		DG::Image::SP img[2];
 	};
 	//-------------------------------------------------------------------
-	class  Object : public  BEnemy
+	class  Object : public  BChara
 	{
 		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
@@ -35,6 +35,7 @@ namespace Enemy00
 		typedef  weak_ptr<Object>		WP;
 		//生成窓口 引数はtrueでタスクシステムへ自動登録
 		static  Object::SP  Create(bool flagGameEnginePushBack_);
+		static void Spawn(const ML::Vec2& pos, const int& kind);
 		Resource::SP	res;
 	private:
 		Object();
@@ -51,7 +52,12 @@ namespace Enemy00
 		};
 		void Move();
 		void Animation();
+		void Draw();
 		void SetType(Type t) { type = t; }
+		void Recieved(const int& power) override;
+		void Dead() override;
+		bool CheckHitCamera2D() const;
+
 	private:
 		enum class Anim {
 			Move, Dead
