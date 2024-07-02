@@ -108,26 +108,27 @@ namespace Title
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		//
+		//背景
 		{
 			ML::Box2D draw(0, 0, ge->screen2DWidth, ge->screen2DHeight);
 			ML::Box2D src(0, 0, 1920, 1080);
 			res->imgBG->Draw(draw, src);
 		}
 
-		//テキストボックス
-		ML::Box2D src(0, 0, 1228, 197);
-		ML::Box2D draw(ge->screen2DWidth / 4 - 100, 0, src.w, src.h);
-		string text;
-		//段階毎の処理
-		switch (phase)
+		//ロゴ
 		{
-		case 2://fall through
-		case 1://fall through
-		case 0:
-			draw.y += static_cast<int>(easing::GetPos("タイトル文字"));
-			res->imgLogo->Draw(draw, src);
-			break;
+			ML::Box2D src(0, 0, 1228, 197);
+			ML::Box2D draw(ge->screen2DWidth / 4 - 100, 0, src.w, src.h);
+			//段階毎の処理
+			switch (phase)
+			{
+			case 2://fall through
+			case 1://fall through
+			case 0:
+				draw.y += static_cast<int>(easing::GetPos("タイトル文字"));
+				res->imgLogo->Draw(draw, src);
+				break;
+			}
 		}
 	}
 
