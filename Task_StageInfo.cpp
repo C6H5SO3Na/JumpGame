@@ -22,6 +22,7 @@ namespace StageInfo
 	bool  Resource::Finalize()
 	{
 		imgHP.reset();
+		imgHPFrame.reset();
 		font.reset();
 		return true;
 	}
@@ -32,7 +33,7 @@ namespace StageInfo
 		//スーパークラス初期化
 		__super::Initialize(defGroupName, defName, true);
 		//リソースクラス生成orリソース共有
-		this->res = Resource::Create();
+		res = Resource::Create();
 
 		//★データ初期化
 
@@ -46,7 +47,7 @@ namespace StageInfo
 	{
 		//★データ＆タスク解放
 
-		if (!ge->QuitFlag() && this->nextTaskCreate) {
+		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
 		}
 
@@ -61,38 +62,58 @@ namespace StageInfo
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		//TODO:機能分割
-		{
-			ML::Box2D textBox(0, 0, 1000, 1000);
-			string scoreText = "score:" + to_string(ge->score);
-			res->font->DrawF(textBox, scoreText, DG::Font::x1);
-		}
-		//体力ゲージの枠
-		{
-			ML::Box2D draw(500, 10, 256, 68);
-			ML::Box2D src(0, 0, 256, 68);
-			res->imgHPFrame->Draw(draw, src);
-		}
-		//体力ゲージの中身
-		{
-			int nowLife, maxLife;
-			if (ge->qa_Player == nullptr) {
-				nowLife = 0;
-				maxLife = 1;
-			}
-			else {
-				nowLife = ge->qa_Player->life.getNow();
-				maxLife = ge->qa_Player->life.getMax();
-			}
-
-			float lifePer =
-				static_cast<float>(nowLife) /
-				static_cast<float>(maxLife);
-			ML::Box2D src(0, 0, static_cast<int>(196.f * lifePer), 68);
-			ML::Box2D draw(56 + 500, 10, static_cast<int>(196.f * lifePer), 68);
-			res->imgHP->Draw(draw, src);
-		}
+		DrawScore();
+		DrawGauge();
 	}
+
+	//-------------------------------------------------------------------
+	//スコア描画
+	void  Object::DrawScore() const
+	{
+		ML::Box2D textBox(0, 0, 1000, 1000);
+		string scoreText = "score:" + to_string(ge->score);
+		res->font->DrawF(textBox, scoreText, DG::Font::x1);
+	}
+
+	//-------------------------------------------------------------------
+	//体力ゲージ描画
+	void  Object::DrawGauge() const
+	{
+		DrawGaugeFlame();
+		DrawGaugeBar();
+	}
+
+	//-------------------------------------------------------------------
+	//体力ゲージのフレーム描画
+	void  Object::DrawGaugeFlame() const
+	{
+		ML::Box2D draw(500, 10, 256, 68);
+		ML::Box2D src(0, 0, 256, 68);
+		res->imgHPFrame->Draw(draw, src);
+	}
+
+	//-------------------------------------------------------------------
+	//体力ゲージの中身描画
+	void  Object::DrawGaugeBar() const
+	{
+		int nowLife, maxLife;
+		if (ge->qa_Player == nullptr) {
+			nowLife = 0;
+			maxLife = 1;
+		}
+		else {
+			nowLife = ge->qa_Player->life.getNow();
+			maxLife = ge->qa_Player->life.getMax();
+		}
+
+		float lifePer =
+			static_cast<float>(nowLife) /
+			static_cast<float>(maxLife);
+		ML::Box2D src(0, 0, static_cast<int>(196.f * lifePer), 68);
+		ML::Box2D draw(56 + 500, 10, static_cast<int>(196.f * lifePer), 68);
+		res->imgHP->Draw(draw, src);
+	}
+
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
@@ -117,13 +138,13 @@ namespace StageInfo
 	//-------------------------------------------------------------------
 	bool  Object::B_Initialize()
 	{
-		return  this->Initialize();
+		return  Initialize();
 	}
 	//-------------------------------------------------------------------
-	Object::~Object() { this->B_Finalize(); }
+	Object::~Object() { B_Finalize(); }
 	bool  Object::B_Finalize()
 	{
-		auto  rtv = this->Finalize();
+		auto  rtv = Finalize();
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
@@ -147,5 +168,5 @@ namespace StageInfo
 	//-------------------------------------------------------------------
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
-	Resource::~Resource() { this->Finalize(); }
+	Resource::~Resource() { Finalize(); }
 }

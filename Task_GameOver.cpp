@@ -5,7 +5,8 @@
 #include "Task_GameOver.h"
 #include "Task_Title.h"
 #include "Task_PressSKey.h"
-#include "Sound.h"
+#include "sound.h"
+#include "easing.h"
 
 namespace GameOver
 {
@@ -31,17 +32,21 @@ namespace GameOver
 		//スーパークラス初期化
 		__super::Initialize(defGroupName, defName, true);
 		//リソースクラス生成orリソース共有
-		this->res = Resource::Create();
+		res = Resource::Create();
 
 		//★データ初期化
 		render2D_Priority[1] = 1.0f;
-		isFadeout = false;
+		phase = Phase::PlayingJingle;
+
 		//★タスクの生成
-		auto pressStartKey = PressSKey::Object::Create(true);
 
 		//BGM(ジングル)
 		se::LoadFile("GameOver", "./data/Sound/BGM/GameOver.wav");
 		se::Play("GameOver");
+
+		//カウンター開始
+		ge->StartCounter("Jingle", 60 * 3);
+		//todo:イージング適用　GAME OVERロゴを分離する
 		return  true;
 	}
 	//-------------------------------------------------------------------
@@ -51,7 +56,7 @@ namespace GameOver
 		//★データ＆タスク解放
 
 
-		if (!ge->QuitFlag() && this->nextTaskCreate) {
+		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
 			auto title = Title::Object::Create(true);
 		}
@@ -63,18 +68,35 @@ namespace GameOver
 	void  Object::UpDate()
 	{
 		auto inp = ge->in1->GetState();
-		//PressStartKeyが消えたら画面推移
-		if (ge->GetTask<PressSKey::Object>(PressSKey::defGroupName, PressSKey::defName) == nullptr)
+		//段階毎の処理
+		switch (phase)
 		{
-			if (!isFadeout) {
-				ge->StartCounter("Fadeout2", 45); //フェードは90フレームなので半分の45で切り替え
-				ge->CreateEffect(99, ML::Vec2());
-				isFadeout = true;
+			//イージング中
+		case Phase::PlayingJingle:
+			if (ge->getCounterFlag("Jingle") == ge->LIMIT) {
+				PressSKey::Object::Create(true);
+				phase = Phase::PressSKey;
 			}
-		}
+			break;
 
-		if (ge->getCounterFlag("Fadeout2") == ge->LIMIT) {
-			Kill();
+			//PressSKeyが点滅している間
+		case Phase::PressSKey:
+			//PressStartKeyが消えたら画面推移
+			if (ge->GetTask<PressSKey::Object>(PressSKey::defGroupName, PressSKey::defName) == nullptr)
+			{
+				ge->StartCounter("Fadeout", 45); //フェードは90フレームなので半分の45で切り替え
+				//フェードのエフェクト
+				ge->CreateEffect(99, ML::Vec2(0.f, 0.f));
+				phase = Phase::FadeOut;
+			}
+			break;
+
+			//フェードアウト中
+		case Phase::FadeOut:
+			if (ge->getCounterFlag("Fadeout") == ge->LIMIT) {
+				Kill();
+			}
+			break;
 		}
 	}
 	//-------------------------------------------------------------------
@@ -110,17 +132,17 @@ namespace GameOver
 	//-------------------------------------------------------------------
 	bool  Object::B_Initialize()
 	{
-		return  this->Initialize();
+		return  Initialize();
 	}
 	//-------------------------------------------------------------------
-	Object::~Object() { this->B_Finalize(); }
+	Object::~Object() { B_Finalize(); }
 	bool  Object::B_Finalize()
 	{
-		auto  rtv = this->Finalize();
+		auto  rtv = Finalize();
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object():isFadeout() {	}
+	Object::Object() : phase(Phase::None) {	}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()
@@ -140,5 +162,5 @@ namespace GameOver
 	//-------------------------------------------------------------------
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
-	Resource::~Resource() { this->Finalize(); }
+	Resource::~Resource() { Finalize(); }
 }

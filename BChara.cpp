@@ -145,14 +145,14 @@ void BChara::CheckMove(ML::Vec2& e_)
 bool  BChara::CheckHit(BChara::SP ptr)
 {
 	if (ptr == nullptr) { return false; }
-	ML::Box2D me = this->GetHitBase().OffsetCopy(this->GetPos());
+	ML::Box2D me = GetHitBase().OffsetCopy(GetPos());
 	ML::Box2D you = ptr->GetHitBase().OffsetCopy(ptr->GetPos());
 #if defined(DEBUG)
 	ML::Box2D debugYou = ge->ApplyCamera2D(you);
 	ge->debugRect(debugYou, ge->DEBUGRECTMODE::RED);
 #endif
 	if (you.Hit(me)) {
-		ptr->Recieved(this->attackPower);
+		ptr->Recieved(attackPower);
 		return true;
 	}
 	return false;
@@ -164,14 +164,14 @@ bool  BChara::CheckHit(shared_ptr<vector<BChara::SP>> iters)
 	bool rtv = false;
 	for_each(iters->begin(), iters->end(),
 		[&](auto iter) {
-			ML::Box2D me = this->GetHitBase().OffsetCopy(this->GetPos());
+			ML::Box2D me = GetHitBase().OffsetCopy(GetPos());
 			ML::Box2D you = iter->GetHitBase().OffsetCopy(iter->GetPos());
 #if defined(DEBUG)
 			ML::Box2D debugYou = ge->ApplyCamera2D(you);
 			ge->debugRect(debugYou, ge->DEBUGRECTMODE::RED);
 #endif
 			if (you.Hit(me)) {
-				iter->Recieved(this->attackPower);
+				iter->Recieved(attackPower);
 				rtv = true;
 				return;
 			}

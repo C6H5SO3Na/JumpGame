@@ -81,6 +81,7 @@ namespace Player
 			}
 		};
 
+		//体力管理クラス
 		class Life {
 			int now = 0;
 			int max = 0;
@@ -100,6 +101,8 @@ namespace Player
 			int getNow() const { return now; }
 			//最大ライフ取得
 			int getMax() const { return max; }
+			//生きているか否か
+			bool isLive() const { return now >= 0; }
 		};
 	public:
 		Life life;

@@ -31,7 +31,7 @@ namespace GoalFlag
 		//スーパークラス初期化
 		__super::Initialize(defGroupName, defName, true);
 		//リソースクラス生成orリソース共有
-		this->res = Resource::Create();
+		res = Resource::Create();
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
@@ -48,7 +48,7 @@ namespace GoalFlag
 	{
 		//★データ＆タスク解放
 
-		if (!ge->QuitFlag() && this->nextTaskCreate) {
+		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
 		}
 
@@ -68,11 +68,6 @@ namespace GoalFlag
 		ML::Box2D draw = drawBase.OffsetCopy(pos);
 		draw = ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
-	}
-	//-------------------------------------------------------------------
-	//処理
-	void Object::Oparation()
-	{
 	}
 	//-------------------------------------------------------------------
 	//受け身処理
@@ -122,13 +117,13 @@ namespace GoalFlag
 	//-------------------------------------------------------------------
 	bool  Object::B_Initialize()
 	{
-		return  this->Initialize();
+		return  Initialize();
 	}
 	//-------------------------------------------------------------------
-	Object::~Object() { this->B_Finalize(); }
+	Object::~Object() { B_Finalize(); }
 	bool  Object::B_Finalize()
 	{
-		auto  rtv = this->Finalize();
+		auto  rtv = Finalize();
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
@@ -152,7 +147,7 @@ namespace GoalFlag
 	//-------------------------------------------------------------------
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
-	Resource::~Resource() { this->Finalize(); }
+	Resource::~Resource() { Finalize(); }
 	//-------------------------------------------------------------------
 	//タスク生成&パラメーター指定
 	void  Object::Spawn(const ML::Vec2& pos)

@@ -1,15 +1,15 @@
 #pragma warning(disable:4996)
 #pragma once
 //-------------------------------------------------------------------
-//ゲーム本編
+//敵マネージャー
 //-------------------------------------------------------------------
 #include "GameEngine_Ver3_83.h"
 
-namespace StageEditor
+namespace EnemyManager
 {
 	//タスクに割り当てるグループ名と固有名
-	const  string  defGroupName("本編");	//グループ名
-	const  string  defName("統括");	//タスク名
+	const  string  defGroupName("敵マネージャー");	//グループ名
+	const  string  defName("NoName");	//タスク名
 	//-------------------------------------------------------------------
 	class  Resource : public BResource
 	{
@@ -22,13 +22,11 @@ namespace StageEditor
 		typedef  weak_ptr<Resource>		WP;
 		static   WP  instance;
 		static  Resource::SP  Create();
-		//共有する変数はここに追加する
-		shared_ptr<DG::Font> font;
 	};
 	//-------------------------------------------------------------------
 	class  Object : public  BTask
 	{
-		//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
+	//変更不可◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆
 	public:
 		virtual  ~Object();
 		typedef  shared_ptr<Object>		SP;
@@ -44,16 +42,7 @@ namespace StageEditor
 		void  UpDate()			override;//「実行」１フレーム毎に行う処理
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
-		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
-	public:
-		//追加したい変数・メソッドはここに追加する
 
-	private:
-		int deadCnt; //やられてからの経過時間
-		ML::Point mousePos;
-		ML::Point prePos;
-		ML::Point mapPos;
-		ML::Point preCamera2D;
-		bool isClicked;
+		bool LoadEnemy(const string& fpath_);//敵情報の読み込み
 	};
 }

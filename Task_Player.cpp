@@ -36,7 +36,7 @@ namespace Player
 		//スーパークラス初期化
 		__super::Initialize(defGroupName, defName, true);
 		//リソースクラス生成orリソース共有
-		this->res = Resource::Create();
+		res = Resource::Create();
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
@@ -61,7 +61,7 @@ namespace Player
 		//★データ＆タスク解放
 
 
-		if (!ge->QuitFlag() && this->nextTaskCreate) {
+		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
 		}
 
@@ -111,20 +111,23 @@ namespace Player
 	//カメラの位置を再調整
 	void Object::AdjustCameraPlayer() const
 	{
+		Map2D::Object::SP map = ge->qa_Map;
+		if (map == nullptr) { return; }
+
 		//プレイヤを画面のどこに置くか（今回は画面中央）
 		int px = ge->camera2D.w / 2;
 		int py = ge->camera2D.h / 2;
+
 		//プレイヤを画面中央に置いたときのカメラの左上座標を求める
 		int cpx = static_cast<int>(pos.x) - px;
 		int cpy = static_cast<int>(pos.y) - py;
+
 		//カメラの座標を更新
 		ge->camera2D.x = cpx;
 		ge->camera2D.y = cpy;
+
 		//マップの外側が映らないようにカメラを調整する
-		Map2D::Object::SP map = ge->qa_Map;
-		if (map != nullptr) {
-			map->AdjustCameraPos();
-		}
+		map->AdjustCameraPos();
 	}
 	//-------------------------------------------------------------------
 	//思考
@@ -136,18 +139,18 @@ namespace Player
 	//行動
 	void Object::Move()
 	{
-		if (moveVec.y < 0 || !CheckFoot()) {
+		if (moveVec.y < 0.f || !CheckFoot()) {
 			moveVec.y += ML::Gravity(32) * 6.f;//重力加速
 		}
 		else {
-			moveVec.y = 0;
+			moveVec.y = 0.f;
 		}
 
-		if (moveVec.x < 0) {
-			moveVec.x = min(moveVec.x + 1.f, 0);
+		if (moveVec.x < 0.f) {
+			moveVec.x = min(moveVec.x + 1.f, 0.f);
 		}
 		else {
-			moveVec.x = max(moveVec.x - 1.f, 0);
+			moveVec.x = max(moveVec.x - 1.f, 0.f);
 		}
 		state->move();
 
@@ -526,17 +529,17 @@ namespace Player
 				ChangeState(new JumpState(this));
 				rtv = true;
 				return;
-	}
+			}
 
-});
+			});
 		return rtv;
 	}
 	//-------------------------------------------------------------------
 	//状態変更
 	void Object::ChangeState(StateBase* const state_)
 	{
-		delete this->state;
-		this->state = state_;
+		delete state;
+		state = state_;
 		moveCnt = 0;
 		animCnt = 0;
 	}
@@ -545,8 +548,6 @@ namespace Player
 	void Object::DamageOperation()
 	{
 		ChangeState(new HurtState(this));
-		moveCnt = 0;
-		animCnt = 0;
 		invincible.start();
 		se::Play("Damage");
 	}
@@ -555,7 +556,7 @@ namespace Player
 	void Object::LifeOperation(const int& addLife)
 	{
 		life.addNow(addLife);
-		if (life.getNow() <= 0) {
+		if (!life.isLive()) {
 			Dead();
 		}
 	}
@@ -565,7 +566,7 @@ namespace Player
 	{
 		if (invincible.isInvincible()) { return; }
 		LifeOperation(-power);
-		if (life.getNow() >= 0) {//死んでいないときはダメージを受ける演出を入れる
+		if (life.isLive()) {//死んでいないときはダメージを受ける演出を入れる
 			DamageOperation();
 		}
 	}
@@ -602,13 +603,13 @@ namespace Player
 	//-------------------------------------------------------------------
 	bool  Object::B_Initialize()
 	{
-		return  this->Initialize();
+		return  Initialize();
 	}
 	//-------------------------------------------------------------------
-	Object::~Object() { this->B_Finalize(); }
+	Object::~Object() { B_Finalize(); }
 	bool  Object::B_Finalize()
 	{
-		auto  rtv = this->Finalize();
+		auto  rtv = Finalize();
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
@@ -636,7 +637,7 @@ namespace Player
 	//-------------------------------------------------------------------
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
-	Resource::~Resource() { this->Finalize(); }
+	Resource::~Resource() { Finalize(); }
 	//-------------------------------------------------------------------
 	//タスク生成&パラメーター指定
 	void  Object::Spawn(const ML::Vec2& pos)

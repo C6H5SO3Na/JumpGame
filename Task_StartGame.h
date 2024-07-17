@@ -46,6 +46,16 @@ namespace StartGame
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 
-		int phase = 0;
+		enum class Phase {
+			None, FadeIn, ShowInfo, FadeOut
+		};
+		Phase phase;
+
+		void DrawStageNum() const;
+		void DrawScore() const;
+		void DrawImageStage() const;
+		void DrawRemain() const;
+		void DrawRemainNum() const;
+		void DrawPlayerImage() const;
 	};
 }

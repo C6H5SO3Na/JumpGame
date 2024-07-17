@@ -49,7 +49,12 @@ namespace Title
 	private:
 		//追加したい変数・メソッドはここに追加する
 		int mainCnt = 0;
-		int phase = 0;
-		bool isFadeout;
+		enum class Phase {
+			None, IsEasing, PressSKey, FadeOut
+		};
+		Phase phase;
+
+		void DrawBG() const;
+		void DrawLogo() const;
 	};
 }

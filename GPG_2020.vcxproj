@@ -145,6 +145,7 @@
     <ClCompile Include="Task_Effect00.cpp" />
     <ClCompile Include="Task_Ending.cpp" />
     <ClCompile Include="Task_Enemy00.cpp" />
+    <ClCompile Include="Task_EnemyManager.cpp" />
     <ClCompile Include="Task_Game.cpp" />
     <ClCompile Include="Task_GoalFlag.cpp" />
     <ClCompile Include="Task_Map2D.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="Task_Effect00.h" />
     <ClInclude Include="Task_Ending.h" />
     <ClInclude Include="Task_Enemy00.h" />
+    <ClInclude Include="Task_EnemyManager.h" />
     <ClInclude Include="Task_Game.h" />
     <ClInclude Include="Task_GoalFlag.h" />
     <ClInclude Include="Task_Map2D.h" />

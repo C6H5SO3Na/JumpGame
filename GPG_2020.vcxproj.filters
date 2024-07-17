@@ -148,6 +148,9 @@
     <ClCompile Include="Task_Effect00.cpp">
       <Filter>MyPG\ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Task_EnemyManager.cpp">
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine_Ver3_83.h">
@@ -248,6 +251,9 @@
     </ClInclude>
     <ClInclude Include="Task_Effect00.h">
       <Filter>MyPG\ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Task_EnemyManager.h">
+      <Filter>MyPG\ソース ファイル\Task\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

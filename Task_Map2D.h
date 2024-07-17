@@ -69,7 +69,6 @@ namespace Map2D
 
 	public:
 		bool LoadMap(const string& fpath_);
-		bool LoadEnemy(const string& fpath_);//敵情報の読み込み
 		void AdjustCameraPos();//マップ外を見せないようにカメラを位置調整
 		bool CheckHit(const ML::Box2D& hit_);
 		ML::Vec2 GetPlayerSpawnpos()const { return playerSpawnPos; }

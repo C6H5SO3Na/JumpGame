@@ -170,63 +170,6 @@ namespace Map2D
 		return true;
 	}
 	//-------------------------------------------------------------------
-	//敵の配置のロード
-	bool Object::LoadEnemy(const string& fpath_)
-	{
-		ifstream fin(fpath_);
-		if (!fin.is_open()) {
-			assert(!"読み込み失敗");
-			return false;
-		}
-
-		int n;//敵の数
-		{
-			string lineText;
-			getline(fin, lineText);
-			istringstream  ss_lt(lineText);
-			string  tc;
-			getline(ss_lt, tc, ',');
-
-			stringstream ss;
-			ss << tc;
-			ss >> n;
-		}
-
-		for (int i = 0; i < n; ++i) {
-			string lineText;
-			getline(fin, lineText);
-			istringstream  ss_lt(lineText);
-			ML::Vec2 pos;
-			int enemyKind;
-			string  tc;
-			{
-				stringstream ss;
-				getline(ss_lt, tc, ',');
-				ss << tc;
-				ss >> pos.x;
-			}
-
-			{
-				stringstream ss;
-				getline(ss_lt, tc, ',');
-				ss << tc;
-				ss >> pos.y;
-			}
-
-			{
-				stringstream ss;
-				getline(ss_lt, tc, ',');
-				ss << tc;
-				ss >> enemyKind;
-			}
-			Enemy00::Object::Spawn(pos, enemyKind);
-		}
-
-		//ファイルを閉じる
-		fin.close();
-		return true;
-	}
-	//-------------------------------------------------------------------
 	//当たり判定
 	bool Object::CheckHit(const ML::Box2D& hit_)
 	{

@@ -47,7 +47,6 @@ namespace GoalFlag
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 		//変更可◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇
 	private:
-		void Oparation();
 		void Recieved(const int& power) override;
 		void Think() override;
 		void Move() override;

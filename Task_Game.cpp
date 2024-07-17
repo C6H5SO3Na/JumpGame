@@ -9,6 +9,7 @@
 #include "Task_Ending.h"
 
 #include "Task_Map2D.h"
+#include "Task_EnemyManager.h"
 #include "Task_StageInfo.h"
 #include "Task_Player.h"
 #include "Task_Enemy00.h"
@@ -38,7 +39,7 @@ namespace Game
 		//スーパークラス初期化
 		__super::Initialize(defGroupName, defName, true);
 		//リソースクラス生成orリソース共有
-		this->res = Resource::Create();
+		res = Resource::Create();
 
 		//★データ初期化
 		ge->isDead = false;
@@ -53,8 +54,8 @@ namespace Game
 		auto map = Map2D::Object::Create(true);
 		map->LoadMap("./data/map/stage"+to_string(ge->stage) + ".csv");
 
-		//敵の生成
-		map->LoadEnemy("./data/enemy/enemyStage" + to_string(ge->stage) + ".csv");
+		//敵マネージャーの生成
+		EnemyManager::Object::Create(true);
 
 		//スポーン プレイヤ
 		Player::Object::Spawn(map->GetPlayerSpawnpos());
@@ -82,7 +83,7 @@ namespace Game
 		ge->KillAll_G("ステージ情報");
 		ge->debugRectReset();
 
-		if (!ge->QuitFlag() && this->nextTaskCreate) {
+		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
 			
 			if (ge->isDead) {
@@ -180,13 +181,13 @@ namespace Game
 	//-------------------------------------------------------------------
 	bool  Object::B_Initialize()
 	{
-		return  this->Initialize();
+		return  Initialize();
 	}
 	//-------------------------------------------------------------------
-	Object::~Object() { this->B_Finalize(); }
+	Object::~Object() { B_Finalize(); }
 	bool  Object::B_Finalize()
 	{
-		auto  rtv = this->Finalize();
+		auto  rtv = Finalize();
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
@@ -210,5 +211,5 @@ namespace Game
 	//-------------------------------------------------------------------
 	Resource::Resource() {}
 	//-------------------------------------------------------------------
-	Resource::~Resource() { this->Finalize(); }
+	Resource::~Resource() { Finalize(); }
 }
