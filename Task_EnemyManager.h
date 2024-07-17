@@ -44,5 +44,14 @@ namespace EnemyManager
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 
 		bool LoadEnemy(const string& fpath_);//敵情報の読み込み
+
+		template<typename T>
+		T InputToCSV(ifstream& fin);
+
+		template<typename T>
+		void ImportArray(ifstream& fin, T* const arr, const POINT& n);
+
+		template<typename T>
+		T InputComma(istringstream& ss_lt);
 	};
 }

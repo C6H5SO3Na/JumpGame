@@ -59,8 +59,9 @@ namespace EnemyManager
 	void  Object::Render2D_AF()
 	{
 	}
+
 	//-------------------------------------------------------------------
-//敵の配置のロード
+	//敵の配置のロード
 	bool Object::LoadEnemy(const string& fpath_)
 	{
 		ifstream fin(fpath_);
@@ -69,52 +70,78 @@ namespace EnemyManager
 			return false;
 		}
 
-		int n;//敵の数
-		{
+		//敵の数
+		int enemyNum = InputToCSV<int>(fin);
+
+		//敵の座標
+		ML::Vec2 pos;
+
+		//敵の種類
+		int enemyKind;
+
+		//敵のデータ読み込み&出現
+		for (int i = 0; i < enemyNum; ++i) {
 			string lineText;
 			getline(fin, lineText);
 			istringstream  ss_lt(lineText);
-			string  tc;
-			getline(ss_lt, tc, ',');
 
-			stringstream ss;
-			ss << tc;
-			ss >> n;
-		}
+			pos.x = InputComma<float>(ss_lt);
+			pos.y = InputComma<float>(ss_lt);
+			enemyKind = InputComma<int>(ss_lt);
 
-		for (int i = 0; i < n; ++i) {
-			string lineText;
-			getline(fin, lineText);
-			istringstream  ss_lt(lineText);
-			ML::Vec2 pos;
-			int enemyKind;
-			string  tc;
-			{
-				stringstream ss;
-				getline(ss_lt, tc, ',');
-				ss << tc;
-				ss >> pos.x;
-			}
-
-			{
-				stringstream ss;
-				getline(ss_lt, tc, ',');
-				ss << tc;
-				ss >> pos.y;
-			}
-
-			{
-				stringstream ss;
-				getline(ss_lt, tc, ',');
-				ss << tc;
-				ss >> enemyKind;
-			}
 			Enemy00::Object::Spawn(pos, enemyKind);
 		}
 
 		//ファイルを閉じる
 		fin.close();
 		return true;
+	}
+
+
+	//CSVファイル一行の一項目を読み込む
+	template<typename T>
+	T Object::InputToCSV(ifstream& fin)
+	{
+		string lineText;
+		getline(fin, lineText);
+		istringstream  ss_lt(lineText);
+
+		return true;//InputComma<T>(ss_lt);
+	}
+
+
+	//-------------------------------------------------------------------
+	//二次元配列に複数行分のデータをインポート
+	template<typename T>
+	void Object::ImportArray(ifstream& fin, T* const arr, const POINT& n)
+	{
+		for (int y = 0; y < n.y; ++y) {
+			string lineText;
+			getline(fin, lineText);
+			istringstream  ss_lt(lineText);
+			for (int x = 0; x < n.x; ++x) {
+				string  tc;
+				getline(ss_lt, tc, ',');
+
+				stringstream ss;
+				ss << tc;
+				ss >> arr[y][x];
+			}
+		}
+	}
+
+	//CSVファイル一項目を読み込む
+	template<typename T>
+	T Object::InputComma(istringstream& ss_lt)
+	{
+		T rtv;
+		string  tc;
+		getline(ss_lt, tc, ',');
+
+		stringstream ss;
+		ss << tc;
+		ss >> rtv;
+		return rtv;
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -128,7 +155,7 @@ namespace EnemyManager
 			ob->me = ob;
 			if (flagGameEnginePushBack_) {
 				ge->PushBack(ob);//ゲームエンジンに登録
-				
+
 			}
 			if (!ob->B_Initialize()) {
 				ob->Kill();//イニシャライズに失敗したらKill
