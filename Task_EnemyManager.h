@@ -49,9 +49,6 @@ namespace EnemyManager
 		T InputToCSV(ifstream& fin);
 
 		template<typename T>
-		void ImportArray(ifstream& fin, T* const arr, const POINT& n);
-
-		template<typename T>
 		T InputComma(istringstream& ss_lt);
 	};
 }

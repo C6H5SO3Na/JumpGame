@@ -106,28 +106,7 @@ namespace EnemyManager
 		getline(fin, lineText);
 		istringstream  ss_lt(lineText);
 
-		return true;//InputComma<T>(ss_lt);
-	}
-
-
-	//-------------------------------------------------------------------
-	//二次元配列に複数行分のデータをインポート
-	template<typename T>
-	void Object::ImportArray(ifstream& fin, T* const arr, const POINT& n)
-	{
-		for (int y = 0; y < n.y; ++y) {
-			string lineText;
-			getline(fin, lineText);
-			istringstream  ss_lt(lineText);
-			for (int x = 0; x < n.x; ++x) {
-				string  tc;
-				getline(ss_lt, tc, ',');
-
-				stringstream ss;
-				ss << tc;
-				ss >> arr[y][x];
-			}
-		}
+		return InputComma<T>(ss_lt);
 	}
 
 	//CSVファイル一項目を読み込む
