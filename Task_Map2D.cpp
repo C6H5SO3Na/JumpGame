@@ -164,7 +164,7 @@ namespace Map2D
 			static_cast<float>(pos[Y] * chipSize + chipSize / 2));
 
 		//マップの当たり判定を定義
-		hitBase = ML::Box2D(0, 0, mapSize[X] * chipSize, mapSize[Y] * chipSize);
+		hitBase = ML::Box2D(0, 0, mapSize[X] * chipSize, mapSize[Y] * chipSize - 8);//-8はhitBase.h = 1080にする
 
 		ImportArray(fin, &map[0][0], mapSize[X], mapSize[Y]);
 
