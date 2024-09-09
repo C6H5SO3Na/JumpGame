@@ -83,8 +83,10 @@ namespace Player
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
+		//無敵の際の点滅(描画しない)
 		if (invincible.isFlash() && moveCnt % 2 == 0) { return; }
 		Animation();
+
 		ML::Box2D draw = drawBase.OffsetCopy(pos);
 		draw = ge->ApplyCamera2D(draw);
 		res->img->Draw(draw, src);
@@ -139,13 +141,15 @@ namespace Player
 	//行動
 	void Object::Move()
 	{
+		//落下
 		if (moveVec.y < 0.f || !CheckFoot()) {
 			moveVec.y += ML::Gravity(32) * 6.f;//重力加速
 		}
-		else {
+		else {//足元に地面がある
 			moveVec.y = 0.f;
 		}
 
+		//ずっと動き続けないようにする
 		if (moveVec.x < 0.f) {
 			moveVec.x = min(moveVec.x + 1.f, 0.f);
 		}

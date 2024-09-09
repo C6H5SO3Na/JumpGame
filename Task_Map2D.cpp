@@ -70,13 +70,25 @@ namespace Map2D
 	//「２Ｄ描画」１フレーム毎に行う処理
 	void  Object::Render2D_AF()
 	{
-		for (int i = 0; i < 10; ++i) {
+		DrawBG();
+		DrawMapChips();
+	}
+	//-------------------------------------------------------------------
+	//背景を描画
+	void Object::DrawBG() const
+	{
+		//マップチップの長さから何枚描画するかを判断
+		for (int i = 0; i <= chipSize * mapSize[X] / 1920; ++i) {
 			ML::Box2D src(0, 0, 1920, 1080);
 			ML::Box2D draw(i * src.w, 0, src.w, src.h);
 			draw = ge->ApplyCamera2D(draw);
 			res->imgBG->Draw(draw, src);
 		}
-
+	}
+	//-------------------------------------------------------------------
+	//マップチップを描画
+	void Object::DrawMapChips() const
+	{
 		for (int y = 0; y < mapSize[Y]; ++y) {
 			for (int x = 0; x < mapSize[X]; ++x) {
 				DrawMapChip(map[y][x], x, y);
@@ -84,8 +96,8 @@ namespace Map2D
 		}
 	}
 	//-------------------------------------------------------------------
-	//マップチップ描画
-	void Object::DrawMapChip(const int& map, const int& x, const int& y)
+	//マップチップを1枚描画
+	void Object::DrawMapChip(const int& map, const int& x, const int& y) const
 	{
 		if (map == -1) {
 			return;//マップ番号が-1(空白)の場合は描画しない

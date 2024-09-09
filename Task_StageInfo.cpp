@@ -97,7 +97,7 @@ namespace StageInfo
 	void  Object::DrawGaugeBar() const
 	{
 		int nowLife, maxLife;
-		if (ge->qa_Player == nullptr) {
+		if (ge->qa_Player == nullptr) {//—Ž‰º‚µ‚½‚çƒvƒŒƒCƒ„[‚Í‚¢‚È‚¢‚Ì‚Å
 			nowLife = 0;
 			maxLife = 1;
 		}

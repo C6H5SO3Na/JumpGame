@@ -44,8 +44,15 @@ namespace Game
 		void  Render2D_AF()		override;//「2D描画」１フレーム毎に行う処理
 		bool  Finalize();		//「終了」タスク消滅時に１回だけ行う処理
 
-		int cnt; //時間計測用のカウンタ
-		int nextStagePhase;//やられてからの処理段階
-		int afterClearPhase;//クリアしてからの処理段階
+		//int cnt; //時間計測用のカウンタ
+
+		enum class NextStagePhase {
+			Stage, StageEnd, PreFadeout, Fadeout, AfterFadeout
+		};
+
+		NextStagePhase nextStagePhase;//クリアしてからの処理段階
+
+		void StageEndOperation();//ステージ終了後の処理
+		void NextStageOperation() const;//次のタスクへの処理
 	};
 }

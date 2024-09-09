@@ -70,10 +70,9 @@ namespace Enemy00
 	{
 		Think();
 		Move();
-		if (ge->qa_Player != nullptr) {
-			if (!ge->qa_Player->CheckHitEnemyHead()) {
-				CheckHit(ge->qa_Player);
-			}
+		if (ge->qa_Player == nullptr) { return; }
+		if (!ge->qa_Player->CheckHitEnemyHead()) {
+			CheckHit(ge->qa_Player);
 		}
 	}
 	//-------------------------------------------------------------------
@@ -146,7 +145,7 @@ namespace Enemy00
 			animAngleTmp = 128;
 		}
 
-		int frameInterval = 0;//アニメーションの間隔フレーム
+		int frameInterval = 0;//アニメーションの間隔フレーム(0で初期化)
 		switch (animKind) {
 		case Anim::Move:
 			frameInterval = 8;

@@ -85,24 +85,7 @@ namespace Game
 
 		if (!ge->QuitFlag() && nextTaskCreate) {
 			//★引き継ぎタスクの生成
-			
-			if (ge->isDead) {
-				//ゲームオーバー画面に推移
-				if (ge->remaining <= 0) {
-					GameOver::Object::Create(true);
-				}
-				else {
-					--ge->remaining;
-					StartGame::Object::Create(true);
-				}
-			}
-			else if(ge->stage >= ge->maxStage){
-				Ending::Object::Create(true);
-			}
-			else {
-				++ge->stage;
-				StartGame::Object::Create(true);
-			}
+			NextStageOperation();
 		}
 
 		return  true;
@@ -120,32 +103,7 @@ namespace Game
 
 		//クリアしたら or やられたら
 		if (ge->isClear || ge->isDead) {
-			switch (nextStagePhase) {
-			case 0:
-				if (ge->isClear){
-					bgm::Stop("Main");
-					bgm::Play("StageClear");
-				}
-				ge->StartCounter("ClearCount", 60 * 3);
-				++nextStagePhase;
-				break;
-			case 1:
-				if (ge->getCounterFlag("ClearCount") == ge->LIMIT) {
-					++nextStagePhase;
-				}
-				break;
-			case 2:
-				ge->CreateEffect(99, ML::Vec2());
-				ge->StartCounter("FadeoutCount", 45);
-				++nextStagePhase;
-				break;
-			case 3:
-				if (ge->getCounterFlag("FadeoutCount") == ge->LIMIT) {
-					bgm::Stop("StageClear");
-					Kill();//次のタスクへ
-				}
-				break;
-			}
+			StageEndOperation();
 		}
 	}
 	//-------------------------------------------------------------------
@@ -156,6 +114,66 @@ namespace Game
 #ifdef DEBUG
 		ge->debugRectDraw();
 #endif
+	}
+	//-------------------------------------------------------------------
+	//ステージ終了後の処理
+	void  Object::StageEndOperation()
+	{
+		switch (nextStagePhase) {
+		case NextStagePhase::Stage:
+			nextStagePhase = NextStagePhase::StageEnd;
+			break;
+
+		case NextStagePhase::StageEnd:
+			if (ge->isClear) {
+				bgm::Stop("Main");
+				bgm::Play("StageClear");
+			}
+			ge->StartCounter("ClearCount", 60 * 3);
+			nextStagePhase = NextStagePhase::PreFadeout;
+			break;
+
+		case NextStagePhase::PreFadeout:
+			if (ge->getCounterFlag("ClearCount") == ge->LIMIT) {
+				nextStagePhase = NextStagePhase::Fadeout;
+			}
+			break;
+
+		case NextStagePhase::Fadeout:
+			ge->CreateEffect(99, ML::Vec2());
+			ge->StartCounter("FadeoutCount", 45);
+			nextStagePhase = NextStagePhase::AfterFadeout;
+			break;
+
+		case NextStagePhase::AfterFadeout:
+			if (ge->getCounterFlag("FadeoutCount") == ge->LIMIT) {
+				bgm::Stop("StageClear");
+				Kill();//次のタスクへ
+			}
+			break;
+		}
+	}
+	//-------------------------------------------------------------------
+	//次のタスクへの処理
+	void  Object::NextStageOperation() const
+	{
+		if (ge->isDead) {
+			//ゲームオーバー画面に推移
+			if (ge->remaining <= 0) {
+				GameOver::Object::Create(true);
+			}
+			else {
+				--ge->remaining;
+				StartGame::Object::Create(true);
+			}
+		}
+		else if (ge->stage >= ge->maxStage) {
+			Ending::Object::Create(true);
+		}
+		else {
+			++ge->stage;
+			StartGame::Object::Create(true);
+		}
 	}
 	//★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	//以下は基本的に変更不要なメソッド
@@ -191,7 +209,7 @@ namespace Game
 		return  rtv;
 	}
 	//-------------------------------------------------------------------
-	Object::Object() :cnt(),nextStagePhase(), afterClearPhase() {	}
+	Object::Object() :nextStagePhase(NextStagePhase::Stage) {}
 	//-------------------------------------------------------------------
 	//リソースクラスの生成
 	Resource::SP  Resource::Create()

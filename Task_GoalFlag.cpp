@@ -35,8 +35,8 @@ namespace GoalFlag
 
 		//★データ初期化
 		render2D_Priority[1] = 0.5f;
-		hitBase = drawBase = CenterBox(32 * 2, 32 * 2);
-		src = ML::Box2D(0, 0, 32, 32);
+		hitBase = drawBase = ML::Box2D(-32, 0, 64, 64);//旗が浮かないようにしている
+		src = ML::Box2D(0, 0, 64, 64);
 
 		//★タスクの生成
 
